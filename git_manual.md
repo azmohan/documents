@@ -1,4 +1,4 @@
-# repo仓库
+# repo介绍
 
 ## 下载代码
 
@@ -13,10 +13,10 @@ $ repo start --all master
 - `-u`：指定manifest仓库的路径，这是一个git仓库地址
 - `-m`：指定manifest仓库中的某个manifest文件
 
-例如，下载AndroidN 50项目驱动版本，命令如下：
+例如，下载AndroidN 50项目驱动版本，注意修改yourname为你的名字。
 
 ```
-$ repo init --no-repo-verify ssh://yourname@10.20.40.19:29418/freemeos/manifest -m ALPS-MP-N0.MP7-V1_DROI6755_66_N/mtk.xml 
+$ repo init --no-repo-verify ssh://yourname@10.20.40.19:29418/freemeos/manifest -m ALPS-MP-N0.MP7-V1_DROI6755_66_N/driver.xml 
 $ repo sync
 $ repo start --all master
 ```
@@ -25,7 +25,7 @@ $ repo start --all master
 
 repo有多重含义，这里明确说明下，以免混淆。
 - 版本管理工具所谓的`仓库`，对应英文`repository`，缩写为`repo`。一个git仓库，英文即git repo。
-- 整个Android源码树由500个左右的git仓库构成。为了方便管理，Google开发了`repo`工具（使用python语言开发），并且以特殊的目录结构组织Android源代码。有时候，采用这种方式构成的大项目（或称为大仓库）也被称为`Repo`。
+- 整个Android源码树由500个左右的git仓库（git仓库也称为project）构成。为了方便管理，Google开发了`repo`工具（使用python语言开发），并且以特殊的目录结构组织Android源代码。有时候，采用这种方式构成的大项目（或称为大仓库）也被称为`Repo`。
 
 ## 什么是manifest文件
 
@@ -48,6 +48,27 @@ Google设计的Repo项目的组织结构如下图，以AndroidN 50驱动版本�
 - repo. repo工具的具体实现。
 - manifest.xml. 当前Repo的工程描述文件，该文件是个软连接，指向manifest/下的某个文件。
 
+## 当前Gerrit上有哪些项目？如何下载？
+
+当前FreemeOS的mainifest仓库路径是`ssh://yourname@10.20.40.19:29418/freemeos/manifest`。
+
+想要知道FreemeOS有哪些Repo工程可以下载，命令如下，注意修改yourname为你的名字。
+```
+$ git clone ssh://yourname@10.20.40.19:29418/freemeos/manifest
+$ cd manifest
+$ ls
+```
+进入manifest目录，查看当前有哪些manifest配置文件。
+
+![workflow](repo.png)
+
+从上述目录可知，`repo init`的命令`<manifest-file>`参数可以取以下数值：
+- `test.xml`
+- `ALPS-MP-N0.MP7-V1_DROI6755_66_N/driver.xml`
+- `ALPS-MP-N0.MP7-V1_DROI6755_66_N/mtk.xml`
+
+当前约定的规则：以下划线开头的xml文件为内部使用文件，如`_common.xml`，不用于`repo init`的参数。 
+
 # 项目开发
 
 ## 基本工作流程
@@ -64,7 +85,53 @@ Google设计的Repo项目的组织结构如下图，以AndroidN 50驱动版本�
     - 主管或高级工程师进行code review
     - 确认实现无问题，主管将修改提交到代码仓库
 
-![workflow](submit-patches.png)
+![workflow](workflow.svg)
+
+**案例1：上传并被review通过**
+
+正常上传，review进去。涉及命令:
+```
+repo sync
+git add
+git commit
+repo upload
+```
+
+**案例2：review不通过，修改后重新上传**
+
+正常上传，但主管reveiw后发现认为代码需要修正。在案例1的基础上，继续执行:
+
+如果review不过，使用
+```
+重新编辑代码
+git add your-files
+git commit --amend
+repo upload .
+```
+
+**案例3：上传到gerrit上，提示冲突**
+
+上传后，gerrit上提示冲突。在案例1的基础上，继续执行
+```
+repo sync
+根据提示进入冲突文件目录，
+repo rebase .
+编辑冲突文件，修复冲突
+git add 冲突文件
+git rebase --continue
+repo upload .
+```
+
+**案例4：本地有提交但未上传，repo sync时提示冲突**
+
+```
+根据提示进入冲突文件目录，
+git status
+编辑冲突文件，修复冲突
+git add 冲突文件
+git rebase --continue
+repo upload .
+```
 
 ## 同步代码
 
@@ -81,10 +148,6 @@ $ repo sync PROJECT0 PROJECT1 PROJECT2 ...
 
 ## 本地代码修改与提交
 
-### git简介
-
-![gerrit](repo_dir_structure.png)
-
 ### 记录每次更新到仓库
 
 #### 检查当前文件状态
@@ -96,7 +159,7 @@ $ git status
 #### 跟踪新文件或暂存被修改的文件
 
 ```
-$ git add
+$ git add <file>
 ```
 
 如果被修改的文件很多，要将他们全部加入暂存，可以使用
@@ -174,22 +237,234 @@ $ git log --stat --author=biantao build
 
 ![gerrit](gitlog.png)
 
-初次之外，git log还有很多强大参数，比如列出某短时间内，后者以特定格式显示提交历史。不展开了。
+git log还有很多强大参数，比如列出某段时间内的提交，或以特定格式显示提交历史。
 
 ### 撤销修改
 
-* git commit --amend
-* git checkout
-* git reset
-### 冲突修复
+在任何一个阶段，都有可能想要撤消某些操作。
+
+**修订上次提交**
+
+有时候提交完了发现漏掉了几个文件没有添加，或者提交信息写错了。 此时，可以运行带有`--amend`选项的提交命令尝试重新提交：
+
+```
+$ git commit --amend
+```
+
+这个命令会将暂存区中的文件提交。 如果自上次提交以来你还未做任何修改（例如，在上次提交后马上执行了此命令），那么快照会保持不变，而你所修改的只是提交信息。
+
+文本编辑器启动后，可以看到之前的提交信息。 编辑后保存会覆盖原来的提交信息。
+
+例如，你提交后发现忘记了暂存某些需要的修改，可以像下面这样操作：
+
+```
+$ git commit -m 'initial commit'
+$ git add forgotten_file
+$ git commit --amend
+```
+最终只会有一个提交，第二次提交将代替第一次提交的结果。
+
+**取消暂存的文件**
+
+例如，你已经修改了两个文件并且想要将它们作为两次独立的修改提交，但是却意外地输入了`git add * `暂存了它们两个。 如何只取消暂存两个中的一个呢？ `git status`命令提示了你：
+
+```
+$ git add *
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+    renamed:    README.md -> README
+    modified:   CONTRIBUTING.md
+```
+
+根据提示，执行`git reset HEAD CONTRIBUTING.md`可以将`CONTRIBUTING.md`取消暂存。
+
+**取消对文件的修改**
+
+在最后一个例子中，未暂存区域是这样：
+
+```
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+    renamed:    README.md -> README
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+    modified:   CONTRIBUTING.md
+```
+
+让我们来按照提示执行：
+```
+$ git checkout -- CONTRIBUTING.md
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+    renamed:    README.md -> README
+```
+
+可以看到那些修改已经被撤消了。
 
 ## 上传提交
-* repo upload
+
+代码修改完成后，并且在本地提交后，现在可以将本地的改动推送到gerrit服务器上了，命令如下
+
+```
+$ repo upload [<PROJECT_LIST>]
+```
+
+### 上传当前项目
+
+如果只想提交当前项目，那么可在当前项目目录下直接执行
+
+```
+$ repo upload .
+```
+
+![gerrit](repo_upload3.png)
+
+### 上传多个项目
+
+如果在多个项目都有修改，想同时上传多个项目的多个提交，直接执行
+
+```
+$ repo upload
+```
+
+不加参数时，`repo upload`会打开终端编辑窗口（vim），效果如下
+
+![gerrit](repo_upload.png)
+
+将要上传的仓库行前的#号删除，这是个vim窗口，请使用`:wq`保存退出，之后操作如下
+
+![gerrit](repo_upload2.png)
+
+为了防止遗漏，建议在`repo upload`之前，执行`repo status`查看当期Repo仓库各个项目的状态。
+
+代码提交之后，就可以在公司gerrit服务器：[http://10.20.40.19:8080/](http://10.20.40.19:8080/)看到自己的提交了。
+
+![gerrit](gerrit.png)
+
+可以在gerrit上看到自己的提交，接下来请leader审核刚才的改动，确定没有问题submit到代码仓库中。
+
+![gerrit](gerrit2.png)
+
+## 冲突修复
+
+### gerrit上提示冲突
+有时候，一切不是那么顺利。`repo upload`后，你可能在gerrit看到`。像下面这样。
+
+![gerrit](gerrit3.png)
+
+点击进入后，可以看到红色字体醒目的提醒我们，无法合并到仓库中。
+
+![gerrit](gerrit4.png)
+
+
+如果你和别人同时改动了同一个文件的相同位置，并且别人的代码比你先合并到远程仓库，就会出现这种情况。或者你要改动的文件在远程仓库中被删除了、移动、重命名都会出现冲突而无法合并。
+
+**解决冲突**
+
+冲突出现时，表明服务器上代码更新了，而你本地仓库的代码已经过时。
+
+1. 首先更新本地仓库
+
+![gerrit](conflict.png)
+
+可以看到repo提示，因为执行过repo upload上传本地提交，repo提示，`branch master`被发布(published)到gerrit上，但同时服务器上仓库又有更新，这种情况repo提示错误。
+
+2. 进入冲突仓库换基`rebase`，并手动修复冲突
+
+执行`repo base .`，意料之中的，出现冲突了。
+
+![gerrit](conflict1.png)
+
+执行`git status`查看，Git提示有两个提交试图修改`test.c`
+
+![gerrit](conflict2.png)
+
+使用编辑工具打开冲突文件。其中HEAD表示远程服务器分支的改动，等号之下是本地提交的改动，两个提交都改动了源文件的第10行，因此出现冲突。
+
+![gerrit](conflict3.png)
+
+我们选择同时保留这两处修改，那么将<<<、====、 >>>>等行删除。然后保存退出vim。然后依次执行
+
+```
+$ git add 冲突的文件
+$ git rebase --continue
+```
+
+![gerrit](conflict4.png)
+
+3. 重新上传服务器
+
+冲突已经在本地修复，重新上传服务器。
+
+![gerrit](conflict5.png)
+
+gerrit上可以看到冲突已经消除，可以合并。
+
+![gerrit](conflict6.png)
+
+### 其他冲突情形
+
+如果有些代码已经在本地提交，但还没有执行`repo upload`上传服务器，如果此时远程仓库中有提交的改动和你本地提交改动了相同位置，此时执行`repo sync`也出现冲突，如下图所示。
+
+![gerrit](conflict2-1.png)
+
+**解决冲突**
+
+1. 进入冲突项目的位置
+2. 编辑文件，手动修复冲突，然后保存退出
+3. `git add`将冲突文件暂存，
+4. `git rebase --continue`，完成rebase
+
+之后你可以继续在本地工作。
+
+## git图形界面
+
+Git的原生环境是终端。 在那里，你可以体验到最新的功能，也只有在那里，你才能尽情发挥 Git的全部能力。 但是对于某些任务而言，纯文本并不是最佳的选择；有时候你确实需要一个可视化的展示方式，而且有些用户更习惯那种能点击的界面。
+
+有一点请注意，不同的界面是为不同的工作流程设计的。 一些客户端的作者为了支持某种他认为高效的工作流程，经过精心挑选，只显示了`Git`功能的一个子集。 每种工具都有其特定的目的和意义，从这个角度来看，不能说某种工具比其它的“更好”。 还有请注意，没有什么事情是图形界面客户端可以做而命令行客户端不能做的；命令行始终是你可以完全操控仓库并发挥出全部力量的地方。
+
+1. gitk
+
+gitk是git项目自带的图形界面，功能比较简单。
+
+```
+$ sudo apt-get install gitk 
+```
+
+使用时，只需要在git仓库目录下执行gitk即可，加`--all`参数可以查看所有分支的状态，包括本地分支和远程分支。
+```
+$ cd your-git-repo
+$ gitk --all
+```
+
+![gerrit](gitk.png)
+
+2. TortoiseGit(windows)
+
+3. SourceTree(Windows/MAC)
+
+4. SmartGit（Windows/Linux/MAC）
+
+4. 其他GUI
+
+[https://git-scm.com/downloads/guis](https://git-scm.com/downloads/guis)
+
 ## 总结
 
 ## 参考文献
 
-# 附录，repo/git命令
+# 附录
 
 ## `repo`命令
 
@@ -204,7 +479,7 @@ $ repo init -u <URL> [<OPTIONS>]
 在当前目录下安装Repo仓库。执行完毕后在当前目录下生成`.repo`目录，并安装manifests.git, manifest，repo
 
 命令行参数：
-- `-u`：指定manifest仓库的路径。当前FreemeOS的mainifest仓库路径是`ssh://yourname@10.20.40.19:29418/freemeos/manifest`
+- `-u`：指定manifest的git仓库的路径。
 - `-m`：选择manifest仓库中的具体文件，默认是default.xml。
 - `-b`：指定manifest仓库的某个版本，通常是某manifest仓库分支。
 
@@ -216,7 +491,7 @@ $ repo sync [<PROJECT_LIST>]
 
 从远程仓库上同步代码到本地Repo项目。中括号表示参数可选。后面可以跟一个或多个项目列表。如果不带参数，则更新全部项目。
 
-例如，同步全部项目（也就是当期Repo所有的git子仓库）
+例如，同步全部项目（也就是该Repo所有的git子仓库）
 ```
 $ repo sync
 ```
@@ -257,5 +532,5 @@ $ repo upload [<PROJECT_LIST>]
 比较常见的简写是在当前工作的目录下执行 `repo upload .`，仅提交该工程到远程仓库。
 
 ### 参考文献
-
-- http://source.android.com/source/requirements.html
+- http://source.android.com/source/developing.html
+- https://source.android.com/source/using-repo.html

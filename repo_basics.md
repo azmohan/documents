@@ -28,8 +28,8 @@
             * git commit --amend
             * git checkout
             * git reset
-            * git图形界面工具
         * 冲突修复
+        * git图形界面
     * 上传提交
         * repo upload
     * 总结
