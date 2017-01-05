@@ -91,7 +91,7 @@ repo upload
 $ repo abandon patch
 ```
 
-## 将patch合并到pcb分支
+## 3. 将patch合并到pcb分支
 
 ### 拉取pcb分支代码
 
@@ -140,3 +140,4 @@ $ repo upload
 ```
 $ repo abandon patch
 ```
+
