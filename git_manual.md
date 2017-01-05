@@ -16,7 +16,7 @@ $ repo start --all master
 例如，下载AndroidN 50项目驱动版本，注意修改yourname为你的名字。
 
 ```
-$ repo init --no-repo-verify ssh://yourname@10.20.40.19:29418/freemeos/manifest -m ALPS-MP-N0.MP7-V1_DROI6755_66_N/driver.xml 
+$ repo init --no-repo-verify -u ssh://yourname@10.20.40.19:29418/freemeos/manifest -m ALPS-MP-N0.MP7-V1_DROI6755_66_N/driver.xml
 $ repo sync
 $ repo start --all master
 ```
@@ -37,7 +37,7 @@ manifest文件本身也保存在一个git仓库中，这个特殊的仓库也就
 
 Google设计的Repo项目的组织结构如下图，以AndroidN 50驱动版本为例（标准Android的目录结构类似）：
 
-![gerrit](repo_dir_structure.png)
+![gerrit](pic/repo_dir_structure.png)
 
 `.repo`目录结构
 - manifest. 这是一个git仓库，repo命令的`-u`参传入的url被repo脚本使用`git clone`到此处。
@@ -60,7 +60,7 @@ $ ls
 ```
 进入manifest目录，查看当前有哪些manifest配置文件。
 
-![workflow](repo.png)
+![workflow](pic/repo.png)
 
 从上述目录可知，`repo init`的命令`<manifest-file>`参数可以取以下数值：
 - `test.xml`
@@ -85,7 +85,7 @@ $ ls
     - 主管或高级工程师进行code review
     - 确认实现无问题，主管将修改提交到代码仓库
 
-![workflow](workflow.svg)
+![workflow](pic/workflow.svg)
 
 **案例1：上传并被review通过**
 
@@ -235,7 +235,7 @@ $ git log
 $ git log --stat --author=biantao build
 ```
 
-![gerrit](gitlog.png)
+![gerrit](pic/gitlog.png)
 
 git log还有很多强大参数，比如列出某段时间内的提交，或以特定格式显示提交历史。
 
@@ -328,7 +328,7 @@ $ repo upload [<PROJECT_LIST>]
 $ repo upload .
 ```
 
-![gerrit](repo_upload3.png)
+![gerrit](pic/repo_upload3.png)
 
 ### 上传多个项目
 
@@ -340,32 +340,32 @@ $ repo upload
 
 不加参数时，`repo upload`会打开终端编辑窗口（vim），效果如下
 
-![gerrit](repo_upload.png)
+![gerrit](pic/repo_upload.png)
 
 将要上传的仓库行前的#号删除，这是个vim窗口，请使用`:wq`保存退出，之后操作如下
 
-![gerrit](repo_upload2.png)
+![gerrit](pic/repo_upload2.png)
 
 为了防止遗漏，建议在`repo upload`之前，执行`repo status`查看当期Repo仓库各个项目的状态。
 
 代码提交之后，就可以在公司gerrit服务器：[http://10.20.40.19:8080/](http://10.20.40.19:8080/)看到自己的提交了。
 
-![gerrit](gerrit.png)
+![gerrit](pic/gerrit.png)
 
 可以在gerrit上看到自己的提交，接下来请leader审核刚才的改动，确定没有问题submit到代码仓库中。
 
-![gerrit](gerrit2.png)
+![gerrit](pic/gerrit2.png)
 
 ## 冲突修复
 
 ### gerrit上提示冲突
 有时候，一切不是那么顺利。`repo upload`后，你可能在gerrit看到`。像下面这样。
 
-![gerrit](gerrit3.png)
+![gerrit](pic/gerrit3.png)
 
 点击进入后，可以看到红色字体醒目的提醒我们，无法合并到仓库中。
 
-![gerrit](gerrit4.png)
+![gerrit](pic/gerrit4.png)
 
 
 如果你和别人同时改动了同一个文件的相同位置，并且别人的代码比你先合并到远程仓库，就会出现这种情况。或者你要改动的文件在远程仓库中被删除了、移动、重命名都会出现冲突而无法合并。
@@ -376,7 +376,7 @@ $ repo upload
 
 1. 首先更新本地仓库
 
-![gerrit](conflict.png)
+![gerrit](pic/conflict.png)
 
 可以看到repo提示，因为执行过repo upload上传本地提交，repo提示，`branch master`被发布(published)到gerrit上，但同时服务器上仓库又有更新，这种情况repo提示错误。
 
@@ -384,15 +384,15 @@ $ repo upload
 
 执行`repo base .`，意料之中的，出现冲突了。
 
-![gerrit](conflict1.png)
+![gerrit](pic/conflict1.png)
 
 执行`git status`查看，Git提示有两个提交试图修改`test.c`
 
-![gerrit](conflict2.png)
+![gerrit](pic/conflict2.png)
 
 使用编辑工具打开冲突文件。其中HEAD表示远程服务器分支的改动，等号之下是本地提交的改动，两个提交都改动了源文件的第10行，因此出现冲突。
 
-![gerrit](conflict3.png)
+![gerrit](pic/conflict3.png)
 
 我们选择同时保留这两处修改，那么将<<<、====、 >>>>等行删除。然后保存退出vim。然后依次执行
 
@@ -401,23 +401,23 @@ $ git add 冲突的文件
 $ git rebase --continue
 ```
 
-![gerrit](conflict4.png)
+![gerrit](pic/conflict4.png)
 
 3. 重新上传服务器
 
 冲突已经在本地修复，重新上传服务器。
 
-![gerrit](conflict5.png)
+![gerrit](pic/conflict5.png)
 
 gerrit上可以看到冲突已经消除，可以合并。
 
-![gerrit](conflict6.png)
+![gerrit](pic/conflict6.png)
 
 ### 其他冲突情形
 
 如果有些代码已经在本地提交，但还没有执行`repo upload`上传服务器，如果此时远程仓库中有提交的改动和你本地提交改动了相同位置，此时执行`repo sync`也出现冲突，如下图所示。
 
-![gerrit](conflict2-1.png)
+![gerrit](pic/conflict2-1.png)
 
 **解决冲突**
 
@@ -448,7 +448,7 @@ $ cd your-git-repo
 $ gitk --all
 ```
 
-![gerrit](gitk.png)
+![gerrit](pic/gitk.png)
 
 2. TortoiseGit(windows)
 
