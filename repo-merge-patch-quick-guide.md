@@ -51,28 +51,36 @@ $ repo sync
 $ repo start --all patch
 ```
 
-将patch解压到源码目录，确保该步骤执行正确。然后查看当前的改动，添加`-o`选项，如果有未被任何git仓库跟踪的文件也列出来（例如.repo目录目录下新增文件）
+将patch解压到源码目录，确保该步骤执行正确。
+
+tar xvf xxxx.tar.gz
+
+查看patch_list.txt，确认patch中是否有需要删除的文件。
+
+
+然后查看当前的改动，添加`-o`选项，如果有未被任何git仓库跟踪的文件也列出来（例如.repo目录目录下新增文件）
 ```
 $ repo status -o
 ```
 
 ```
 $ repo forall -pc git status --ignored | awk '/^project/{a=1; project=$2 }a==1&&$0~/git/{projects=projects project " ";a=0}END{print projects}'
+
 test/ test2/
 ```
 注意该命令输出将会在接下来的在`pcb`分支合并patch时使用。
 
 添加代码，并本地提交
 ```
-$ repo forall <projects1 projects2 ...> -pc 'git add . && git commit -m "[patch] you-should-say-something-here"'
+$ repo forall <projects1 projects2 ...> -pc 'git add . && git commit -m "[patch/apply] you-should-say-something-here"'
 ```
 
 执行完毕后使用再次确认是否遗漏文件。
 ```
-$ repo forall git status --ignored
+$ repo forall -c git status --ignored
 ```
 
-如果有，那么手动进入该目录下，执行`git add -f .`，`git commit --amend` 后直接保存退出vim窗口。 
+如果有，那么手动进入该目录下，执行`git add -f .`，`git commit --amend` 后直接保存退出vim窗口。
 
 **说明**：`git add`配合`-f`参数，可以强制添加所有文件（即使是在.gitignore被忽略的文件）。
 
@@ -121,12 +129,22 @@ $ repo start --all patch
 $ repo forall <projects1 projects2 ...> -pc git cherry-pick origin/mtk
 ```
 
-如果有仓库冲突，进入仓库，执行`git mergetool`执行三方合并，然后手动`git add`，`git commit`，然后重新执行上述命令，注意project list中去掉已经执行完毕的project。 
+```
+$ repo status
+```
+如果有仓库冲突，进入仓库，执行`git mergetool`执行三方合并，然后手动`git add`，`git cherry-pick --continue`
+
+```
+$ git config --global merge.tool meld
+$ git mergetool
+```
+
+处理完冲突之后，需要删除备份文件*.orig。
 
 如果patch分支已经全部合并了`origin/mtk`分支提交。接下来对project list使用`git commit --amend -m`重写提交信息。由于`git cherry-pick`会将某提交完整的“pick”过来，包括其commit message，其中被使用的change-id，使用`git commit --amend -m`重写提交信息，确保每个提交都生成新的的change-id。
 
 ```
-$ repo forall <projects1 projects2 ...> -pc git commit --amend -m "[patch] you-should-say-something-here"
+$ repo forall <projects1 projects2 ...> -pc git commit --amend -m "[patch/apply] you-should-say-something-here"
 ```
 
 上传代码
