@@ -1,6 +1,6 @@
 # 编译Android7.0代码
 
-## 安装openjdk8
+## ubuntu14.04 安装openjdk8
 
 Android7.0代码依赖openjdk8。以下内容参考自Android官网。
 
@@ -28,6 +28,16 @@ $ sudo dpkg -i openjdk-8-jre-headless_8u45-b14-1_amd64.deb openjdk-8-jre_8u45-b1
 上述命令在14.04上会安装失败，提示缺少部分依赖库，执行如下命令修复依赖并完成jdk8安装。
 ```
 $ sudo apt-get -f install
+```
+
+## ubuntu 12.04安装jdk8
+
+参考： http://ubuntuhandbook.org/index.php/2015/01/install-openjdk-8-ubuntu-14-04-12-04-lts/
+
+```
+sudo add-apt-repository ppa:openjdk-r/ppa
+sudo apt-get update
+sudo apt-get install openjdk-8-jdk
 ```
 
 ## 切换jdk版本

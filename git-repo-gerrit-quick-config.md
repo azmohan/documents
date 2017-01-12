@@ -33,10 +33,9 @@ $ git config --global core.editor vim
 $ ssh-keygen -t rsa -b 4096 -C "yourname@droi.com"
 ```
 
-之后一直回车即可。执行完毕后生成`~/.ssh`目录，存储了一对秘钥（id_rsa.pub为公钥，id_rsa为私钥）
+之后**一直回车**即可。执行完毕后生成`~/.ssh`目录，其中保存了一对秘钥（id_rsa.pub为公钥，id_rsa为私钥）
 
 参考[非对称加密的简单概念](http://www.cnblogs.com/xuanhun/archive/2012/06/23/2559543.html)
-
 
 ## 下载安装repo命令
 
@@ -81,7 +80,7 @@ export REPO_URL="ssh://yourname@10.20.40.19:29418/freemeos/git-repo"
 ## 添加ssh-key
 
 首先确保已经生成了ssh-key，如果未生成，请参考本文第一节生成。
-打开`~/.ssh/id_rsa.pub`文件，把全部内容按照下图配置。可以配置多个ssh-key。
+打开`~/.ssh/id_rsa.pub`文件（可在命令行执行`gedit ~/.ssh/id_rsa.pub`打开该文件），把其中全部内容配置到添加到gerrit的ssh-key中，如下图所示。可以配置多个ssh-key。
 
 ![gerrit](gerrit/6.png)
 
