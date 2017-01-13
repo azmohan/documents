@@ -95,70 +95,7 @@ export REPO_URL="ssh://yourname@10.20.40.19:29418/freemeos/git-repo"
 $ git clone ssh://yourname@10.20.40.19:29418/droi/test/test && scp -p -P 29418 yourname@10.20.40.19:hooks/commit-msg test/.git/hooks/
 ```
 
-修改代码后，提交到gerrit上，默认取出的是主分支（master），对代码修改后，使用如下命令推送到远程的master分支上。
-
-```
-$ git push origin HEAD:refs/for/master
-```
-
-# 下载 `ALPS-MP-N0.MP7-V1_DROI6755_66_N`项目代码
-
-1. 初始化repo仓库
-
-拉取driver版本，该分支用于驱动组调试和项目前期开发，将yourname改成你的名字。
-```
-$ mkdir droi6755_n_driver
-$ cd droi6755_n_driver
-$ repo init --no-repo-verify -u ssh://yourname@10.20.40.19:29418/freemeos/manifest -m ALPS-MP-N0.MP7-V1_DROI6755_66_N/driver.xml
-```
-
-2. 同步代码
-```
-$ repo sync
-```
-
-3. 创建本地driver分支
-```
-$ repo start --all driver
-```
-
-## 代码更新
-
-```
-$ repo sync
-```
-
-## 代码提交
-
-**方法1，使用repo命令**
-```
-$ repo upload
-```
-
-弹出的vim交互式命令行窗口，根据提示，注释掉需要相关行，保存退出（使用vim的:wq命令），repo即调用git命令上传服务器。
-
-**方法2，使用git命令**
-
-该方法仅建议对git和repo命令较熟悉的人使用。使用时，务必小心，不要提交到错误的远程分支上。
-
-```
-$ git push origin HEAD:refs/for/the-actual-branch
-```
-
-注意修改`the-actual-branch`为实际远程分支。如果拉取的是driver版本，那么代码提交命令是：
-
-```
-$ git push origin HEAD:refs/for/driver
-```
-
-查看本地分支和远程分支，可以使用如下命令
-```
-$ git branch -a
-```
-
-如果不能确定该向哪个分支提交，请使用第一种方法，`repo upload`。
-
-注意，不可以直接使用`git push origin driver`方式提交。
+修改代码后如何提交，以及git/repo/gerrit的基本工作流程，请参考`git-repo-quick-guide.md`文档。
 
 # 参考文献
 

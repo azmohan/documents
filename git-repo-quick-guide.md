@@ -13,13 +13,15 @@ $ repo start --all master
 - `-u`：指定manifest仓库的路径，这是一个git仓库地址
 - `-m`：指定manifest仓库中的某个manifest文件
 
-例如，下载AndroidN 50项目驱动版本，注意修改yourname为你的名字。
+例如，下载AndroidN 50项目海外公版本，注意修改yourname为你的名字。
 
 ```
-$ repo init --no-repo-verify -u ssh://yourname@10.20.40.19:29418/freemeos/manifest -m ALPS-MP-N0.MP7-V1_DROI6755_66_N/driver.xml
+$ repo init --no-repo-verify -u ssh://yourname@10.20.40.19:29418/freemeos/manifest -m ALPS-MP-N0.MP7-V1_DROI6755_66_N/pcb_oversea.xml
 $ repo sync
 $ repo start --all master
 ```
+
+如果要下载驱动版本，请把repo init命令最后的`pcb_oversea.xml`改成`driver.xml`。
 
 ## 什么是repo？
 
