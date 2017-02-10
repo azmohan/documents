@@ -34,7 +34,7 @@ $ cat ALPS-MP-N0.MP2-V1_DROI6580_WE_N_INHOUSE.tar.gz* | tar xf -
 
 ## 准备manifests文件
 
-将creategit.sh和scandir.py脚本拷贝到~/bin目录下。
+将scripts目录下的creategit.sh和scandir.py脚本拷贝到~/bin目录下。
 
 如果本机没有`manifest`的`git`仓库，那么请`clone`该仓库。注意修改`zhuzhongkai`为你的名字。
 
