@@ -9,6 +9,7 @@ function checkargs() {
 }
 
 action=$1
+gerrituser=$(git config user.name)
 
 function _setupvar() {
     projects_file=project.list
@@ -16,7 +17,6 @@ function _setupvar() {
     git_lists=($(cat $projects_file))
     git_lists_num=${#git_lists[@]}
     git_location_lists=($(cat ${projects_file%.*}.gerrit))
-    gerrituser=$(git config user.name)
 }
 
 function clone_manifests() {
@@ -45,16 +45,16 @@ EOM
 
 function create_empty_gits() {
     for i in ${git_lists[*]}
-    do 
+    do
         cd $i
         if [  -d ".git" ]; then
             echo "WARN: $i git repo already exsited!"
         else
             git init
-            cp ~/Downloads/commit-msg .git/hooks/
+            cp ~/commit-msg .git/hooks/
             git commit --allow-empty -q -m "$commitmsg"
             echo "$i git init over"
-        fi 
+        fi
     done
 }
 
@@ -64,7 +64,7 @@ EOM
 
 function add_code_gits() {
     for i in ${git_lists[*]}
-    do 
+    do
         cd $i
         git add -f .
         git commit -q -m "$commitmsg2"
@@ -75,7 +75,7 @@ function add_code_gits() {
 #gerrit_path="droi/freemeos/"
 function create_gerrit_projects() {
     for g in ${git_location_lists[*]}
-    do 
+    do
         ssh -p 29418 ${gerrituser}@10.20.40.19 gerrit create-project $gerrit_path$g.git
         echo "ssh -p 29418 ${gerrituser}@10.20.40.19 gerrit create-project $gerrit_path$g.git"
     done
@@ -84,7 +84,7 @@ function create_gerrit_projects() {
 function push_gerrit_projects() {
     #for i in ${git_lists[*]}
     for ((i=0;i<git_lists_num;i++))
-    do 
+    do
         local p=${git_lists[$i]}
         local g=${git_location_lists[$i]}
         echo "cd $p"
@@ -97,7 +97,7 @@ function push_gerrit_projects() {
 
 function review_gerrit_projects() {
     for ((i=0;i<git_lists_num;i++))
-    do 
+    do
         local p=${git_lists[$i]}
         local g=${git_location_lists[$i]}
         cd $p
@@ -153,20 +153,24 @@ case $action in
         clone_manifests "$@"
         ;;
     s0|step0)
+        if [ ! -f "~/commit-msg" ]
+            scp -p -P 29418 ${gerrituser}@10.20.40.19:hooks/commit-msg ~/commit-msg
+        fi
+
         _dirpath=$(dirname $0)
         scandir=${_dirpath:-"."}/scandir.py
         if [ ! -f "$scandir" ]; then
             echo "error: cannot find scandir.py"
             exit
         fi
-        
+
         manifest=$1
         if [ ! -f "$manifest" ]; then
             echo "error: $manifest is not exsited!"
             exit
         fi
 
-        wrapper "python $scandir -f $manifest $(pwd)" "diff xml with workplace"
+        wrapper "python $scandir -f $(pwd) $manifest" "diff xml with workplace"
         ;;
     s1|step1)
         _setupvar
@@ -174,10 +178,10 @@ case $action in
         wrapper add_code_gits "add code to local git repo"
 cat <<EOF
 Now, you may fix the git repo which has sub git repos, such as "device/", run:
-      git rm --cached sub-git-dir; echo "sub-git-dir/" >> .gitignore
+      git rm --cached <your-sub-git-dirs>;
+      echo "<your-sub-git-dirs>" >> .gitignore
       git add .gitignore
-      git commit -m "[freeme] ignore xxx]
-      git push origin HEAD:refs/for/master
+      git commit -m "[freeme] ignore xxx"
 EOF
         ;;
     s2|step2)
