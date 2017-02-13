@@ -40,8 +40,7 @@ $ cat ALPS-MP-N0.MP2-V1_DROI6580_WE_N_INHOUSE.tar.gz* | tar xf -
 
 ```
 $ cd ~/workplace/freemeos
-$ git clone ssh://zhuzhongkai@10.20.40.19:29418/freemeos/manifest \
-  && scp -p -P 29418 zhuzhongkai@10.20.40.19:hooks/commit-msg manifest/.git/hooks/
+$ git clone ssh://zhuzhongkai@10.20.40.19:29418/freemeos/manifest && scp -p -P 29418 zhuzhongkai@10.20.40.19:hooks/commit-msg manifest/.git/hooks/
 $ tree manifest
 manifest
 ├── ALPS-MP-N0.MP2-V1_DROI6580_WE_N
@@ -73,7 +72,7 @@ manifest
 $ cd ~/workplace/freemeos/droi6737/ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N
 ```
 
-0. **生成辅助文件 
+### 0. 生成辅助文件
 
 ```
 ~/bin/creategit.sh s0 ~/workplace/freemeos/manifest/ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N/_common.xml
@@ -81,7 +80,7 @@ $ cd ~/workplace/freemeos/droi6737/ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N
 
 执行完成之后，在该目录下生成三个文件：droi.xml，project.list，project.gerrit，是后续工作的必要文件。
 
-1. 创建本地git仓库并添加代码
+### 1. 创建本地git仓库并添加代码
 
 ```
 ~/bin/creategit.sh s1
@@ -89,9 +88,26 @@ $ cd ~/workplace/freemeos/droi6737/ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N
 
 根据manifest.xml中执行的本地git仓库路径创建本地git仓库，并做本地提交。
 
-本部执行总时间大概20分钟。 
+本步执行总时间大概20分钟（机械硬盘）。
 
-2. 在gerrit服务器上创建projects
+本步执行完毕之后，会打印如下提示，请检查是否存在嵌套git目录。当前仓库git分拆方案，`device/`下的`droi/`、`mediatek/`都是独立的`git`仓库。
+```
+Now, you may fix the git repo which has sub git repos, such as "device/", run:
+      git rm --cached <your-sub-git-dirs>;
+      echo "<your-sub-git-dirs>" >> .gitignore
+      git add .gitignore
+      git commit -m "[freeme] ignore xxx"
+```
+
+根据提示执行以下命令
+```
+$ cd device
+$ git rm --cached droi/ mediatek/
+$ git add .gitignore
+$ git commit -m "[freeme/bringup] ignore droi/ mediatek/"
+```
+
+### 2. 在gerrit服务器上创建projects
 
 ```
 ~/bin/creategit.sh s2
@@ -101,7 +117,7 @@ $ cd ~/workplace/freemeos/droi6737/ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N
 
 本步执行总时间不到一分钟。
 
-3. 推送代码到服务器
+### 3. 推送代码到服务器
 
 ```
 ~/bin/creategit.sh s3
@@ -116,7 +132,7 @@ $ cd ~/workplace/freemeos/droi6737/ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N
 git config --global pack.threads 4
 ```
 
-4. 在`gerrit`服务器上`review`提交
+### 4. 在`gerrit`服务器上`review`提交
 
 ```
 ~/bin/creategit.sh s4
