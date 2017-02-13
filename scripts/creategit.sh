@@ -153,7 +153,7 @@ case $action in
         clone_manifests "$@"
         ;;
     s0|step0)
-        if [ ! -f "~/commit-msg" ]
+        if [ ! -f "~/commit-msg" ]; then
             scp -p -P 29418 ${gerrituser}@10.20.40.19:hooks/commit-msg ~/commit-msg
         fi
 
