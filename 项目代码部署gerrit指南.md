@@ -119,18 +119,18 @@ $ git commit -m "[freemeos/bringup] ignore droi/ mediatek/"
 
 ### 3. 推送代码到服务器
 
+本步骤执行时间较长，请执行如下命令配置git压缩并发进程数以加快速度。笔者机器是四核八线程，配置`6`，请根据自己的机器实际情况配置（16核32线程，配置`8`后效果提升明显）。
+```
+git config --global pack.threads 6
+```
+
 ```
 ~/bin/creategit.sh s3
 ```
 
 这一步将本地git仓库代码推送到gerrit服务器上。
 
-本步总执行时间在2小时左右（机械硬盘）。本次执行完毕后注意观察全部输出日志，检查是否有异常语句，具体参见本节最后。
-
-通过`htop`发现`git push`时会执行`git pack-object`命令对仓库进行重新`pack`，该命令默认单进程执行。以下命令也许能加快`git pack-object`方法，待测试。
-```
-git config --global pack.threads 4
-```
+本步总执行时间在1~2小时左右（机械硬盘）。本次执行完毕后注意观察全部输出日志，检查是否有异常语句，具体参见本节最后。
 
 ### 4. 在`gerrit`服务器上`review`提交
 
