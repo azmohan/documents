@@ -104,7 +104,7 @@ Now, you may fix the git repo which has sub git repos, such as "device/", run:
 $ cd device
 $ git rm --cached droi/ mediatek/
 $ git add .gitignore
-$ git commit -m "[freeme/bringup] ignore droi/ mediatek/"
+$ git commit -m "[freemeos/bringup] ignore droi/ mediatek/"
 ```
 
 ### 2. 在gerrit服务器上创建projects
@@ -161,6 +161,7 @@ $ cd ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N
 $ vim mtk.xml 
 将mtk分支修改为master分支后保存（因为此时mtk分支还未创建）
 $ git add _common.xml mtk.xml
+$ git commit -m "[mainfest] add ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N"
 $ git push origin HEAD:refs/for/master
 ```
 
