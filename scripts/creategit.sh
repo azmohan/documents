@@ -121,9 +121,11 @@ function review_gerrit_projects() {
 function wrapper() {
     local cmd=$1
     local log=$2
-    echo "##### $2 start... ###"
+    local color=$'\E'"[0;33m"
+    local color_reset=$'\E'"[00m"
+    echo "$color$2 start... $color_reset"
     $cmd
-    echo "##### $2 over ###"
+    echo "$color$2 over $color_reset"
 }
 
 function help() {
@@ -153,7 +155,7 @@ case $action in
         clone_manifests "$@"
         ;;
     s0|step0)
-        if [ ! -f "~/commit-msg" ]; then
+        if [ ! -f "$HOME/commit-msg" ]; then
             scp -p -P 29418 ${gerrituser}@10.20.40.19:hooks/commit-msg ~/commit-msg
         fi
 
