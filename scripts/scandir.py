@@ -32,7 +32,7 @@ def walkdir(root_node, rootdir, path):
             elif ret == "part":
                 walkdir(root_node, rootdir, subdir_full)
             else:
-                print "WARN: <", rel_path, "> has no git project"
+                warning("warning: <", rel_path, "> has no git project")
     return
 
 def walkdir_withlevel(path, level_max, level, outlist):
@@ -102,6 +102,12 @@ def createlndir(root_node, dirsrc, dirdes):
 
     outfile.close()
 
+def warning(*args):
+    print '\033[1;31;40m',
+    for i in args:
+        print i,
+    print '\033[0m'
+
 # descripton:
 #   diff the android code directory with an repo mainifest.xml, to figure out the
 #   git projects not exsited in this android code. so we need remove those items in
@@ -117,7 +123,7 @@ def parsexml(ddir, mainifestxml):
 
         fullpath = ddir+'/'+p_path
         if os.path.exists(fullpath) is False:
-            print "WARN: <", p_path, "> is not existed"
+            warning("warning: <", p_path, "> is not existed")
             project.set('has', 'false')
         else:
             project_list.write(fullpath+'\n')
@@ -142,7 +148,7 @@ def scandir(androiddir, listfile):
     for p in dir_lists:
         fullpath = androiddir+'/'+p
         if os.path.exists(fullpath) is False:
-            print "WARNING:", fullpath, "is not existed"
+            print "warning:", fullpath, "is not existed"
         else:
             dir_rel_lists.append(fullpath)
     return dir_rel_lists;
@@ -184,8 +190,8 @@ if __name__ == "__main__":
             exit(-1)
         ddir = sys.argv[2]
         mainifest_xml = sys.argv[3]
-        print "\n####  check extra git projects in mainifest.xml"
+        print "####  check extra git projects in mainifest.xml"
         root = parsexml(ddir, mainifest_xml)
         createxml(root)
-        print "\n\n####  check extra directories in ", ddir
+        print "\n####  check extra directories in ", ddir
         diffdir_with_mainifestxml(ddir, mainifest_xml)

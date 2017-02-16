@@ -75,7 +75,31 @@ $ cd ~/workplace/freemeos/droi6737/ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N
 ### 0. 生成辅助文件
 
 ```
-~/bin/creategit.sh s0 ~/workplace/freemeos/manifest/ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N/_common.xml
+$ ~/bin/creategit.sh s0 ~/workplace/freemeos/manifest/ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N/_common.xml
+
+```
+
+该命令对比`_common.xml`和当前源代码目录结构，其输出类似如下效果：
+
+```
+diff xml with workplace start...
+####  check extra git projects in mainifest.xml
+ warning: < trusty > is not existed
+
+####  check extra directories in  /home/prife/workplace/freemeos/droi6755/pcb
+ warning: < kernel-4.4 > has no git project
+diff xml with workplace over
+```
+
+上面的含义表示：当前源代码目录比_common.xml中多了个`kernel-4.4`，少了个`trusty`，请继续编辑`_common.xml`文件，上多出的目录项删除，并补足缺少的目录项。
+然后继续执行上面命令直到输出为为如下效果：
+
+```
+diff xml with workplace start...
+####  check extra git projects in mainifest.xml
+
+####  check extra directories in  /home/prife/workplace/freemeos/droi6755/pcb
+diff xml with workplace over
 ```
 
 执行完成之后，在该目录下生成三个文件：droi.xml，project.list，project.gerrit，是后续工作的必要文件。
@@ -105,6 +129,7 @@ $ cd device
 $ git rm --cached droi/ mediatek/
 $ git add .gitignore
 $ git commit -m "[freemeos/bringup] ignore droi/ mediatek/"
+$ cd ../
 ```
 
 ### 2. 在gerrit服务器上创建projects
@@ -153,7 +178,7 @@ git config --global pack.threads 6
 
 下面具体介绍
 
-**提交manifest**
+### 提交manifest
 
 ```
 $ cd ~/workplace/freemeos/manifest
@@ -165,7 +190,7 @@ $ git commit -m "[mainfest] add ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N"
 $ git push origin HEAD:refs/for/master
 ```
 
-**拉取代码**
+### 拉取代码
 
 注意修改`zhuzhongkai`为你的名字。
 
@@ -176,7 +201,7 @@ $ repo sync
 $ repo start --all master
 ```
 
-**执行编译**
+### 执行编译
 
 ```
 $ . build/envsetup.sh
@@ -188,11 +213,11 @@ $ make -j10
 
 如果编译通过，那么继续下一步。
 
-**合并patch**
+### 合并patch
 
 如果有patch，此时合并patch，方法参见相关文档。合并patch后继续执行编译并验证。
 
-**创建mtk分支**
+### 创建mtk分支
 
 创建本地mtk分支
 ```
@@ -208,7 +233,7 @@ $ repo forall -pc git push origin mtk
 
 进入manifests仓库修改`mtk.xml`，将master修改为`mtk`，并提交。具体方法参考本节开头**提交manifest**。
 
-**创建driver分支**
+### 创建driver分支
 
 方法与创建mtk分支同理。创建完毕后注意在manifest仓库提交`driver.xml`。
 
