@@ -127,6 +127,8 @@ Now, you may fix the git repo which has sub git repos, such as "device/", run:
 ```
 $ cd device
 $ git rm --cached droi/ mediatek/
+$ echo "/droi/" >> .gitignore
+$ echo "/mediatek/" >> .gitignore
 $ git add .gitignore
 $ git commit -m "[freemeos/bringup] ignore droi/ mediatek/"
 $ cd ../
