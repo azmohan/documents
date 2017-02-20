@@ -126,7 +126,7 @@ Now, you may fix the git repo which has sub git repos, such as "device/", run:
 根据提示执行以下命令
 ```
 $ cd device
-$ git rm --cached droi/ mediatek/
+$ git rm --cached droi mediatek
 $ echo "/droi/" >> .gitignore
 $ echo "/mediatek/" >> .gitignore
 $ git add .gitignore
