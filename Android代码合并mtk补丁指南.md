@@ -2,12 +2,14 @@
 
 ## 准备
 
-将scripts目录下的`repopatch.sh`链接到~/bin目录下（或其他包含在系统`PATH`环境变量的路径中，例如：
+将`scripts`目录下的`repopatch.sh`链接到~/bin目录下（或其他包含在系统`PATH`环境变量的路径中，例如：
 
 ```
 $ cd ~/bin
 $ ln -s your-repopatch.sh
 ```
+
+说明：`scripts`目录下还提供了`gen.py`，用于生成`repopatch.sh`命令，具体用法在下文说明。
 
 PS. 如使shell为`zsh`，请执行`hash -r`，当前终端即可直接执行`repopatch.sh`
 
@@ -90,6 +92,27 @@ log: create P7_ALPS03108431.txt
 
 如果还有其他补丁包，请重复使用上述命令。
 
+### 补丁较多
+
+如果补丁较多，重复输入命令枯燥无趣，可以使用`gen.py`自动生成补丁合并脚本。将`gen.py`也链接到`～/bin`目录下（方法参见本文开头）。然后执行
+
+```
+$ gen.py ../patch tempdir > run.sh
+$ cat run.sh
+#!/bin/bash
+repopatch.sh mtk "../patch/ALPS03039046(For_droi6755_66_n_alps-mp-n0.mp7-V1_P1).tar.gz" tempdir
+repopatch.sh mtk "../patch/ALPS03076119(For_droi6755_66_n_alps-mp-n0.mp7-V1_P2).tar.gz" tempdir
+repopatch.sh mtk "../patch/ALPS03108339(For_droi6755_66_n_alps-mp-n0.mp7-V1_P3).tar.gz" tempdir
+...
+repopatch.sh mtk "../patch/ALPS03144425(For_droi6755_66_n_alps-mp-n0.mp7-V1_P24).tar.gz" tempdir
+repopatch.sh mtk "../patch/ALPS03144423(For_droi6755_66_n_alps-mp-n0.mp7-V1_P25).tar.gz" tempdir
+```
+
+编辑run.sh，删除已经合并的补丁行。然后运行
+```
+$ bash run.sh
+```
+
 ### 检查是否有遗漏
 
 查看当前的改动，添加`-o`选项，如果有未被任何git仓库跟踪的文件也列出来（例如.repo目录目录下新增文件或目录）
@@ -121,16 +144,12 @@ $ repopatch.sh logcommit pwork/changelogs
 $ repo upload
 ```
 
-add ATTENTION
-
+注意，当一次合并较多patch时，可能会出现如下警告，这是repo监测到个别仓库提交较多发出的提醒，直接输入`yes`即可
 ```
-gaojinchuan@gaojinchuan:~/gaojinchuan/pcb_oversea_patch/50n_mtk$ repo upload
 ATTENTION: One or more branches has an unusually high number of commits.
 YOU PROBABLY DO NOT MEAN TO DO THIS. (Did you rebase across branches?)
 If you are sure you intend to do this, type 'yes': yes
-
 ```
-
 
 ### gerrit上合并提交
 
@@ -226,4 +245,3 @@ $ repo upload
 $ repo abandon mtk
 $ repo abandon pcb_oversea
 ```
-
