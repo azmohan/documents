@@ -5,7 +5,8 @@
 将scripts目录下的`repopatch.sh`链接到~/bin目录下（或其他包含在系统`PATH`环境变量的路径中，例如：
 
 ```
-$ ln -s your-repopatch.sh.sh ~/bin/repopatch.sh
+$ cd ~/bin
+$ ln -s your-repopatch.sh
 ```
 
 PS. 如使shell为`zsh`，请执行`hash -r`，当前终端即可直接执行`repopatch.sh`
