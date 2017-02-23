@@ -162,7 +162,7 @@ function apply_patch_from_changelog() {
 
         if [ "$?" -ne 0 ]; then
             #TODO: how to continue?
-            loge "error: <%{_project}> pick conflict, please fix it later, now we just skip"
+            loge "error: <%${_project}> pick conflict, please fix it later, now we just skip"
             commit_array="$commit_array ${_project}:----------------------------------------"
             pick_no_conflicts="false"
         else
