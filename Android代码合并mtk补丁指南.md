@@ -1,5 +1,15 @@
 # repo项目管理与分支演进
 
+## 准备
+
+将scripts目录下的`repopatch.sh`链接到~/bin目录下（或其他包含在系统`PATH`环境变量的路径中，例如：
+
+```
+$ ln -s your-repopatch.sh.sh ~/bin/repopatch.sh
+```
+
+PS. 如使shell为`zsh`，请执行`hash -r`，当前终端即可直接执行`repopatch.sh`
+
 ## 1. patch文件备份
 
 ### 首次创建仓库
@@ -24,7 +34,7 @@ $ git push origin HEAD:refs/for/master
 
 ## 2. mtk版本合并patch
 
-为了减少干扰，建议使用完全干净的源码树执行patch合并操作。
+为了减少干扰，请使用完全干净的源码树执行patch合并操作。
 
 ### 拉取代码
 
@@ -46,36 +56,49 @@ $ repo sync
 
 ### 合并patch
 
-创建新的本地分支`patch`用于执行本次的patch合并
+创建新的本地分支`mtk`用于执行本次的`mtk`合并
 ```
-$ repo start --all patch
+$ repo start --all `mtk`
 ```
 
-将patch解压到源码目录，确保该步骤执行正确。
+创建`patch临时工作目录`用于合并patch，笔者在`pwork`，请根据自己喜好修改。
+```
+$ mkdir pwork
+```
 
-tar xvf xxxx.tar.gz
+执行patch合并操作
+```
+$ repopatch.sh mtk ../patch/ALPS03108431\(For_droi6755_66_n_alps-mp-n0.mp7-V1_P7\).tar.gz pwork
+tar patch files... 
+override patch files... 
+loop modified projects...
+patch device/droi
+patch frameworks
+patch packages
+patch system
+patch vendor
+create change log file
+log: create P7_ALPS03108431.txt
+```
 
-查看patch_list.txt，确认patch中是否有需要删除的文件。
+执行完毕后，`patch临时工作目录`下会生成
+```
+- changelog/: 用于存放patch合并信息文件，
+- P7_ALPS03108431/: 本patch包解压目录，类似目录可能有多个
+```
 
+如果还有其他补丁包，请重复使用上述命令。
 
-然后查看当前的改动，添加`-o`选项，如果有未被任何git仓库跟踪的文件也列出来（例如.repo目录目录下新增文件）
+### 检查是否有遗漏
+
+查看当前的改动，添加`-o`选项，如果有未被任何git仓库跟踪的文件也列出来（例如.repo目录目录下新增文件或目录）
 ```
 $ repo status -o
 ```
 
-```
-$ repo forall -pc git status --ignored | awk '/^project/{a=1; project=$2 }a==1&&$0~/git/{projects=projects project " ";a=0}END{print projects}'
+如果有新增文件或目录（概率很小，暂时还没遇到过），那么需要具体分析，请联系本作者。
 
-test/ test2/
-```
-注意该命令输出将会在接下来的在`pcb`分支合并patch时使用。
-
-添加代码，并本地提交
-```
-$ repo forall <projects1 projects2 ...> -pc 'git add . && git commit -m "[patch/apply] you-should-say-something-here"'
-```
-
-执行完毕后使用再次确认是否遗漏文件。
+再次确认是否遗漏文件，命令
 ```
 $ repo forall -c git status --ignored
 ```
@@ -84,78 +107,110 @@ $ repo forall -c git status --ignored
 
 **说明**：`git add`配合`-f`参数，可以强制添加所有文件（即使是在.gitignore被忽略的文件）。
 
-确认完毕后，上传代码到服务器
+### 上传
+
+提交补丁变更文件，注意，修改`pwork`为你的`patch临时工作目录`
+
 ```
-repo upload
+$ repopatch.sh logcommit pwork/changelogs
+```
+
+上传代码到服务器
+```
+$ repo upload
 ```
 ### gerrit上合并提交
 
 打开gerrit网页，http://10.20.40.19:8080，登陆，确认代码提交成功，将代码review并submit到仓库中。
 
-### 本地分支清理
-
-删除本地分支
-```
-$ repo abandon patch
-```
-
 ## 3. 将patch合并到pcb分支
 
-### 拉取pcb分支代码
+### 修改manifests
 
+首先修改`.repo/manifest.xml`，将`default revision="mtk"`修改成`default revision="pcb_oversea"`。注意，有些项目是`pcb`分支，务必确保本步正确。
+然后创建新的本地分支`pcb_oversea`用于执行本次的patch合并
 ```
-$ mkdir alsp_50n_pcb_oversea
-$ cd alsp_50n_pcb_oversea
-$ repo init --no-repo-verify -u ssh://yourname@10.20.40.19:29418/freemeos/manifest -m ALPS-MP-N0.MP7-V1_DROI6755_66_N/pcb_oversea.xml
-$ repo sync
 $ repo start --all pcb_oversea
 ```
 
-### 从mtk合并提交
+### 从changelog文件中合并patch
 
-更新仓库，确保获得仓库最新代码。
-
+例如，合并P7补丁，命令如下，修改`pwork`为你的`patch临时工作目录`
 ```
-$ repo sync
-```
-
-创建新的本地分支`patch`用于执行本次的patch合并
-```
-$ repo start --all patch
-```
-
-从mtk分支合并patch，其中`<projects1 projects2 ...>`参数，请使用前面生成的project list替换，注意该命令需要在项目根目录下执行。
-```
-$ repo forall <projects1 projects2 ...> -pc git cherry-pick origin/mtk
+$ repopatch.sh droi pwork/changelogs/P7_ALPS03108431.txt
+loop patched projects...
+pick 0a8e656a13740a8e15b79a4635ea95c7200cee03 from device/droi
+picked!
+pick c923c744872e5dd667696de82c1b0ce7764e8b24 from frameworks
+picked!
+create change log file
+log: create P7_ALPS03108431.txt
 ```
 
+如果没有任何冲突，效果如上面所示。
+
+如果运气不好，个别仓库合并失败，合并脚本会继续执行。
 ```
-$ repo status
+$ repopatch.sh droi pwork/changelogs/P8_ALPS03128418.txt
+loop patched projects...
+pick f60a45baf19182f79123778a2ba09ab7042fec96 from bionic
+picked!
+pick 849b7b693aaf0b0753f98da8857c0a4d72bd0b2e from bootable/recovery
+error: could not apply 849b7b6... [patch/apply] ALPS03128418(For_droi6755_66_n_alps-mp-n0.mp7-V1_P8)
+hint: after resolving the conflicts, mark the corrected paths
+hint: with 'git add <paths>' or 'git rm <paths>'
+Recorded preimage for 'mt_recovery.cpp'
+error: pick conflict, please fix it later, now we just skip
+pick b0287947170328802040e6b6e6482b404c44004b from device/droi
+picked!
+...
+create change log file
+log: create pwork/changelogs_new/P8_ALPS03128418.txt
 ```
-如果有仓库冲突，进入仓库，执行`git mergetool`执行三方合并，然后手动`git add`，`git cherry-pick --continue`
+
+冲突的仓库会红色高亮日志打印出来，请手动修复冲突：进入该仓库，执行`git mergetool`执行三方合并。
 
 ```
 $ git config --global merge.tool meld
 $ git mergetool
 ```
 
-处理完冲突之后，需要删除备份文件*.orig。
-
-如果patch分支已经全部合并了`origin/mtk`分支提交。接下来对project list使用`git commit --amend -m`重写提交信息。由于`git cherry-pick`会将某提交完整的“pick”过来，包括其commit message，其中被使用的change-id，使用`git commit --amend -m`重写提交信息，确保每个提交都生成新的的change-id。
+手动处理完冲突之后，执行
 
 ```
-$ repo forall <projects1 projects2 ...> -pc git commit --amend -m "[patch/apply] you-should-say-something-here"
+$ git add -u
+$ git commit -m "[patch/apply] ALPS03128418(For_droi6755_66_n_alps-mp-n0.mp7-V1_P8)"
 ```
 
-上传代码
+如果有冲突，修复冲突之后，请更新变更日志，没有冲突请跳过此步。
+```
+$ repopatch.sh logupdate pwork/changelogs_new/P8_ALPS03128418.txt
+```
+
+如果还有其他补丁包，请重复使用上述命令。
+
+### 上传
+
+提交补丁变更文件，注意，修改`pwork`为你的`patch临时工作目录`，且pcb分支的日志目录为`changelogs-new`
+
+```
+$ repopatch.sh logcommit pwork/changelogs-new
+```
+
+上传代码到服务器
 ```
 $ repo upload
 ```
+
+### 代码合并
+
+在gerrit上将代码合并到仓库中。
 
 ### 本地分支清理
 
 删除本地分支
 ```
-$ repo abandon patch
+$ repo abandon mtk
+$ repo abandon pcb_oversea
 ```
 
