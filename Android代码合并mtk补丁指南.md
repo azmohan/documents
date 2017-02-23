@@ -120,6 +120,18 @@ $ repopatch.sh logcommit pwork/changelogs
 ```
 $ repo upload
 ```
+
+add ATTENTION
+
+```
+gaojinchuan@gaojinchuan:~/gaojinchuan/pcb_oversea_patch/50n_mtk$ repo upload
+ATTENTION: One or more branches has an unusually high number of commits.
+YOU PROBABLY DO NOT MEAN TO DO THIS. (Did you rebase across branches?)
+If you are sure you intend to do this, type 'yes': yes
+
+```
+
+
 ### gerrit上合并提交
 
 打开gerrit网页，http://10.20.40.19:8080，登陆，确认代码提交成功，将代码review并submit到仓库中。
