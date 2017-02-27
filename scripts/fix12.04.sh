@@ -18,7 +18,7 @@ function update_binary() {
 
     echo "update ${cmd}"
     rm -rf ${name}
-    wget http://192.168.0.193/packages/linux/${name} && rm -rf ${cmd} && chmod a+x ${name} && mv ${name} ${cmd}
+    wget http://192.168.0.193/packages/linux/${name} && chmod a+x ${name} && mv ${name} ${cmd}
 }
 
 checkuser
