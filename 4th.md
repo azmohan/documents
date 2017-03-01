@@ -10,7 +10,8 @@
 git reset
 ```
 
-它有两种形式
+它有两种形式:
+
 1. `git reset <commit-id> [files]`，只丢弃git提交，但保留工作目录文件内容不变。
 2. `git reset --hard <commit-id> [files]`，`--hard`参数丢弃git提交，同时丢弃工作目录文件改动。
 
@@ -110,11 +111,13 @@ patch -Np1 < xxxx.diff
 ## 查看提交历史
 
 ubuntu下最简单、方便的git图形工具就是gitk，安装方法如下：
+
 ```
 sudo apt-get install gitk
 ```
 
 使用方法是进入git仓库所在目录下，执行
+
 ```
 gitk --all
 ```

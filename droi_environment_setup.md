@@ -1,5 +1,7 @@
 # 卓易framework组linux开发环境搭建指南
 
+[TOC]
+
 ## ubuntu系统安装
 
 安装环境为ubuntu14.04，下载地址为：

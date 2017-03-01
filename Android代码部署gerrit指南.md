@@ -1,4 +1,8 @@
-# 主要内容
+# 部署AOSP代码到Gerrit服务器操作指南
+
+[TOC]
+
+## 概述
 
 本文以案例方式演示如何将mtk提供的Android项目代码部署到`gerrit`上。
 
@@ -68,6 +72,7 @@ manifest
 ## 构造repo工程
 
 首先命令行切换目录到`ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N`项目源代码目录（解压后），命令如下:
+
 ```
 $ cd ~/workplace/freemeos/droi6737/ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N
 ```
@@ -76,7 +81,6 @@ $ cd ~/workplace/freemeos/droi6737/ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N
 
 ```
 $ ~/bin/creategit.sh s0 ~/workplace/freemeos/manifest/ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N/_common.xml
-
 ```
 
 该命令对比`_common.xml`和当前源代码目录结构，其输出类似如下效果：
@@ -115,6 +119,7 @@ diff xml with workplace over
 本步执行总时间大概20分钟（机械硬盘）。
 
 本步执行完毕之后，会打印如下提示，请检查是否存在嵌套git目录。当前仓库git分拆方案，`device/`下的`droi/`、`mediatek/`都是独立的`git`仓库。
+
 ```
 Now, you may fix the git repo which has sub git repos, such as "device/", run:
       git rm --cached <your-sub-git-dirs>;
@@ -124,6 +129,7 @@ Now, you may fix the git repo which has sub git repos, such as "device/", run:
 ```
 
 根据提示执行以下命令
+
 ```
 $ cd device
 $ git rm --cached droi mediatek
@@ -147,6 +153,7 @@ $ cd ../
 ### 3. 推送代码到服务器
 
 本步骤执行时间较长，请执行如下命令配置git压缩并发进程数以加快速度。笔者机器是四核八线程，配置`6`，请根据自己的机器实际情况配置（16核32线程，配置`8`后效果提升明显）。
+
 ```
 git config --global pack.threads 6
 ```
@@ -222,11 +229,13 @@ $ make -j10
 ### 创建mtk分支
 
 创建本地mtk分支
+
 ```
 $ repo start --all mtk
 ```
 
 将本地mtk分支推送到gerrit服务器上
+
 ```
 $ repo forall -pc git push origin mtk
 ```

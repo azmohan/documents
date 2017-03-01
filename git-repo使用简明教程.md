@@ -1,8 +1,11 @@
+[TOC]
+
 # repo介绍
 
 ## 下载代码
 
 下载一个Repo项目，只需要三条命令：
+
 ```
 $ repo init --no-repo-verify -u <URL> -m <manifest-file>
 $ repo sync
@@ -10,6 +13,7 @@ $ repo start --all master
 ```
 
 `repo init`中的使用到参数含义如下：
+
 - `-u`：指定manifest仓库的路径，这是一个git仓库地址
 - `-m`：指定manifest仓库中的某个manifest文件
 
@@ -26,6 +30,7 @@ $ repo start --all master
 ## 什么是repo？
 
 repo有多重含义，这里明确说明下，以免混淆。
+
 - 版本管理工具所谓的`仓库`，对应英文`repository`，缩写为`repo`。一个git仓库，英文即git repo。
 - 整个Android源码树由500个左右的git仓库（git仓库也称为project）构成。为了方便管理，Google开发了`repo`工具（使用python语言开发），并且以特殊的目录结构组织Android源代码。有时候，采用这种方式构成的大项目（或称为大仓库）也被称为`Repo`。
 
@@ -42,6 +47,7 @@ Google设计的Repo项目的组织结构如下图，以AndroidN 50驱动版本�
 ![gerrit](pic/repo_dir_structure.png)
 
 `.repo`目录结构
+
 - manifest. 这是一个git仓库，repo命令的`-u`参传入的url被repo脚本使用`git clone`到此处。
 - manifests.git
 - project.list
@@ -55,16 +61,19 @@ Google设计的Repo项目的组织结构如下图，以AndroidN 50驱动版本�
 当前FreemeOS的mainifest仓库路径是`ssh://yourname@10.20.40.19:29418/freemeos/manifest`。
 
 想要知道FreemeOS有哪些Repo工程可以下载，命令如下，注意修改yourname为你的名字。
+
 ```
 $ git clone ssh://yourname@10.20.40.19:29418/freemeos/manifest
 $ cd manifest
 $ ls
 ```
+
 进入manifest目录，查看当前有哪些manifest配置文件。
 
 ![workflow](pic/repo.png)
 
 从上述目录可知，`repo init`的命令`<manifest-file>`参数可以取以下数值：
+
 - `test.xml`
 - `ALPS-MP-N0.MP7-V1_DROI6755_66_N/driver.xml`
 - `ALPS-MP-N0.MP7-V1_DROI6755_66_N/mtk.xml`
@@ -92,6 +101,7 @@ $ ls
 **案例1：上传并被review通过**
 
 正常上传，review进去。涉及命令:
+
 ```
 repo sync
 git add
@@ -104,6 +114,7 @@ repo upload
 正常上传，但主管reveiw后发现认为代码需要修正。在案例1的基础上，继续执行:
 
 如果review不过，使用
+
 ```
 重新编辑代码
 git add your-files
@@ -114,6 +125,7 @@ repo upload .
 **案例3：上传到gerrit上，提示冲突**
 
 上传后，gerrit上提示冲突。在案例1的基础上，继续执行
+
 ```
 repo sync
 根据提示进入冲突文件目录，
@@ -138,10 +150,13 @@ repo upload .
 ## 同步代码
 
 同步所有项目代码到本地。
+
 ```
 $ repo sync
 ```
+
 只同步某些项目
+
 ```
 $ repo sync PROJECT0 PROJECT1 PROJECT2 ...
 ```
@@ -185,6 +200,7 @@ $ cat .gitignore
 *.swp
 build/
 ```
+
 - 第一行告诉`Git`忽略所有以`.o`或`.a`结尾的文件。一般这类对象文件和存档文件都是编译过程中出现的。
 - 第二行告诉`Git`忽略所有以swp结尾的文件，这是vim生成的临时文件。
 - 第三行告诉`Git`忽略`build/`
@@ -194,6 +210,7 @@ build/
 ### 提交更新（提交到本地git仓库）
 
 现在的暂存区域已经准备妥当可以提交了。 在此之前，请一定要确认还有什么修改过的或新建的文件还没有`git add`过，否则提交的时候不会记录这些还没暂存起来的变化。 这些修改过的文件只保留在本地磁盘。 所以，每次准备提交前，先用 `git status`看下，是不是都已暂存起来了， 然后再运行提交命令`git commit`：
+
 ```
 $ git commit
 ```
@@ -201,6 +218,7 @@ $ git commit
 
 
 另外，也可以在`commit`命令后添加`-m`选项，将提交信息与命令放在同一行，如下所示：
+
 ```
 $ git commit -m "Story 182: Fix benchmarks for speed"
 [master 463dc4f] Story 182: Fix benchmarks for speed
@@ -213,6 +231,7 @@ $ git commit -m "Story 182: Fix benchmarks for speed"
 ### 查看历史
 
 查看提交历史使用
+
 ```
 $ git log
 ```
@@ -239,7 +258,7 @@ $ git log --stat --author=biantao build
 
 ![gerrit](pic/gitlog.png)
 
-git log还有很多强大参数，比如列出某段时间内的提交，或以特定格式显示提交历史。
+`git log`还有很多强大参数，比如列出某段时间内的提交，或以特定格式显示提交历史。
 
 ### 撤销修改
 
@@ -264,6 +283,7 @@ $ git commit -m 'initial commit'
 $ git add forgotten_file
 $ git commit --amend
 ```
+
 最终只会有一个提交，第二次提交将代替第一次提交的结果。
 
 **取消暂存的文件**
@@ -302,6 +322,7 @@ Changes not staged for commit:
 ```
 
 让我们来按照提示执行：
+
 ```
 $ git checkout -- CONTRIBUTING.md
 $ git status
@@ -445,6 +466,7 @@ $ sudo apt-get install gitk
 ```
 
 使用时，只需要在git仓库目录下执行gitk即可，加`--all`参数可以查看所有分支的状态，包括本地分支和远程分支。
+
 ```
 $ cd your-git-repo
 $ gitk --all
@@ -481,6 +503,7 @@ $ repo init -u <URL> [<OPTIONS>]
 在当前目录下安装Repo仓库。执行完毕后在当前目录下生成`.repo`目录，并安装manifests.git, manifest，repo
 
 命令行参数：
+
 - `-u`：指定manifest的git仓库的路径。
 - `-m`：选择manifest仓库中的具体文件，默认是default.xml。
 - `-b`：指定manifest仓库的某个版本，通常是某manifest仓库分支。
@@ -494,11 +517,13 @@ $ repo sync [<PROJECT_LIST>]
 从远程仓库上同步代码到本地Repo项目。中括号表示参数可选。后面可以跟一个或多个项目列表。如果不带参数，则更新全部项目。
 
 例如，同步全部项目（也就是该Repo所有的git子仓库）
+
 ```
 $ repo sync
 ```
 
 例如，只同步`frameworks`和`vendor/droi/freeme`
+
 ```
 $ repo sync frameworks vendor/droi/freeme
 ```
@@ -534,5 +559,6 @@ $ repo upload [<PROJECT_LIST>]
 比较常见的简写是在当前工作的目录下执行 `repo upload .`，仅提交该工程到远程仓库。
 
 ### 参考文献
+
 - http://source.android.com/source/developing.html
 - https://source.android.com/source/using-repo.html

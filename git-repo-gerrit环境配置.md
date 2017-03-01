@@ -1,4 +1,6 @@
-# git/repo配置
+# git/repo环境配置
+
+[TOC]
 
 ## 安装git
 

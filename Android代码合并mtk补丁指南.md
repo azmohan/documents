@@ -1,4 +1,6 @@
-# repo项目管理与分支演进
+# repo项目patch合并操作指南
+
+[TOC]
 
 ## 准备
 
@@ -60,16 +62,19 @@ $ repo sync
 ### 合并patch
 
 创建新的本地分支`mtk`用于执行本次的`mtk`合并
+
 ```
 $ repo start --all `mtk`
 ```
 
 创建`patch临时工作目录`用于合并patch，笔者在`pwork`，请根据自己喜好修改。
+
 ```
 $ mkdir pwork
 ```
 
 执行patch合并操作
+
 ```
 $ repopatch.sh mtk ../patch/ALPS03108431\(For_droi6755_66_n_alps-mp-n0.mp7-V1_P7\).tar.gz pwork
 tar patch files... 
@@ -85,6 +90,7 @@ log: create P7_ALPS03108431.txt
 ```
 
 执行完毕后，`patch临时工作目录`下会生成
+
 ```
 - changelog/: 用于存放patch合并信息文件，
 - P7_ALPS03108431/: 本patch包解压目录，类似目录可能有多个
@@ -109,6 +115,7 @@ repopatch.sh mtk "../patch/ALPS03144423(For_droi6755_66_n_alps-mp-n0.mp7-V1_P25)
 ```
 
 编辑run.sh，删除已经合并的补丁行。然后运行
+
 ```
 $ bash run.sh
 ```
@@ -116,6 +123,7 @@ $ bash run.sh
 ### 检查是否有遗漏
 
 查看当前的改动，添加`-o`选项，如果有未被任何git仓库跟踪的文件也列出来（例如.repo目录目录下新增文件或目录）
+
 ```
 $ repo status -o
 ```
@@ -123,6 +131,7 @@ $ repo status -o
 如果有新增文件或目录（概率很小，暂时还没遇到过），那么需要具体分析，请联系本作者。
 
 再次确认是否遗漏文件，命令
+
 ```
 $ repo forall -c git status --ignored
 ```
@@ -140,11 +149,13 @@ $ repopatch.sh logcommit pwork/changelogs
 ```
 
 上传代码到服务器
+
 ```
 $ repo upload
 ```
 
 注意，当一次合并较多patch时，可能会出现如下警告，这是repo监测到个别仓库提交较多发出的提醒，直接输入`yes`即可
+
 ```
 ATTENTION: One or more branches has an unusually high number of commits.
 YOU PROBABLY DO NOT MEAN TO DO THIS. (Did you rebase across branches?)
@@ -161,6 +172,7 @@ If you are sure you intend to do this, type 'yes': yes
 
 首先修改`.repo/manifest.xml`，将`default revision="mtk"`修改成`default revision="pcb_oversea"`。注意，有些项目是`pcb`分支，务必确保本步正确。
 然后创建新的本地分支`pcb_oversea`用于执行本次的patch合并
+
 ```
 $ repo start --all pcb_oversea
 ```
@@ -168,6 +180,7 @@ $ repo start --all pcb_oversea
 ### 从changelog文件中合并patch
 
 例如，合并P7补丁，命令如下，修改`pwork`为你的`patch临时工作目录`
+
 ```
 $ repopatch.sh droi pwork/changelogs/P7_ALPS03108431.txt
 loop patched projects...
@@ -182,6 +195,7 @@ log: create P7_ALPS03108431.txt
 如果没有任何冲突，效果如上面所示。
 
 如果运气不好，个别仓库合并失败，合并脚本会继续执行。
+
 ```
 $ repopatch.sh droi pwork/changelogs/P8_ALPS03128418.txt
 loop patched projects...
@@ -215,6 +229,7 @@ $ git commit -m "[patch/apply] ALPS03128418(For_droi6755_66_n_alps-mp-n0.mp7-V1_
 ```
 
 如果有冲突，修复冲突之后，请更新变更日志，没有冲突请跳过此步。
+
 ```
 $ repopatch.sh logupdate pwork/changelogs_new/P8_ALPS03128418.txt
 ```
@@ -230,6 +245,7 @@ $ repopatch.sh logcommit pwork/changelogs_new
 ```
 
 上传代码到服务器
+
 ```
 $ repo upload
 ```
@@ -241,6 +257,7 @@ $ repo upload
 ### 本地分支清理
 
 删除本地分支
+
 ```
 $ repo abandon mtk
 $ repo abandon pcb_oversea
