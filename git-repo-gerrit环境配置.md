@@ -31,6 +31,7 @@ $ git config --global core.editor vim
 ### 生成ssh-key
 
 请把下面的`yourname`替换为自己的名字。
+
 ```
 $ ssh-keygen -t rsa -b 4096 -C "yourname@droi.com"
 ```
@@ -49,6 +50,7 @@ $ chmod a+x ~/bin/repo
 ```
 
 打开`~/.bashrc`（如果使用zsh，请加入到`~/.zshrc`），添加如下行，注意，将`yourname`改成你的名字。
+
 ```
 export REPO_URL="ssh://yourname@10.20.40.19:29418/freemeos/git-repo"
 ```
@@ -119,6 +121,7 @@ and the repository exists.
 ```
 
 请做如下检查：
+
 1. 确认已经安装了openssh-server，`sudo apt-get install openssh-server`
 2. ssh-key已经生成，且公钥（~/.ssh/id_rsa.pub文件内容）已经添加到gerrit的ssh key public页面。
 3. git clone <url>，url中的yourname是你本人的用户名
