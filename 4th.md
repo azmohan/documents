@@ -43,9 +43,9 @@ git reset --hard HEAD~1
 
 在gerrit上打开driver分支提交页面，点击`Cherry pick`，填写想要合并到的分支。如下图。
 
-![gerrit](pic/gerrit-pick1.png)
+![gerrit](pic/gerrit_pick1.png)
 
-![gerrit](pic/gerrit-pick2.png)
+![gerrit](pic/gerrit_pick2.png)
 
 填写想要pick到的分支，gerrit会自动补全，然后点击`Cherry pick Chang`。如果没有任何错误，则会生成一个该分支的新提交。
 如果有冲突，pick将不成功，请尝试其他方法。
@@ -54,7 +54,7 @@ git reset --hard HEAD~1
 
 在gerrit上打开driver分支提交页面，点击右上角的`download`按钮。
 
-![gerrit](pic/gerrit-download1.png)
+![gerrit](pic/gerrit_download1.png)
 
 将上面红色圆圈，复制命令到粘贴板。拉取pcb_oversea仓库，命令行切换到相关仓库路径，粘贴命令。
 
@@ -85,7 +85,7 @@ git reset --hard HEAD~1
 
 在gerrit上打开driver分支提交页面，点击右上角的`download`按钮。
 
-![gerrit](pic/gerrit-download2.png)
+![gerrit](pic/gerrit_download2.png)
 
 下载patch的zip包，解压后，然后进入相关代码目录下，执行
 

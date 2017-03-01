@@ -419,7 +419,7 @@ gerrit上可以看到冲突已经消除，可以合并。
 
 如果有些代码已经在本地提交，但还没有执行`repo upload`上传服务器，如果此时远程仓库中有提交的改动和你本地提交改动了相同位置，此时执行`repo sync`也出现冲突，如下图所示。
 
-![gerrit](pic/conflict2-1.png)
+![gerrit](pic/conflict2_1.png)
 
 **解决冲突**
 
