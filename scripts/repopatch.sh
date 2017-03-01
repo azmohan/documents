@@ -93,7 +93,7 @@ function get_patchname_from_changelog() {
 
 function commit_changelog() {
     local logdir=$1
-    cp -r ${logdir} ${CHANGLOGDIR}/changelogs
+    cp -r ${logdir}/. ${CHANGLOGDIR}/changelogs
     cd ${CHANGLOGDIR}
     git add . && git commit -q -m "[patch/log] add changelogs"
     cd ${WORKDIR}
