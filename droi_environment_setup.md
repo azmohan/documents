@@ -9,6 +9,7 @@
 iso可从官网下载，也可从公司的ftp服务器上下载（位于software\镜像软件目录下\ubuntu-14.04-desktop-amd64.iso），可使用u盘制作启动盘安装，u盘制作方法请参考网上资料。
 
 linux系统上制作ubuntu启动盘的方法为（需要准备一块可用U盘，根据自己系统的实际情况修改下面命令中的/dev/sdc1）
+
 ```
 sudo dd if=ubuntu-14.04-desktop-amd64.iso of=/dev/sdc1 bs=1M
 ```
