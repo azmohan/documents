@@ -28,6 +28,7 @@ git reset --hard HEAD~1
 ## 同仓库多分支提交同一个Feature改动
 
 目前已经上线的项目仓库，主要有以下四个分支：
+
 1. mtk，用于记录mtk提供原生代码，并合并mtk后续补丁
 2. driver，用于驱动组调试驱动
 3. pcb_oversea，用于海外版本开发
@@ -70,6 +71,7 @@ git reset --hard HEAD~1
 `git cherry-pick`命令，顾名思义，用于合并一个或多个已存在的提交到某分支上。
 
 只拉取一套，比如是`driver`分支，然后希望向`pcb_oversea`分支也提交
+
 1. `git checkout pcb_oversea -b origin/pcb_oversea`
 2. `git chery-pick your-commit`
 3. `git commit --amend`，删除changid行以生成新的changid
