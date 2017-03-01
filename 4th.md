@@ -45,9 +45,14 @@ git reset --hard HEAD~1
 
 ![gerrit](pic/gerrit_pick1.png)
 
+填写想要pick到的分支，gerrit会自动补全，然后点击`Cherry pick Chang`。
+
 ![gerrit](pic/gerrit_pick2.png)
 
-填写想要pick到的分支，gerrit会自动补全，然后点击`Cherry pick Chang`。如果没有任何错误，则会生成一个该分支的新提交。
+如果没有任何错误，则会生成一个该分支的新提交。
+
+![gerrit](pic/gerrit_pick3.png)
+
 如果有冲突，pick将不成功，请尝试其他方法。
 
 ### 方法3，使用gerrit的`download`
