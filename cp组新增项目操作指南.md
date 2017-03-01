@@ -7,6 +7,7 @@
 ## 1. gerrit上创建仓库
 
 登陆gerrit，打开project 页面，进入`Create New Project`，
+
 - Project Name对应的编辑框中输入： `freemeos/mt6580/ALPS-MP-N0.MP2-V1_DROI6580_WE_N/pcb/droi/wf5`
 - Rights Inherit From编辑框中保持空白
 - 勾选`Create initial empty commit`
@@ -16,6 +17,7 @@
 通过`List`页面进入刚刚创建的`wf5`项目。由于该仓库刚刚创建完毕，仅有`master`分支。
 
 如果此`wf5`是为用于海外版本出货，那么需要创建`pcb_oversea`分支，进入branches页面，操作如下
+
 - Branch Name： 输入`pcb_oversea`
 - Initial Revision: 输入`master`
 
@@ -40,6 +42,7 @@ $ git push origin HEAD:refs/for/master
 ## 4. 向wf5中提交代码
 
 更新80项目repo仓库
+
 ```
 $ cd 80N
 $ repo sync

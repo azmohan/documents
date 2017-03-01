@@ -36,7 +36,7 @@ $ git config --global core.editor vim
 $ ssh-keygen -t rsa -b 4096 -C "yourname@droi.com"
 ```
 
-之后**一直回车**即可。执行完毕后生成`~/.ssh`目录，其中保存了一对秘钥（id_rsa.pub为公钥，id_rsa为私钥）
+之后一直回车即可。执行完毕后生成`~/.ssh`目录，其中保存了一对秘钥（id_rsa.pub为公钥，id_rsa为私钥）
 
 参考[非对称加密的简单概念](http://www.cnblogs.com/xuanhun/archive/2012/06/23/2559543.html)
 
