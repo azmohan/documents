@@ -92,10 +92,12 @@ function get_patchname_from_changelog() {
 }
 
 function commit_changelog() {
-    local logdir=$1
-    cp -r ${logdir}/. ${CHANGLOGDIR}/changelogs
+    local _changelog=$1
+    local patchlog=$(basename $_changelog)
+
+    cp $(_changelog) ${CHANGLOGDIR}/changelogs
     cd ${CHANGLOGDIR}
-    git add . && git commit -q -m "[patch/log] add changelogs"
+    git add ${patchlog} && git commit -q -m "[patch/log] add ${patchlog}"
     cd ${WORKDIR}
 }
 #--------------------------------------------------------------------------------
@@ -142,6 +144,9 @@ function apply_patch_from_tarball() {
     local logdir=${dirname}/changelogs
     mkdir -p ${logdir}
     create_changelog ${patchfullname} "${commit_array}" ${logdir}
+
+    logi "commit change log file"
+    commit_changelog ${logdir}/$(get_patch_id $patchfullname).txt
 }
 
 function apply_patch_from_changelog() {
@@ -180,8 +185,11 @@ function apply_patch_from_changelog() {
     mkdir -p ${logdir}
     create_changelog ${patchfullname} "${commit_array}" ${logdir}
 
-    if [ "${pick_no_conflicts}" = "false" ]; then
-        logw "warning: commit chang log file need update after you fix pick confilct"
+    logi "commit change log file"
+    if [ "${pick_no_conflicts}" = "true" ]; then
+        commit_changelog ${logdir}/$(get_patch_id $patchfullname).txt
+    else
+        logw "warning: run 'logupdate' to update commit chang log file after you fix pick confilct"
     fi
 }
 
@@ -275,12 +283,7 @@ case $action in
             exit 1
         fi
         update_commits_of_changelog $1
-        ;;
-    logcommit)
-        if [ ! -d "$1" ]; then
-            loge "error: $1 not existed!"
-            exit 1
-        fi
+        logi "commit change log file"
         commit_changelog $1
         ;;
     clean)

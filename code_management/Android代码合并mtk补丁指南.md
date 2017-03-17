@@ -238,12 +238,6 @@ $ repopatch.sh logupdate pwork/changelogs_new/P8_ALPS03128418.txt
 
 ### 上传
 
-提交补丁变更文件，注意，修改`pwork`为你的`patch临时工作目录`，且pcb分支的日志目录为`changelogs-new`
-
-```
-$ repopatch.sh logcommit pwork/changelogs_new
-```
-
 上传代码到服务器
 
 ```
