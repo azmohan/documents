@@ -95,8 +95,8 @@ function commit_changelog() {
     local _changelog=$1
     local patchlog=$(basename $_changelog)
 
-    cp $(_changelog) ${CHANGLOGDIR}/changelogs
-    cd ${CHANGLOGDIR}
+    cp ${_changelog} ${CHANGLOGDIR}/changelogs
+    cd ${CHANGLOGDIR}/changelogs
     git add ${patchlog} && git commit -q -m "[patch/log] add ${patchlog}"
     cd ${WORKDIR}
 }
