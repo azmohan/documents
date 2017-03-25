@@ -6,13 +6,13 @@
 
 本文讲述如果开发branch分支。
 
-本文以70M项目例讲解，如何从`driver`分支branch出`pcb_oversea`分支的具体方法。
+本文以70M项目为例讲解，如何从`driver`分支branch出`pcb_oversea`分支的具体方法。
 
 ## 获取权限
 
 本文操作需要操作人员具有相关权限，属于`gerrit`的代码管理组（即cm组）。
 
-请具有`cm`权限的人帮忙添加进入改组，添加方法是，打开`gerrit`，在`People` 进入`List Groups`，点击`cm`，将自己的名字加入。
+请具有`cm`权限的人帮忙添加进入改组。添加方法是打开`gerrit`，在`People` 进入`List Groups`，点击`cm`，将自己的名字加入。
 
 ## 拉取代码
 
@@ -50,6 +50,7 @@ $ cp driver.xml pcb_oversea.xml
 ```
 
 编辑该文件，将其中的`revision`字段的`driver`修改为`pcb_oversea`
+
 ```
 @@ -4,7 +4,7 @@
    <remote  name="origin"
@@ -61,9 +62,23 @@ $ cp driver.xml pcb_oversea.xml
             sync-j="4" />
 ```
 
-请检查其他项目额外项目的`revision`字段也需要替换成对应的分支。
+请检查其他项目外项目的`revision`字段可能也需要相应修改。对于特殊仓库，如`freemeos/common/freeme`仓库，配置使用自己的`m-driver`分支。
+
+```
+  <project path="vendor/freeme" name="freemeos/common/freeme" revision="m-driver" >
+    <linkfile src="build/tools/build" dest="mk" />
+    <linkfile src="build/tools/build" dest="publish" />
+    <linkfile src="build/tools/build" dest="stepup" />
+    <linkfile src="build/tools/build" dest="otadiff" />
+  </project>
+```
+
+该仓库属于属于公共仓库，如果不确定该项目的修改，请联系该项目owner（卞涛）了解该仓库如何配置`revision`。
+
+## 提交代码
 
 接下来提交代码
+
 ```
 $ git add pcb_oversea.xml
 $ git commit -m "[mainfest] branch pcb_oversea for ALPS-MP-M0.MP23-V1.32.3_DROI6570_CTLC_M"
