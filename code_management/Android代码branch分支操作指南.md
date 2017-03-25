@@ -74,8 +74,6 @@ $ cp driver.xml pcb_oversea.xml
 
 该仓库属于属于公共仓库，如果不确定该项目的修改，请联系该项目owner（卞涛）了解该仓库如何配置`revision`。
 
-## 提交代码
-
 接下来提交代码
 
 ```
