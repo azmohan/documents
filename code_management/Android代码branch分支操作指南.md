@@ -22,7 +22,6 @@
 $ mkdir 6570m
 $ repo init --no-repo-verify -u ssh://zhuzhongkai@10.20.40.19:29418/freemeos/manifest -m ALPS-MP-M0.MP23-V1.32.3_DROI6570_CTLC_M/driver.xml
 $ repo sync
-$ repo start --all master
 ```
 
 ## 创建分支
@@ -86,3 +85,7 @@ $ git push origin HEAD:refs/for/master
 ```
 
 然后请Leader将review该提交。
+
+## 邮件通知
+
+提交被review通过后，就可以通知相关team执行后续开发了。一般来说，代码管理人员需要撰写邮件通知相关人等。
