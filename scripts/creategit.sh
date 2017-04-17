@@ -72,12 +72,32 @@ function add_code_gits() {
     done
 }
 
+function get_gerrit_parent_project() {
+    local p=$(basename $1)
+    case "$p" in
+        kernel*)
+            echo "privilege/bsp"
+            ;;
+        vendor)
+            echo "privilege/bsp"
+            ;;
+        *)
+            ;;
+    esac
+}
+
 #gerrit_path="droi/freemeos/"
 function create_gerrit_projects() {
     for g in ${git_location_lists[*]}
     do
-        ssh -p 29418 ${gerrituser}@10.20.40.19 gerrit create-project $gerrit_path$g.git
-        echo "ssh -p 29418 ${gerrituser}@10.20.40.19 gerrit create-project $gerrit_path$g.git"
+        local parent=$(get_gerrit_parent_project $g)
+        if [ -z "$parent" ]; then
+            ssh -p 29418 ${gerrituser}@10.20.40.19 gerrit create-project $gerrit_path$g.git
+            echo "ssh -p 29418 ${gerrituser}@10.20.40.19 gerrit create-project $gerrit_path$g.git"
+        else
+            ssh -p 29418 ${gerrituser}@10.20.40.19 gerrit create-project $gerrit_path$g.git -p $parent
+            echo "ssh -p 29418 ${gerrituser}@10.20.40.19 gerrit create-project $gerrit_path$g.git -p $parent"
+        fi
     done
 }
 

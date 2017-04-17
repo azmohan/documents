@@ -2,14 +2,24 @@
 
 [TOC]
 
-为某一项目如AndroidN 6580项目，海外版本添加`wf5`主板。操作如下：
+## 概述
+
+本文以案例方式演示如何在gerrit上创建project。
+
+本文演示为AndroidN 6580项目海外版本添加`wf5`主板。
+
+## 获取权限
+
+本文操作需要操作人员具有相关权限，属于`gerrit`的代码管理组（`cm`组）。
+
+如果你不具有`cm`组权限，请具有`cm`权限的人帮忙将你添加进入该组。添加方法是打开`gerrit`，在`People` 进入`List Groups`，点击`cm`，将自己的名字加入。
 
 ## 1. gerrit上创建仓库
 
 登陆gerrit，打开project 页面，进入`Create New Project`，
 
 - Project Name对应的编辑框中输入： `freemeos/mt6580/ALPS-MP-N0.MP2-V1_DROI6580_WE_N/pcb/droi/wf5`
-- Rights Inherit From编辑框中保持空白
+- Rights Inherit From编辑框中输入：`privilege/cp`
 - 勾选`Create initial empty commit`
 
 ## 2. 创建分支
