@@ -32,17 +32,25 @@ ssh://zhuzhongkai@10.20.40.19:29418/freemeos/common/documents
 └── scripts
 ```
 
-假如将`features/instrument`这个目录独立成git仓库。假如当前documents仓库位于`~/sharedir/projects/documents`目录下，那么操作如下：
+假如将`features/instrument`这个目录独立成git仓库。笔者先将documents仓库clone到本地`~/sharedir/projects/documents`，接下来操作如下：
+
+1.切换到要git仓库的根目录下（必须是该仓库的根目录下，即该目录下有.git隐藏目录）
 
 ```
 $ cd ~/sharedir/projects/documents
 ```
 
+2.将某目录的所有提交过滤到单独分支
+
 ```
 $ git subtree split -P features/instrument -b instrument
 ```
 
-上述命令会将该仓库的`features/instrument`目录下的所有提交过滤到`instrument`分支上。
+说明： -P参数指定要分拆的目录；-b参数指定将该目录的所有提交过滤到一个新分支
+
+即上述命令将该仓库的`features/instrument`目录的所有提交过滤到`instrument`分支上。
+
+3.独立子git仓库
 
 ```
 $ cd ~/sharedir/projects/
@@ -52,7 +60,7 @@ $ git init
 $ git pull ~/sharedir/projects/documents -b instrument
 ```
 
-这样在seperate_instrument就是本地的独立git仓库，可以用`git log`查看提交记录
+这样seperate_instrument独立的git仓库，可以用`git log`查看提交记录
 
 ## 提交代码到gerrit
 
@@ -66,11 +74,11 @@ $ git remote add origin ssh://你的名字@gitlab.droi.com:29418/freemeos/common
 $ git push origin master
 ```
 
-注意上面最后一条push命令需要特殊gerrit权限。需要联系gerrit管理人员临时赋予你直接推送已有提交历史直接到gerrit仓库的权限。
+注意上面最后一条push命令需要特殊gerrit权限。需要联系gerrit管理员临时赋予你直接推送已有提交历史到gerrit仓库的权限。
 
 ## 后续
 
-原有仓库可能中的目录请删除。
+请删除原有仓库的相关目录。
 
 ```
 $ cd ~/sharedir/projects/documents
