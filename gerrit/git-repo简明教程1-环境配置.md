@@ -90,6 +90,8 @@ export REPO_URL="ssh://yourname@10.20.40.19:29418/freemeos/git-repo"
 
 ## 拉取项目测试
 
+### 1. 拉取git仓库测试
+
 ![gerrit](1/7.png)
 ![gerrit](1/8.png)
 
@@ -101,12 +103,32 @@ $ git clone ssh://yourname@10.20.40.19:29418/droi/test/test && scp -p -P 29418 y
 
 修改代码后如何提交，以及git/repo/gerrit的基本工作流程，请参考`git-repo-quick-guide.md`文档。
 
+### 2. 拉取repo仓库测试
+
+创建临时目录，在终端中切换到该目录下，执行
+
+```
+$ repo init -u ssh://你的名字拼音@10.20.40.19:29418/freemeos/manifest -m test.xml
+$ repo sync
+$ repo start --all master
+```
+
 # 参考文献
 
 - [Pro.git官方中文版本](https://git-scm.com/book/zh/v2)
 - [Git与Repo入门](http://www.cnblogs.com/angeldevil/p/3238470.html)
 
 # FAQ
+
+## `Q: branch 'stable' has not been signed `
+
+你的repo脚本可能是google原生的repo脚本，请在运行repo init命令时添加以下参数。
+
+```
+repo init --no-repo-verify -u ssh://***
+```
+
+或者使用 `http://192.168.0.193/packages/linux/repo` repo脚本
 
 ## `Q: git clone`提示`Permission denied (publickey)`
 
