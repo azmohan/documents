@@ -135,3 +135,22 @@ $ git clone git@github.com:Droi-FreemeOS/ALPS-MP-M0.MP1-V2.84_DROI6737M_65_M0_mo
 ```
 
 ## 编译方法
+
+- 编译Android
+```
+source build/envsetup.sh
+lunch full_droi6737t_35g_m0-user
+make -j32
+```
+
+- 编译modem
+  移动联通
+
+  ```
+  ./make.sh
+  $project.mak new
+  ```
+
+  电信
+
+  参考C2K_Modem_Build_Environment.pdf，密码6322477226
