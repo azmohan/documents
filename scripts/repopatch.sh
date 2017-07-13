@@ -1,7 +1,7 @@
 #!/bin/bash
 
 WORKDIR=$(pwd)
-CHANGLOGDIR=device/mediatek/
+CHANGLOGDIR=device/mediatek/changelogs/
 
 function logi() {
     # yellow
@@ -95,8 +95,13 @@ function commit_changelog() {
     local _changelog=$1
     local patchlog=$(basename $_changelog)
 
-    cp ${_changelog} ${CHANGLOGDIR}/changelogs
-    cd ${CHANGLOGDIR}/changelogs
+    if [ ! -d "${CHANGLOGDIR}" ]; then
+        logw "warning: \$CHANGLOGDIR ${CHANGLOGDIR} not existed, create it at first"
+        mkdir -p ${CHANGLOGDIR}
+    fi
+
+    cp ${_changelog} ${CHANGLOGDIR}
+    cd ${CHANGLOGDIR}
     git add ${patchlog} && git commit -q -m "[patch/log] add ${patchlog}"
     cd ${WORKDIR}
 }
@@ -243,11 +248,6 @@ EOF
 
 if [ ! -d ".repo" ]; then
     loge "error: must run in the root directory of Repo"
-    exit 1
-fi
-
-if [ ! -d "${CHANGLOGDIR}" ]; then
-    loge "error: \$CHANGLOGDIR ${CHANGLOGDIR} not existed, please fix"
     exit 1
 fi
 
