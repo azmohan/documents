@@ -34,6 +34,17 @@ $ sudo dpkg -i openjdk-8-jre-headless_8u45-b14-1_amd64.deb openjdk-8-jre_8u45-b1
 $ sudo apt-get -f install
 ```
 
+## ubuntu 14.04安装编译依赖
+
+```
+$ sudo apt-get install git-core gnupg flex bison gperf build-essential \
+  zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 \
+  lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache \
+  libgl1-mesa-dev libxml2-utils xsltproc unzip
+```
+
+参考：https://source.android.com/source/initializing
+
 ## ubuntu 12.04安装jdk8
 
 参考： http://ubuntuhandbook.org/index.php/2015/01/install-openjdk-8-ubuntu-14-04-12-04-lts/
