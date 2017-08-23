@@ -69,7 +69,7 @@ def diffdir_with_mainifestxml(androiddir, mainifestxml):
     root = tree.getroot()
     walkdir(root, androiddir, androiddir)
 
-def createxml(root_node):
+def createxml(root_node, prefix=''):
     template_header = '''<?xml version="1.0" encoding="UTF-8"?>
 <manifest>
 
@@ -89,7 +89,7 @@ def createxml(root_node):
                 warning("warning: no attr <", p_name, ">")
                 p_path = p_name;
             #droi/freemeos/
-            item = '  <project path="' + p_path + '" name="' + p_name + '" />\n'
+            item = '  <project path="' +  p_path + '" name="' + prefix + p_name + '" />\n'
             outfile.write(item)
 
     outfile.write(template_tail)
@@ -190,13 +190,12 @@ if __name__ == "__main__":
         ddes = sys.argv[4]
         createlndir(ET.parse(mainifest_xml).getroot(), dsrc, ddes)
     elif sys.argv[1] == '-c':
-        if len(sys.argv) != 4:
+        if len(sys.argv) < 4:
             showhelp()
             exit(-1)
-        ddir = sys.argv[2]
-        mainifest_xml = sys.argv[3]
-        root = parsexml(ddir, mainifest_xml)
-        createxml(root)
+        mainifest_xml = sys.argv[2]
+        prefix = sys.argv[3]
+        createxml(ET.parse(mainifest_xml).getroot(), prefix)
     elif sys.argv[1] == '-tyd':
         ddir = sys.argv[2]
         create_tyd_project(ddir)

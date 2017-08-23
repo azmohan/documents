@@ -109,12 +109,25 @@ function push_gerrit_projects() {
         local g=${git_location_lists[$i]}
         echo "cd $p"
         cd $p
-        git remote add origin ssh://${gerrituser}@10.20.40.19:29418/$gerrit_path$g.git
+        #git remote add origin ssh://${gerrituser}@10.20.40.19:29418/$gerrit_path$g.git
+        #git push origin HEAD:refs/for/master
         #git push origin HEAD:master
-        git push origin HEAD:refs/for/master
+        local droirepo=ssh://${gerrituser}@10.20.40.19:29418/$gerrit_path$g.git
+        git push ${droirepo} HEAD:refs/for/master
     done
 }
 
+function push_tags_gerrit_projects() {
+    for ((i=0;i<git_lists_num;i++))
+    do
+        local p=${git_lists[$i]}
+        local g=${git_location_lists[$i]}
+        echo "cd $p"
+        cd $p
+        local droirepo=ssh://${gerrituser}@10.20.40.19:29418/$gerrit_path$g.git
+        git push ${droirepo} --tags
+    done
+}
 
 function update_code_gits() {
     for i in ${git_lists[*]}
@@ -235,6 +248,15 @@ EOF
     u|update)
         _setupvar
         wrapper update_code_gits "scan changed git repo"
+        ;;
+
+    c|create_projects)
+        _setupvar
+        wrapper create_gerrit_projects "create gerrit projects"
+        ;;
+    pt|push_tags)
+        _setupvar
+        wrapper push_tags_gerrit_projects "push all gits tags to gerrit"
         ;;
     *)
         echo "fail: unknown subcommand!"
