@@ -115,6 +115,20 @@ function push_gerrit_projects() {
     done
 }
 
+
+function update_code_gits() {
+    for i in ${git_lists[*]}
+    do
+        cd $i
+        local st=$(git status -s)
+        if [ ! -z "$st" ]; then
+            git add -f .
+            git commit -q -m "[driver] bring up"
+            echo "$i git add commit over"
+        fi
+    done
+}
+
 function review_gerrit_projects() {
     for ((i=0;i<git_lists_num;i++))
     do
@@ -217,6 +231,10 @@ EOF
     s4|step4)
         _setupvar
         wrapper review_gerrit_projects "review change in gerrit projects"
+        ;;
+    u|update)
+        _setupvar
+        wrapper update_code_gits "scan changed git repo"
         ;;
     *)
         echo "fail: unknown subcommand!"
