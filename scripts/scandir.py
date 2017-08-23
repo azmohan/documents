@@ -83,8 +83,13 @@ def createxml(root_node):
     outfile.write(template_header)
     for project in root_node.findall('project'):
         if project.get('has') != 'false':
+            p_path = project.get('path')
+            p_name = project.get('name')
+            if p_path is None:
+                warning("warning: no attr <", p_name, ">")
+                p_path = p_name;
             #droi/freemeos/
-            item = '  <project path="' + project.get("path") + '" name="' + project.get("name") + '" />\n'
+            item = '  <project path="' + p_path + '" name="' + p_name + '" />\n'
             outfile.write(item)
 
     outfile.write(template_tail)
@@ -120,6 +125,9 @@ def parsexml(ddir, mainifestxml):
     for project in root.iter('project'):
         p_path = project.get('path')
         p_name = project.get('name')
+        if p_path is None:
+            warning("warning: no attr <", p_name, ">")
+            p_path = p_name;
 
         fullpath = ddir+'/'+p_path
         if os.path.exists(fullpath) is False:
@@ -164,7 +172,7 @@ def showhelp():
             create the status file of the difference between the dir and xml
         scandir.py -l <mainifest.xml> <dir-src> <dir-des>
             create link shell script
-        scandir.py -ty <freeme-os-code-dir>
+        scandir.py -tyd <freeme-os-code-dir>
             find the `tyd' dir, and print the part of manifest
     '''
     print usage
@@ -181,6 +189,14 @@ if __name__ == "__main__":
         dsrc = sys.argv[3]
         ddes = sys.argv[4]
         createlndir(ET.parse(mainifest_xml).getroot(), dsrc, ddes)
+    elif sys.argv[1] == '-c':
+        if len(sys.argv) != 4:
+            showhelp()
+            exit(-1)
+        ddir = sys.argv[2]
+        mainifest_xml = sys.argv[3]
+        root = parsexml(ddir, mainifest_xml)
+        createxml(root)
     elif sys.argv[1] == '-tyd':
         ddir = sys.argv[2]
         create_tyd_project(ddir)
