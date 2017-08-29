@@ -129,6 +129,26 @@ function push_tags_gerrit_projects() {
     done
 }
 
+function clean_projects_subgits() {
+    for p in ${git_lists[*]}
+    do
+        if [ -d "$p/.git" ]; then
+            echo "rm -rf $p/.git"
+            rm -rf $p/.git
+        else
+            echo "warning: $p/.git not exsited!"
+        fi
+    done
+}
+
+function delete_gerrit_projects() {
+    for g in ${git_location_lists[*]}
+    do
+        echo "delete $g in gerrit"
+        ssh -p 29418 ${gerrituser}@10.20.40.19 deleteproject delete $g --yes-really-delete
+    done
+}
+
 function update_code_gits() {
     for i in ${git_lists[*]}
     do
@@ -249,7 +269,6 @@ EOF
         _setupvar
         wrapper update_code_gits "scan changed git repo"
         ;;
-
     c|create_projects)
         _setupvar
         wrapper create_gerrit_projects "create gerrit projects"
@@ -257,6 +276,14 @@ EOF
     pt|push_tags)
         _setupvar
         wrapper push_tags_gerrit_projects "push all gits tags to gerrit"
+        ;;
+    cl|clean_gits)
+        _setupvar
+        wrapper clean_projects_subgits "clean sub gits"
+        ;;
+    d|delete_projects)
+        _setupvar
+        wrapper delete_gerrit_projects "delete gerrit projects"
         ;;
     *)
         echo "fail: unknown subcommand!"
