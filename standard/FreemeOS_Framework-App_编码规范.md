@@ -66,6 +66,7 @@
 > Tip: 在使用Unicode转义符或是一些实际的Unicode字符时，建议做些注释给出解释，这有助于别人阅读和理解。
 
 例如：
+
 ``` java
 String unitAbbrev = "μs";                                 | 赞，即使没有注释也非常清晰
 String unitAbbrev = "\u03bcs"; // "μs"                    | 允许，但没有理由要这样做
@@ -73,6 +74,7 @@ String unitAbbrev = "\u03bcs"; // Greek letter mu, "s"    | 允许，但这样�
 String unitAbbrev = "\u03bcs";                            | 很糟，读者根本看不出这是什么
 return '\ufeff' + content; // byte order mark             | Good，对于非打印字符，使用转义，并在必要时写上注释
 ```
+
 > Tip: 永远不要由于害怕某些程序可能无法正确处理非ASCII字符而让你的代码可读性变差。当程序无法正确处理非ASCII字符时，它自然无法正确运行，你就会去fix这些问题的了。(言下之意就是大胆去用非ASCII字符，如果真的有需要的话)
 
 ## (1)3 源文件结构
@@ -100,6 +102,7 @@ import语句不换行，列限制(4.4节)并不适用于import语句。(每个im
 
 #### 3.3.3 顺序和间距
 import语句可分为以下几组，按照这个顺序，每组由一个空行分隔：
+
 1. 所有的静态导入独立成组
 2. 第三方的包。每个顶级包为一组，字典序。例如：android, com, junit, org, sun
 3. `java` imports
@@ -135,6 +138,7 @@ import语句可分为以下几组，按照这个顺序，每组由一个空行�
 - 如果右大括号是一个语句、函数体或类的终止，则右大括号后换行; 否则不换行。例如，如果右大括号后面是else或逗号，则不换行。
 
 示例：
+
 ``` java
 return new MyClass() {
     @Override public void method() {
@@ -148,12 +152,14 @@ return new MyClass() {
     }
 };
 ```
+
 4.8.1节给出了enum类的一些例外。
 
 #### 4.1.3 空块：可以用简洁版本
 一个空的块状结构里什么也不包含，大括号可以简洁地写成{}，不需要换行。例外：如果它是一个多块语句的一部分(if/else 或 try/catch/finally) ，即使大括号内没内容，右大括号也要换行。
 
 示例：
+
 ``` java
 void doNothing() {}
 ```
@@ -168,6 +174,7 @@ void doNothing() {}
 一个项目可以选择一行80个字符或100个字符的列限制，除了下述例外，任何一行如果超过这个字符数限制，必须自动换行。
 
 例外：
+
 1. 不可能满足列限制的行(例如，Javadoc中的一个长URL，或是一个长的JSNI方法参考)。
 2. `package`和`import`语句(见3.2节和3.3节)。
 3. 注释中那些可能被剪切并粘贴到shell中的命令行。
@@ -197,8 +204,9 @@ void doNothing() {}
 ### 4.6 空白
 #### 4.6.1 垂直空白
 以下情况需要使用一个空行：
+
 1. 类内连续的成员之间：字段，构造函数，方法，嵌套类，静态初始化块，实例初始化块。 
-   - **例外**：两个连续字段之间的空行是可选的，用于字段的空行主要用来对字段进行逻辑分组。
+    - **例外**：两个连续字段之间的空行是可选的，用于字段的空行主要用来对字段进行逻辑分组。
 2. 在函数体内，语句的逻辑分组间使用空行。
 3. 类内的第一个成员前或最后一个成员后的空行是可选的(既不鼓励也不反对这样做，视个人喜好而定)。
 4. 要满足本文档中其他节的空行要求(比如3.3节：import语句)
@@ -207,19 +215,21 @@ void doNothing() {}
 
 #### 4.6.2 水平空白
 除了语言需求和其它规则，并且除了文字，注释和Javadoc用到单个空格，单个ASCII空格也出现在以下几个地方：
+
 1. 分隔任何保留字与紧随其后的左括号(`(`)(如`if, for catch`等)。
 2. 分隔任何保留字与其前面的右大括号(`}`)(如`else, catch`)。
 3. 在任何左大括号前(`{`)，两个例外： 
-   - `@SomeAnnotation({a, b})`(不使用空格)。
-   - `String[][] x = foo;`(大括号间没有空格，见下面的Note)。
+    - `@SomeAnnotation({a, b})`(不使用空格)。
+    - `String[][] x = foo;`(大括号间没有空格，见下面的Note)。
 4. 在任何二元或三元运算符的两侧。这也适用于以下“类运算符”符号： 
-   - 类型界限中的&(`<T extends Foo & Bar>`)。
-   - catch块中的管道符号(`catch (FooException | BarException e`)。
-   - `foreach`语句中的分号。
+    - 类型界限中的&(`<T extends Foo & Bar>`)。
+    - catch块中的管道符号(`catch (FooException | BarException e`)。
+    - `foreach`语句中的分号。
 5. 在`, : ;`及右括号(`)`)后
 6. 如果在一条语句后做注释，则双斜杠(//)两边都要空格。这里可以允许多个空格，但没有必要。
 7. 类型和变量之间：List list。
 8. 数组初始化中，大括号内的空格是可选的，即`new int[] {5, 6}`和`new int[] { 5, 6 }`都是可以的。
+
 > **Note**：这个规则并不要求或禁止一行的开关或结尾需要额外的空格，只对内部空格做要求。
 
 #### 4.6.3 水平对齐：不做要求
@@ -228,6 +238,7 @@ void doNothing() {}
 这是允许的(而且在不少地方可以看到这样的代码)，但Google编程风格对此不做要求。即使对于已经使用水平对齐的代码，我们也不需要去保持这种风格。
 
 以下示例先展示未对齐的代码，然后是对齐的代码：
+
 ``` java
 private int x; // this is fine
 private Color color; // this too
@@ -235,6 +246,7 @@ private Color color; // this too
 private int   x;      // permitted, but future edits
 private Color color;  // may leave it unaligned
 ```
+
 > Tip：对齐可增加代码可读性，但它为日后的维护带来问题。考虑未来某个时候，我们需要修改一堆对齐的代码中的一行。这可能导致原本很漂亮的对齐代码变得错位。很可能它会提示你调整周围代码的空白来使这一堆代码重新水平对齐(比如程序员想保持这种水平对齐的风格)，这就会让你做许多的无用功，增加了**reviewer**的工作并且可能导致更多的合并冲突。
 
 ### 4.7 用小括号来限定组：推荐
@@ -249,6 +261,7 @@ private Color color;  // may leave it unaligned
 ``` java
 private enum Suit { CLUBS, HEARTS, SPADES, DIAMONDS }
 ```
+
 由于枚举类也是一个类，因此所有适用于其它类的格式规则也适用于枚举类。
 
 #### 4.8.2 变量声明
@@ -261,9 +274,10 @@ private enum Suit { CLUBS, HEARTS, SPADES, DIAMONDS }
 #### 4.8.3 数组
 ##### 4.8.3.1 数组初始化：可写成块状结构
 数组初始化可以写成块状结构，比如，下面的写法都是OK的：
+
 ``` java
 new int[] {
-    0, 1, 2, 3 
+    0, 1, 2, 3
 }
 
 new int[] {
@@ -294,6 +308,7 @@ new int[]{0, 1, 2, 3}
 
 ##### 4.8.4.2 Fall-through：注释
 在一个switch块内，每个语句组要么通过`break, continue, return`或抛出异常来终止，要么通过一条注释来说明程序将继续执行到下一个语句组，任何能表达这个意思的注释都是OK的(典型的是用`// fall through`)。这个特殊的注释并不需要在最后一个语句组(一般是`default`)中出现。示例：
+
 ``` java
 switch (input) {
     case 1:
@@ -313,6 +328,7 @@ switch (input) {
 
 #### 4.8.5 注解(Annotations)
 注解紧跟在文档块后面，应用于类、方法和构造函数，一个注解独占一行。这些换行不属于自动换行(第4.5节，自动换行)，因此缩进级别不变。例如：
+
 ``` java
 @Override
 @Nullable
@@ -320,11 +336,13 @@ public String getNameIfPresent() { ... }
 ```
 
 **例外**：单个的注解可以和签名的第一行出现在同一行。例如：
+
 ``` java
 @Override public int hashCode() { ... }
 ```
 
 应用于字段的注解紧随文档块出现，应用于字段的多个注解允许与字段出现在同一行。例如：
+
 ``` java
 @Partial @Mock DataLoader loader;
 ```
@@ -334,7 +352,8 @@ public String getNameIfPresent() { ... }
 #### 4.8.6 注释
 #####4.8.6.1 块注释风格
 块注释与其周围的代码在同一缩进级别。它们可以是`/* ... */`风格，也可以是`// ...`风格。对于多行的`/* ... */`注释，后续行必须从`*`开始，并且与前一行的`*`对齐。以下示例注释都是OK的。
-```
+
+``` java
 /*
  * This is          // And so           /* Or you can
  * okay.            // is this.          * even do this. */
@@ -347,6 +366,7 @@ public String getNameIfPresent() { ... }
 
 #### 4.8.7 Modifiers
 类和成员的modifiers如果存在，则按Java语言规范中推荐的顺序出现。
+
 ``` java
 public protected private abstract static final transient volatile synchronized native strictfp
 ```
@@ -379,6 +399,7 @@ public protected private abstract static final transient volatile synchronized n
 常量名命名模式为`CONSTANT_CASE`，全部字母大写，用下划线分隔单词。那，到底什么算是一个常量？
 
 每个常量都是一个静态final字段，但不是所有静态final字段都是常量。在决定一个字段是否是一个常量时，考虑它是否真的感觉像是一个常量。例如，如果任何一个该实例的观测状态是可变的，则它几乎肯定不会是一个常量。只是永远不`打算`改变对象一般是不够的，它要真的一直不变才能将它示为常量。
+
 ``` java
 // Constants
 static final int NUMBER = 5;
@@ -395,6 +416,7 @@ static final ImmutableSet<SomeMutableType> mutableElements = ImmutableSet.of(mut
 static final Logger logger = Logger.getLogger(MyClass.getName());
 static final String[] nonEmptyArray = {"these", "can", "change"};
 ```
+
 这些名字通常是名词或名词短语。
 
 #### 5.2.5 非常量字段名
@@ -416,6 +438,7 @@ static final String[] nonEmptyArray = {"these", "can", "change"};
 
 #### 5.2.8 类型变量名
 类型变量可用以下两种风格之一进行命名：
+
 - 单个的大写字母，后面可以跟一个数字(如：E, T, X, T2)。
 - 以类命名方式(5.2.2节)，后面加个大写的T(如：RequestT, FooBarT)。
 
@@ -423,15 +446,17 @@ static final String[] nonEmptyArray = {"these", "can", "change"};
 驼峰式命名法分大驼峰式命名法(`UpperCamelCase`)和小驼峰式命名法(`lowerCamelCase`)。有时，我们有不只一种合理的方式将一个英语词组转换成驼峰形式，如缩略语或不寻常的结构(例如”IPv6”或”iOS”)。Google指定了以下的转换方案。
 
 名字从`散文形式`(prose form)开始:
+
 1. 把短语转换为纯ASCII码，并且移除任何单引号。例如：”Müller’s algorithm”将变成”Muellers algorithm”。
 2. 把这个结果切分成单词，在空格或其它标点符号(通常是连字符)处分割开。 
-   - 推荐：如果某个单词已经有了常用的驼峰表示形式，按它的组成将它分割开(如”AdWords”将分割成”ad words”)。 需要注意的是”iOS”并不是一个真正的驼峰表示形式，因此该推荐对它并不适用。
+    - 推荐：如果某个单词已经有了常用的驼峰表示形式，按它的组成将它分割开(如”AdWords”将分割成”ad words”)。 需要注意的是”iOS”并不是一个真正的驼峰表示形式，因此该推荐对它并不适用。
 3. 现在将所有字母都小写(包括缩写)，然后将单词的第一个字母大写： 
-   - 每个单词的第一个字母都大写，来得到大驼峰式命名。
-   - 除了第一个单词，每个单词的第一个字母都大写，来得到小驼峰式命名。
+    - 每个单词的第一个字母都大写，来得到大驼峰式命名。
+    - 除了第一个单词，每个单词的第一个字母都大写，来得到小驼峰式命名。
 4. 最后将所有的单词连接起来得到一个标识符。
 
 示例：
+
 ``` java
 Prose form                Correct               Incorrect
 ------------------------------------------------------------------
@@ -442,6 +467,7 @@ Prose form                Correct               Incorrect
 "YouTube importer"        YouTubeImporter
                           YoutubeImporter*
 ```
+
 加星号处表示可以，但不推荐。
 
 > **Note**：在英语中，某些带有连字符的单词形式不唯一。例如：”nonempty”和”non-empty”都是正确的，因此方法名`checkNonempty`和`checkNonEmpty`也都是正确的。
@@ -454,6 +480,7 @@ Prose form                Correct               Incorrect
 除了下面的例子，对捕获的异常不做响应是极少正确的。(典型的响应方式是打印日志，或者如果它被认为是不可能的，则把它当作一个`AssertionError`重新抛出。)
 
 如果它确实是不需要在catch块中做任何响应，需要做注释加以说明(如下面的例子)。
+
 ``` java
 try {
     int i = Integer.parseInt(response);
@@ -463,7 +490,9 @@ try {
 }
 return handleTextResponse(response);
 ```
+
 **例外**：在测试中，如果一个捕获的异常被命名为`expected`，则它可以被不加注释地忽略。下面是一种非常常见的情形，用以确保所测试的方法会抛出一个期望中的异常，因此在这里就没有必要加注释。
+
 ``` java
 try {
     emptyStack.pop();
@@ -474,6 +503,7 @@ try {
 
 ### 6.3 静态成员：使用类进行调用
 使用类名调用静态的类成员，而不是具体某个对象或表达式。
+
 ``` java
 Foo aFoo = ...;
 Foo.aStaticMethod(); // good
@@ -490,6 +520,7 @@ somethingThatYieldsAFoo().aStaticMethod(); // very bad
 ### 7.1 格式
 #### 7.1.1 一般形式
 Javadoc块的基本格式如下所示：
+
 ``` java
 /**
  * Multiple lines of Javadoc text are written here,
@@ -497,10 +528,13 @@ Javadoc块的基本格式如下所示：
  */
 public int method(String p1) { ... }
 ```
+
 或者是以下单行形式：
+
 ``` java
 /** An especially short bit of Javadoc. */
 ```
+
 基本格式总是OK的。当整个Javadoc块能容纳于一行时(且没有Javadoc标记@XXX)，可以使用单行形式。
 
 #### 7.1.2 段落
@@ -538,12 +572,14 @@ public int method(String p1) { ... }
 
 ## (2)1 前言
 本篇是FreemeOS在工程实施中一些规范。
-> **Note:** 
+
+> **Note:**  
+>
 > 1. *(1)*节的各种约定，须严格执行，但不必拘泥——新场景/文件中按照此约定，但原生场景下，请遵循**上下文**约定。
 > 2. *(1)*节的各种约定，如无专项规范，同样(可选择性/可参考性)适用于其他编程语言/工程：
->   - 缩进，可适用于C/C++/Makefile/Shell/Python等；
->   - 大括号/风格，不强制适用于C/C++/Makefile等；
->   - 不一而足；
+>     - 缩进，可适用于C/C++/Makefile/Shell/Python等；
+>     - 大括号/风格，不强制适用于C/C++/Makefile等；
+>     - 不一而足；
 
 ## (2)2 源码(Code)
 ### 2.1 缩进
@@ -553,6 +589,7 @@ public int method(String p1) { ... }
 ### 2.2 文件
 #### 2.2.1 文件命名
 代码(`java, c/cpp`等)文件的命名除按照各自代码规范约束外，FreemeOS新添加的文件须使用`Freeme/freeme_`前缀：
+
 ``` markdown
 FreemeFingerprint.java
 IFreemeFingetCallback.aidl
@@ -574,6 +611,7 @@ com.freeme.server;
 ```
 
 如相关源码文件放置在FreemeOS自有包(`package`)内，**按需**使用上节约定的`Freeme/freeme_`前缀：
+
 ``` markdown
 # 目录：vendor/freeme/frameworks/
 # 何谓“按需”？即可以不用，但如果FreemeOS自建的文件（特别是Java类），如果与原生系统中的Api类名冲突，在引用时出现麻烦，还是需要前缀“Freeme/freeme_”。
@@ -581,7 +619,9 @@ com.freeme.server;
 
 ### 2.3 SystemProperty命名
 Android SystemProperty命名约定：**`<prefix>.freeme.<module>_<feature>`**。
+
 *案例：*
+
 ``` markdown
 # 一般需求
 ro.freeme.camera_eis             | Camera-EIS
@@ -591,11 +631,14 @@ ro.freeme.factory_forestrobe     | 工厂模式-前闪光灯
 ro.build.ota.product             | 系统更新版本适配属性
 ro.config.message_sound          | 短信声音路径
 ```
+
 > Tips:
+>
 > - 命名串长度限制为31，灵活缩减各字段长度；
 
 ### 2.4 控制宏命名
 约定：**FREEME\_<module>\_<feature>**。
+
 ``` markdown
 FREEME_FACTORYMODE_SUPPORT    | 工厂模式App模块
 FREEME_FACTORYMODE_FORESTROBE | 工厂模式App内特性-前闪光灯
@@ -604,11 +647,14 @@ FREEME_FACTORYMODE_GSENSOR    | 工厂模式App内特性-加速度传感器
 
 ### 2.5 Android API生成约束
 对于上述新添加的源码中涉及到Javadoc的内容(java)部分，须使用`@hide`进行隐藏。
+
 ``` markdown
 # 到底哪些涉及到呢？
 #   framework/base/[core|media|*]等中涉及新Java API导出(修饰符为public,protected等)。
 ```
+
 *案例：*
+
 ``` java
 // Sample 1
 /** @hide */
@@ -633,42 +679,47 @@ public class Context {
 
 ### 2.7 注释
 除了`Javadoc`类注释需要块注释（`/* */`），全部使用行注释（`//...`）。
+
 在既有系统源码文件中修改和插入新代码时，须使用特定注释和标签：
+
 - 原则：保留原始实现（**代码行**），凸显**最小**修改变动。
 - **标签：`freeme.<name>, <date(yyyyMMdd)>. <purpose>`** 。
 - 注释：结合既有源码/编程语言，灵活使用块/行注释
-  ``` java
-  // Java/C/C++
 
-  // Style 1
-  /*/
-  [既有代码]
-  //*/
+``` java
+// Java/C/C++
 
-  // Style 2
-  //*/ <标签>
-  [插入新]
-  //*/
+// Style 1
+/*/
+[既有代码]
+//*/
 
-  // Style 3
-  /*/ <标签>
-  [修改前(维持原有代码实现)]
-  /*/
-  [修改后]
-  //*/
+// Style 2
+//*/ <标签>
+[插入新]
+//*/
 
-  // Style 4
-  //*/ <标签>
-  [修改后]
-  /*/
-  [修改前(维持原有代码实现)]
-  //*/
-  ```
-  ``` markdown
-  # 探讨：为什么要使用以上注释形式？
-  ```
+// Style 3
+/*/ <标签>
+[修改前(维持原有代码实现)]
+/*/
+[修改后]
+//*/
+
+// Style 4
+//*/ <标签>
+[修改后]
+/*/
+[修改前(维持原有代码实现)]
+//*/
+```
+
+``` markdown
+# 探讨：为什么要使用以上注释形式？
+```
 
 *案例：*
+
 ``` java
 // Java
 public class StatusBarNotification {
@@ -720,6 +771,7 @@ public class StatusBarNotification {
     //*/
 }
 ```
+
 > Tips：既有源码中遇到有块注释(`/*...*/`)的情形，在设计修改代码时，尽量考虑需变动代码的设计形式，最小化修改。极端情况，可使用行注释进行实施。
 
 ``` xml
@@ -790,7 +842,9 @@ public class StatusBarNotification {
     -->
 </application>
 ```
+
 > Tips：如`xml`文件修改过多，可以考虑：
+>
 > 1. 将原始内容完全注释掉，另行添加新实现；
 > 2. 另行添加新文件（`freeme_`前缀）进行置换；
 
@@ -833,6 +887,7 @@ define build-systemimage-target
   ...
 endef
 ```
+
 ``` python
 # Python
 # Sample 1: 移除
@@ -892,6 +947,7 @@ void killAppAtUsersRequest(ProcessRecord app, Dialog fromDialog) {
 ```
 
 > **Note:** 
+>
 > - 约定适用于Java/C/C++/Python/Makefile/Python/Shell/Xml/**sepolicy**等，灵活适用；
 > - 约定只限定于修改原生工程源码。如修改FreemeOS内部开发/修改的源码，可以忽略此约定——直接在原有代码上进行修改，如果需要可添加__行注释__和__标签__说明缘由。
 
@@ -899,19 +955,20 @@ void killAppAtUsersRequest(ProcessRecord app, Dialog fromDialog) {
 只要是新增的内容，如无顺序需求，在同级中尽量集中放置在文件/类尾部。
 
 *案例：*
+
 ``` java
 public class ActivityManagerService {
     ...
-    
+
     //*/ freeme.biantao, 20160531. ProjectMirror.
     private static final String TAG_AM = "ActivityManagerServer-PM";
-    
+
     public static final int FUNC_AM = 1;
-    
+
     private Handler mPMHander = new Handler();
-    
+
     private int mInstanceId;
-    
+
     public int getInstanceId() {
         return mInstanceId;
     }
@@ -926,6 +983,7 @@ public class ActivityManagerService {
 `Android.mk`中禁止包含`PRODUCT_COPY_FILES`，当用`BUILD_PREBUILT`预构建。
 
 ### 2.11 freeme-framework
+
 ``` markdown
 # freeme-framework Map
 vendor/freeme/frameworks/base
@@ -946,6 +1004,7 @@ vendor/freeme/frameworks/base
 ## (2)3 资源(Resources)
 ### 3.1 文件命名
 资源(`layout, drawable, color, xml`等)文件的命名必须以小写字母开头，只包含小写字母[a-z]、数字[0-9]以及下划线[\_]。单词间使用下划线连接，单词尽量使用符合上下文的有意义名词。
+
 ``` markdown
 drawable/ic_launcher.png
 layout/activity_main.xml
@@ -954,6 +1013,7 @@ xml/wifi_settings.xml
 ```
 
 如该文件为某个功能/控件独占，当使用同义前缀：
+
 ``` markdown
 progress_text_color.xml
 progress_state_background.xml
@@ -962,6 +1022,7 @@ progress_layout.xml
 
 ### 3.2 标识符命名
 标识符(`id, color, dimen, integer, style`等)使用小写字母开头，只包含字母[a-z]、数字[0-9]以及下划线[\_]。使用符合上下文有意义的单词，并以下划线连接。
+
 ``` markdown
 id/btn_version_text
 dimen/progress_title_text_size
@@ -969,6 +1030,7 @@ color/progress_title_text_color
 ```
 
 如该标识符为某个功能/控件独占，当使用同义前缀：
+
 ``` markdown
 progress_title_text
 progress_title_text_color
@@ -976,7 +1038,8 @@ progress_title_text_size
 ```
 
 ### 3.3 命名前缀
-为提高新添加内容的可移植性和可维护性，**在既有源生资源环境中**，新加入的文件/标识符须使用`freeme_`前缀（但对于诸如'[strings/themes/symbols/styles/configs/ids/dimens/colors/publics/...].xml'须使用`_freeme`后缀）：
+为提高新添加内容的可移植性和可维护性，**在既有源生资源环境中**，新加入的文件/标识符须使用`freeme_`前缀（但对于诸如`[strings/themes/symbols/styles/configs/ids/dimens/colors/publics/...].xml`须使用`_freeme`后缀）：
+
 ``` markdown
 values/strings_freeme.xml
 values/themes_freeme.xml
