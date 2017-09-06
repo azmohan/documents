@@ -42,7 +42,8 @@ function get_changed_projects() {
 
 function get_patch_id() {
     local patchname=$1
-    echo ${patchname} | sed -n "s/.*\(ALPS[0-9]\+\)(.*_\(P[0-9]\+\)).*/\2_\1/p"
+    local patchid=${patchname} | sed -n "s/.*\(ALPS[0-9]\+\)(.*_\(P[0-9]\+\)).*/\2_\1/p"
+    echo ${patchid:-${patchfullname}}
 }
 
 function commit_project() {
@@ -54,6 +55,11 @@ function commit_project() {
 
 function get_last_commitid() {
     git log --pretty=format:"%H" -1
+}
+
+function get_abs_dir() {
+    local file=$1
+    dirname $(readlink -f ${file})
 }
 
 #--------------------------------------------------------------------------------
@@ -106,26 +112,9 @@ function commit_changelog() {
     cd ${WORKDIR}
 }
 #--------------------------------------------------------------------------------
-
-function apply_patch_from_tarball() {
-    local patchfile=$1
+function loop_commit_modified_gits() {
+    local patchfullname=$1
     local dirname=$2
-    local _name=$(basename $patchfile)
-    local patchfullname=${_name%.tar.gz}
-    local patchid=$(get_patch_id ${patchfullname})
-
-    mkdir -p ${dirname}/${patchid}
-
-    logi "tar patch files... "
-    tar xf ${patchfile} -C ${dirname}/${patchid}
-
-    logi "override patch files... "
-    cp -frp ${dirname}/${patchid}/alps/. ${WORKDIR}
-    for F in $(get_delete_files ${dirname}/${patchid}/patch_list.txt)
-    do
-        rm -rf $F
-        echo "delete $F"
-    done
 
     local commit_array
     commit_array=""
@@ -151,7 +140,29 @@ function apply_patch_from_tarball() {
     create_changelog ${patchfullname} "${commit_array}" ${logdir}
 
     logi "commit change log file"
-    commit_changelog ${logdir}/$(get_patch_id $patchfullname).txt
+    local patchid=$(get_patch_id ${patchfullname})
+    commit_changelog ${logdir}/${patchid}.txt
+}
+
+function apply_patch_from_tarball() {
+    local patchfile=$1
+    local dirname=$2
+    local _name=$(basename $patchfile)
+    local patchfullname=${_name%.tar.gz}
+    local patchid=$(get_patch_id ${patchfullname})
+
+    mkdir -p ${dirname}/${patchid}
+
+    logi "tar patch files... "
+    tar xf ${patchfile} -C ${dirname}/${patchid}
+
+    logi "override patch files... "
+    cp -frp ${dirname}/${patchid}/alps/. ${WORKDIR}
+    for F in $(get_delete_files ${dirname}/${patchid}/patch_list.txt)
+    do
+        rm -rf $F
+        echo "delete $F"
+    done
 }
 
 function apply_patch_from_changelog() {
@@ -233,6 +244,112 @@ function repoclean() {
     'echo "${color}$REPO_PATH ($REPO_REMOTE)${color_reset}"; git clean -fd ; git reset --hard ;'
 }
 
+_dirpath=$(dirname $0)
+_scandir_py=${_dirpath:-"."}/scandir.py
+function scandir() {
+    local manifest=$1
+    if [ ! -f "$_scandir_py" ]; then
+        echo "error: cannot find scandir.py"
+        exit
+    fi
+
+    if [ ! -f "$manifest" ]; then
+        echo "error: $manifest is not exsited!"
+        exit
+    fi
+
+    local _workdir
+    if [ -z "$2" ]; then
+        _workdir=$(pwd)
+    else
+        _workdir=$(readlink -f $2)
+    fi
+    if [ ! -d "$_workdir" ]; then
+        echo "error: $2 is not a directory!"
+        exit
+    fi
+
+    cd ${_workdir}
+    python $_scandir_py -f . $manifest
+    cd ${WORKDIR}
+}
+
+function clean_projects_subgits() {
+    local projects_file=$1
+    local _workdir=$(get_abs_dir ${projects_file})
+    local git_lists=($(cat $projects_file))
+    for p in ${git_lists[*]}
+    do
+        if [ -d "$_workdir/$p/.git" ]; then
+            echo "rm -rf $_workdir/$p/.git"
+            rm -rf $p/.git
+        else
+            echo "warning: $_workdir/$p/.git not exsited!"
+        fi
+    done
+}
+
+function move_projects_subgits() {
+    local projects_file=$1
+    local des_dir=$2
+    local src_dir=$(get_abs_dir ${projects_file})
+    local git_lists=($(cat $projects_file))
+    for p in ${git_lists[*]}
+    do
+        if [ -d "${src_dir}/$p/.git" -a -d "${des_dir}/$p" ]; then
+            echo "move ${src_dir}/$p/.git $p/"
+            mv ${src_dir}/$p/.git ${des_dir}/$p/
+        else
+            if [ ! -d "${src_dir}/$p/.git" ]; then
+                logw "warning: <${src_dir}/$p/.git> not exsited!"
+            fi
+            if [ ! -d "${des_dir}/$p" ]; then
+                logw "warning: <${des_dir}/$p> not exsited!"
+            fi
+        fi
+    done
+}
+
+function apply_patch_from_mtk_repo() {
+    local mtk_repo_xml=$1
+    local mtk_repo_dir=$2
+    local droi_repo_xml=$3
+    local droi_repo_dir=$4
+    local tmp_dir=$5
+
+    # clean gits under mtk-repo
+    logi ">>> create project.list in ${mtk_repo_dir}"
+    scandir ${mtk_repo_xml} ${mtk_repo_dir}
+    if [ "$?" -ne 0 ]; then
+        logw "fail: cannot create project.list in ${mtk_repo_dir}"
+        exit 1
+    fi
+    if [ -d ${tmp_dir} ]; then
+        logw "fail: ${tmp_dir} is already exsited! please check"
+        exit -1
+    fi
+
+    logi ">>> move .repo to ${tmp_dir}/back_dot_repo"
+    mkdir -p ${tmp_dir}
+    mv ${mtk_repo_dir}/.repo ${tmp_dir}/back_dot_repo
+
+    logi ">>> clean sub gits in ${mtk_repo_dir}"
+    clean_projects_subgits ${mtk_repo_dir}/project.list
+
+    echo
+    logi ">>> create project.list in ${droi_repo_dir}"
+    scandir ${droi_repo_xml} ${droi_repo_dir}
+    if [ "$?" -ne 0 ]; then
+        logw "fail: cannot create project.list in ${droi_repo_dir}"
+        exit 1
+    fi
+
+    logi ">>> move .repo and sub gits from ${droi_repo_dir}"
+    mv ${droi_repo_dir}/.repo ${mtk_repo_dir}
+    move_projects_subgits ${droi_repo_dir}/project.list ${mtk_repo_dir}
+    logi ">>> now $droi_repo_dir has become a droi repo!"
+}
+
 # ------------------------------------------------------------------------------
 function help() {
 cat <<EOF
@@ -289,6 +406,37 @@ case $action in
     clean)
         #clean_files $2
         repoclean
+        ;;
+    git_mtk_repo)
+        if [ ! -f "$1" ]; then
+            loge "error: $1 not existed!"
+            exit 1
+        fi
+        if [ ! -d "$2" ]; then
+            loge "error: $2 not existed!"
+            exit 1
+        fi
+        if [ ! -f "$3" ]; then
+            loge "error: $1 not existed!"
+            exit 1
+        fi
+        if [ ! -d "$4" ]; then
+            loge "error: $2 not existed!"
+            exit 1
+        fi
+        apply_patch_from_mtk_repo $1 $2 $3 $4 $5
+        ;;
+    git_mtk_commit)
+        if [ -z "$1" ]; then
+            loge "error: please provide the patch id!"
+            exit 1
+        fi
+
+        if [ ! -d "$2" ]; then
+            loge "error: $2 not existed!"
+            exit 1
+        fi
+        loop_commit_modified_gits $1 $2
         ;;
     *)
         echo "fail: unknown subcommand!"

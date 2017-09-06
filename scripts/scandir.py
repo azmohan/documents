@@ -11,7 +11,7 @@ import os
 
 def is_a_project(dirname, root_node):
     for project in root_node.findall('project'):
-        project_path = project.get('path')
+        project_path = project.get('path') or project.get('name')
         if project_path == dirname :
             return "full"
         if project_path.find(dirname) == 0:
