@@ -282,9 +282,24 @@ function clean_projects_subgits() {
     do
         if [ -d "$_workdir/$p/.git" ]; then
             echo "rm -rf $_workdir/$p/.git"
-            rm -rf $p/.git
+            rm -rf $_workdir/$p/.git
         else
             echo "warning: $_workdir/$p/.git not exsited!"
+        fi
+    done
+}
+
+function clean_projects() {
+    local projects_file=$1
+    local _workdir=$(get_abs_dir ${projects_file})
+    local _lists=($(cat $projects_file))
+    for p in ${_lists[*]}
+    do
+        if [ -d "$_workdir/$p" ]; then
+            echo "rm -rf $_workdir/$p/"
+            rm -rf $_workdir/$p
+        else
+            echo "warning: $_workdir/$p/ not exsited!"
         fi
     done
 }
@@ -308,6 +323,22 @@ function move_projects_subgits() {
             fi
         fi
     done
+}
+
+function skip_projects() {
+cat <<EOF
+./device/asus/
+./device/google/
+./device/htc/
+./device/huawei/
+./device/intel/
+./device/lge/
+./device/linaro/
+./device/mediatek/
+./device/moto/
+./prebuilts/android-emulator/
+./prebuilts/qemu-kernel/
+EOF
 }
 
 function apply_patch_from_mtk_repo() {
@@ -348,6 +379,19 @@ function apply_patch_from_mtk_repo() {
     mv ${droi_repo_dir}/.repo ${mtk_repo_dir}
     move_projects_subgits ${droi_repo_dir}/project.list ${mtk_repo_dir}
     logi ">>> now $droi_repo_dir has become a droi repo!"
+
+    # fix repo: 1) move changelogs 2) restore .gitignore 3) skip some projects. 
+    if [ -d "${droi_repo_dir}/${CHANGLOGDIR}" ]; then
+        cp -frp ${droi_repo_dir}/${CHANGLOGDIR} $(dirname ${mtk_repo_dir}/${CHANGLOGDIR})
+    fi
+    git -C $(dirname ${mtk_repo_dir}/${CHANGLOGDIR}) checkout .gitignore
+    git -C ${mtk_repo_dir}/device checkout .gitignore
+    if [ -f ${mtk_repo_dir}/project.skip ]; then
+        clean_projects ${mtk_repo_dir}/project.skip
+    else
+        logw "should you remove the following projects under ${mtk_repo_dir}?"
+        skip_projects
+    fi
 }
 
 # ------------------------------------------------------------------------------
