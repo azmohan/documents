@@ -355,8 +355,8 @@ function apply_patch_from_mtk_repo() {
         logw "fail: cannot create project.list in ${mtk_repo_dir}"
         exit 1
     fi
-    if [ -d ${tmp_dir} ]; then
-        logw "fail: ${tmp_dir} is already exsited! please check"
+    if [ -d ${tmp_dir}/back_dot_repo ]; then
+        loge "fail: ${tmp_dir}/back_dot_repo is already exsited. please check and be careful !"
         exit -1
     fi
 
@@ -392,6 +392,9 @@ function apply_patch_from_mtk_repo() {
         logw "should you remove the following projects under ${mtk_repo_dir}?"
         skip_projects
     fi
+}
+
+function restore_mtk_repo() {
 }
 
 # ------------------------------------------------------------------------------
@@ -451,7 +454,7 @@ case $action in
         #clean_files $2
         repoclean
         ;;
-    git_mtk_repo)
+    git_mtk_move)
         if [ ! -f "$1" ]; then
             loge "error: $1 not existed!"
             exit 1
@@ -481,6 +484,9 @@ case $action in
             exit 1
         fi
         loop_commit_modified_gits $1 $2
+        ;;
+    git_mtk_restore)
+        restore_mtk_repo $1 $2 $3
         ;;
     *)
         echo "fail: unknown subcommand!"
