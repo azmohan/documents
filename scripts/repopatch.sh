@@ -296,10 +296,9 @@ function clean_projects() {
     for p in ${_lists[*]}
     do
         if [ -d "$_workdir/$p" ]; then
-            echo "rm -rf $_workdir/$p/"
             rm -rf $_workdir/$p
         else
-            echo "warning: $_workdir/$p/ not exsited!"
+            echo "warning: $_workdir/$p not exsited!"
         fi
     done
 }
@@ -312,7 +311,6 @@ function move_projects_subgits() {
     for p in ${git_lists[*]}
     do
         if [ -d "${src_dir}/$p/.git" -a -d "${des_dir}/$p" ]; then
-            echo "move ${src_dir}/$p/.git $p/"
             mv ${src_dir}/$p/.git ${des_dir}/$p/
         else
             if [ ! -d "${src_dir}/$p/.git" ]; then
@@ -342,15 +340,15 @@ EOF
 }
 
 function apply_patch_from_mtk_repo() {
-    local mtk_repo_xml=$1
+    local mtk_repo_xml=$(readlink -f ${1})
     local mtk_repo_dir=$2
-    local droi_repo_xml=$3
+    local droi_repo_xml=$(readlink -f ${3})
     local droi_repo_dir=$4
     local tmp_dir=$5
 
     # clean gits under mtk-repo
     logi ">>> create project.list in ${mtk_repo_dir}"
-    scandir ${mtk_repo_xml} ${mtk_repo_dir}
+    scandir ${mtk_repo_xml} ${mtk_repo_dir} 1> /dev/null
     if [ "$?" -ne 0 ]; then
         logw "fail: cannot create project.list in ${mtk_repo_dir}"
         exit 1
@@ -369,7 +367,7 @@ function apply_patch_from_mtk_repo() {
 
     echo
     logi ">>> create project.list in ${droi_repo_dir}"
-    scandir ${droi_repo_xml} ${droi_repo_dir}
+    scandir ${droi_repo_xml} ${droi_repo_dir} 1> /dev/null
     if [ "$?" -ne 0 ]; then
         logw "fail: cannot create project.list in ${droi_repo_dir}"
         exit 1
@@ -384,8 +382,12 @@ function apply_patch_from_mtk_repo() {
     if [ -d "${droi_repo_dir}/${CHANGLOGDIR}" ]; then
         cp -frp ${droi_repo_dir}/${CHANGLOGDIR} $(dirname ${mtk_repo_dir}/${CHANGLOGDIR})
     fi
-    git -C $(dirname ${mtk_repo_dir}/${CHANGLOGDIR}) checkout .gitignore
-    git -C ${mtk_repo_dir}/device checkout .gitignore
+    if [ ! -f $(dirname ${mtk_repo_dir}/${CHANGLOGDIR})/.gitignore ];then
+        git -C $(dirname ${mtk_repo_dir}/${CHANGLOGDIR}) checkout .gitignore
+    fi
+    if [ ! -f ${mtk_repo_dir}/device/.gitignore ];then
+        git -C ${mtk_repo_dir}/device checkout .gitignore
+    fi
     if [ -f ${mtk_repo_dir}/project.skip ]; then
         clean_projects ${mtk_repo_dir}/project.skip
     else
@@ -394,7 +396,40 @@ function apply_patch_from_mtk_repo() {
     fi
 }
 
+function remove_gits_under_dir() {
+    cd $1
+    local lists=($(find . -name .repo -prune -o -type d -name .git -print))
+    for F in ${lists[*]}
+    do
+        echo "remove $F in $1"
+        rm -rf $F
+    done
+    cd ${WORKDIR}
+}
+
 function restore_mtk_repo() {
+    local mtk_repo_dir=$1
+    local droi_repo_dir=$2
+    local tmp_dir=$3
+
+    if [ -d "$mtk_repo_dir/.repo" -a ! -d ${droi_repo_dir}/.repo -a -d ${tmp_dir}/back_dot_repo ]; then
+        mv $mtk_repo_dir/.repo $droi_repo_dir
+        remove_gits_under_dir ${mtk_repo_dir}
+        mv $tmp_dir/back_dot_repo $mtk_repo_dir/.repo
+    else
+        loge "fail: invalid args!"
+        exit 1
+    fi
+
+    logi ">>> restore mtk repo: ${mtk_repo_dir}"
+    cd $(readlink -f ${mtk_repo_dir})
+    repo sync -l
+
+    logi ">>> restore droi repo: ${droi_repo_dir}"
+    cd $(readlink -f ${droi_repo_dir})
+    repo sync -l
+
+    cd ${WORKDIR}
 }
 
 # ------------------------------------------------------------------------------
@@ -410,10 +445,12 @@ usage: repopatch.sh <command> [<args>]
 EOF
 }
 
-if [ ! -d ".repo" ]; then
-    loge "error: must run in the root directory of Repo"
-    exit 1
-fi
+function check() {
+    if [ ! -d ".repo" ]; then
+        loge "error: must run in the root directory of Repo"
+        exit 1
+    fi
+}
 
 action=$1
 shift
@@ -422,6 +459,7 @@ case $action in
         help
         ;;
     mtk|patchmtk)
+        check
         if [ ! -f "$1" ]; then
             loge "error: $1 not existed!"
             exit 1
@@ -435,6 +473,7 @@ case $action in
         apply_patch_from_tarball $1 $2
         ;;
     droi|patchdroi)
+        check
         if [ ! -f "$1" ]; then
             loge "error: $1 not existed!"
             exit 1
@@ -442,6 +481,7 @@ case $action in
         apply_patch_from_changelog $1
         ;;
     log|logupdate)
+        check
         if [ ! -f "$1" ]; then
             loge "error: $1 not existed!"
             exit 1
@@ -451,7 +491,7 @@ case $action in
         commit_changelog $1
         ;;
     clean)
-        #clean_files $2
+        check
         repoclean
         ;;
     git_mtk_move)
