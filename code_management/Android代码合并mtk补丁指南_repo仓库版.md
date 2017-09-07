@@ -107,9 +107,7 @@ $ repopatch.sh git_mtk_move \
 
 ### 合并patch之step2 本地提交
 
-本节命令在`~/work/mtk_git`路径上操作完成。
-
-请确认本次patch的名称，由于MTK不再提供补丁包，也就没有正式的补丁名称。假如本次更新的是P6补丁，那么将patch名称设计为：
+请提供本次patch的名称，由于MTK不再提供补丁包，也就没有正式的补丁名称。假如本次更新的是P6补丁，那么将patch名称设计为：
 
 ```
 For_Droi6757_n1_mp5_n1-V1.61_P6
@@ -171,7 +169,7 @@ freemos代码树的使命已经完成，由于我司内部重新下载freemeos�
 
 ## 3. 将patch合并到pcb分支
 
-### 修改manifests
+### 拉取pcb仓库
 
 拉取freemeos pcb分支或pcb_oversea仓库。
 
@@ -181,17 +179,17 @@ $ repo start --all pcb_oversea
 
 ### 从changelog文件中合并patch
 
-例如，合并P7补丁，命令如下，修改`pwork`为你的`patch临时工作目录`
+例如，合并P6补丁，命令如下，修改`pwork`为你的`patch临时工作目录`
 
 ```
-$ repopatch.sh droi ../pwork/changelogs/P7_ALPS03108431.txt
+$ repopatch.sh droi ../pwork/changelogs/For_Droi6757_n1_mp5_n1-V1.61_P6.txt
 loop patched projects...
 pick 0a8e656a13740a8e15b79a4635ea95c7200cee03 from device/droi
 picked!
 pick c923c744872e5dd667696de82c1b0ce7764e8b24 from frameworks
 picked!
 create change log file
-log: create P7_ALPS03108431.txt
+log: create For_Droi6757_n1_mp5_n1-V1.61_P6.txt
 ```
 
 如果没有任何冲突，效果如上面所示。
@@ -199,12 +197,12 @@ log: create P7_ALPS03108431.txt
 如果运气不好，个别仓库合并失败，合并脚本会继续执行。
 
 ```
-$ repopatch.sh droi pwork/changelogs/P8_ALPS03128418.txt
+$ repopatch.sh droi pwork/changelogs/For_Droi6757_n1_mp5_n1-V1.61_P7.txt
 loop patched projects...
 pick f60a45baf19182f79123778a2ba09ab7042fec96 from bionic
 picked!
 pick 849b7b693aaf0b0753f98da8857c0a4d72bd0b2e from bootable/recovery
-error: could not apply 849b7b6... [patch/apply] ALPS03128418(For_droi6755_66_n_alps-mp-n0.mp7-V1_P8)
+error: could not apply 849b7b6... [patch/apply] For_Droi6757_n1_mp5_n1-V1.61_P8
 hint: after resolving the conflicts, mark the corrected paths
 hint: with 'git add <paths>' or 'git rm <paths>'
 Recorded preimage for 'mt_recovery.cpp'
@@ -213,7 +211,7 @@ pick b0287947170328802040e6b6e6482b404c44004b from device/droi
 picked!
 ...
 create change log file
-log: create pwork/changelogs_new/P8_ALPS03128418.txt
+log: create pwork/changelogs_new/For_Droi6757_n1_mp5_n1-V1.61_P8.txt
 ```
 
 冲突的仓库会红色高亮日志打印出来，请手动修复冲突：进入该仓库，执行`git mergetool`执行三方合并。
@@ -227,13 +225,13 @@ $ git mergetool
 
 ```
 $ git add -u
-$ git commit -m "[patch/apply] ALPS03128418(For_droi6755_66_n_alps-mp-n0.mp7-V1_P8)"
+$ git commit -m "[patch/apply] For_Droi6757_n1_mp5_n1-V1.61_P8"
 ```
 
 如果有冲突，修复冲突之后，请更新变更日志，没有冲突请跳过此步。
 
 ```
-$ repopatch.sh logupdate pwork/changelogs_new/P8_ALPS03128418.txt
+$ repopatch.sh logupdate pwork/changelogs_new/For_Droi6757_n1_mp5_n1-V1.61_P8.txt
 ```
 
 如果还有其他补丁包，请重复使用上述命令。
@@ -255,6 +253,5 @@ $ repo upload
 删除本地分支
 
 ```
-$ repo abandon mtk
 $ repo abandon pcb_oversea
 ```
