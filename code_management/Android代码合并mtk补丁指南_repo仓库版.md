@@ -1,0 +1,259 @@
+# repo项目patch合并操作指南（mtk repo仓库版）
+
+[TOC]
+
+## 准备
+
+将`scripts`目录下的`repopatch.sh`链接到~/bin目录下（或其他包含在系统`PATH`环境变量的路径中，例如：
+
+```
+$ cd ~/bin
+$ ln -s your-repopatch.sh
+```
+
+PS. 如使shell为`zsh`，请执行`hash -r`，当前终端即可直接执行`repopatch.sh`
+
+## 代码管理概述
+
+MTK不再提供补丁包，而是使用repo方式发布代码，新的patch直接推送到其搭建的repo服务器。我们需要持续维护一套MTK的repo仓库。当mtk有更新patch时，只要使用repo sync更新即可。
+
+MTK的repo仓库分拆了1100多个git子仓库，我司内部将其合并为30个左右的git仓库（基本按照android源代码的第一级目录分拆管理）。之所以这么处理，原因是：
+
+1. 仓库拉取时间极长。验证发现，在我司gerrit服务器上使用MTK同样的代码仓库，即部署1100个git子仓库，从gerrit服务器拉取一套代码的时间极大增加，最长长达3小时。
+2. 代码提交繁琐。由于子git分拆过细，导致驱动组合并代码时，都需要新创建git仓库。操作非常不便。
+
+## 1. mtk版本合并patch
+
+### patch原理
+
+当mtk repo有patch更新时：
+
+1. 首先将mtk repo源码树更新到最新。此时mtk repo代码树将包含patch代码。
+2. 下载一份对应的freemeos-mtk分支的repo源码树
+3. 将mtk repo源代码树的.repo目录移动到其他位置保存，注意这一步很重要，因为重新下载一套mtk repo需要40个小时以上，因此需要妥善保存好。同时将mtk repo仓库目录下的所有.git仓库删除
+4. 将freemeos源码树下的.repo目录、以及所有子目录下的.git移动到原mtk repo源码树对应各个目录下。
+
+经过上述操作，此时原mtk repo源代码树就变身为一套 freemeos的repo。并且工作目录中含有了mtk reo源码树的最新patch。利用repo命令将所有有改动的git仓库提交并上传我司服务器即可。
+
+注意：根据上面的操作，patch合并完成后，两颗代码树都会被破坏。鉴于mtk repo的重要性，需要将其复原。这个在下文专门一节说明。
+
+### 拉取mtk repo代码
+
+请拉取代码树，具体命令请参考mtk提供的文档。
+
+### 拉取freemeos repo仓库mtk分支
+
+为了减少干扰，请使用完全干净的源码树执行patch合并操作。
+
+以`droi6757_n1`为例
+
+```
+$ mkdir droi6757_n1
+$ cd droi6757_n1
+$ repo init --no-repo-verify -u ssh://yourname@10.20.40.19:29418/freemeos/manifest -m ALPS-MP-N1.MP5-V1.61_DROI_TK6757_66_N1/mtk.xml
+$ repo sync
+$ repo start --all mtk
+```
+
+如果已经有这样的一棵树，请更新这棵树，保证代码最新。
+
+```
+$ repo sync
+```
+
+### 合并patch之step1 仓库变身
+
+开始执行真正的动作之前，先说明下笔者当前目录结构如下：
+
+```
+~/work/mtk_git
+├── droi_57_N1， droi6757 n1代码 mtk分支，下文可能简称为freemeos代码树
+└── mtk_57_N1， mtk repo n1代码，下文可能简称为mtk代码树
+```
+
+本文命令均在`~/work/mtk_git/mtk_57_N1`路径上操作完成。
+
+创建`patch临时工作目录`用于合并patch，笔者在`pwork`，请根据自己喜好修改。
+
+```
+$ mkdir ../pwork
+```
+
+注意：在合并patch过程中，会将mtk代码树下的.repo仓库移动到`patch临时工作目录`下，并重命名为`back_dot_repo`，请务必保证该工作目录下没有`back_dot_repo`，否则会报错。
+
+执行patch合并操作，该命令子命令为`git_mtk_move`，之后还有五个参数
+
+```
+$ repopatch.sh git_mtk_move \
+.repo/manifest.xml  
+. \
+../droi_57_N1/.repo/manifests/ALPS-MP-N1.MP5-V1.61_DROI_TK6757_66_N1/_common.xml \
+../droi_57_N1 \
+../pwork
+```
+
+这五个参数的含义如下：
+
+1. `.repo/manifest.xml`，指向mtk仓库的manifests.xml
+2. `.`，指向mtk代码树路径
+3. `../droi_57_N1/.repo/manifests/ALPS-MP-N1.MP5-V1.61_DROI_TK6757_66_N1/_common.xml`，指向freemeos仓库的`manifests.xml`
+4. `../droi_57_N1`，指向freemeos代码树路径
+5. `../pwork`，patch临时工作目录
+
+其中参数1-2用于在mtk代码树路径中生成辅助的配置文件、参数3-4用于在droi代码树目录下生成辅助的配置文件。
+
+该步骤执行成功后，接下需要本地提交patch信息。
+
+### 合并patch之step2 本地提交
+
+本节命令在`~/work/mtk_git`路径上操作完成。
+
+请确认本次patch的名称，由于MTK不再提供补丁包，也就没有正式的补丁名称。假如本次更新的是P6补丁，那么将patch名称设计为：
+
+```
+For_Droi6757_n1_mp5_n1-V1.61_P6
+```
+
+请执行
+
+```
+$ repopatch.sh git_mtk_commit For_Droi6757_n1_mp5_n1-V1.61_P6 pwork
+```
+
+该命令子命令为`git_mtk_commit`，随后带两个参数：
+
+1. `patch-message`，即本次patch的全称，该信息将会作为git commit的提交信息。
+2. `pwork`，patch临时工作目录
+
+执行完毕后，`patch临时工作目录`（本例中即pwork目录）下会生成
+
+```
+- changelog/: 用于存放patch合并信息文件，
+- back_dot_repo/：原mtk源码树下的.repo目录
+```
+
+### 上传
+
+提交补丁变更文件，注意，修改`pwork`为你的`patch临时工作目录`
+
+```
+$ repopatch.sh logcommit ../pwork/changelogs
+```
+
+上传代码到服务器
+
+```
+$ repo upload
+```
+
+### gerrit上合并提交
+
+打开gerrit网页，http://10.20.40.19:8080，登陆，确认代码提交成功，将代码review并submit到仓库中。
+
+### 合并patch之step3 复原仓库
+
+本次补丁合并完成后，需要将仓库复原，以方便以后patch合并，命令如下
+
+```
+$ repopatch.sh git_mtk_restore . ../droi_57_N1 ../pwork
+```
+
+该命令子命令为`git_mtk_restore`，随后带三个参数：
+
+1. `.`，指向mtk代码树路径
+2. `../droi_57_N1`，指向freemeos代码树路径
+2. `../pwork`，patch临时工作目录
+
+该命令执行完毕后，代码树复原。 
+
+freemos代码树的使命已经完成，由于我司内部重新下载freemeos代码树极快，请自行决定。
+
+## 3. 将patch合并到pcb分支
+
+### 修改manifests
+
+拉取freemeos pcb分支或pcb_oversea仓库。
+
+```
+$ repo start --all pcb_oversea
+```
+
+### 从changelog文件中合并patch
+
+例如，合并P7补丁，命令如下，修改`pwork`为你的`patch临时工作目录`
+
+```
+$ repopatch.sh droi ../pwork/changelogs/P7_ALPS03108431.txt
+loop patched projects...
+pick 0a8e656a13740a8e15b79a4635ea95c7200cee03 from device/droi
+picked!
+pick c923c744872e5dd667696de82c1b0ce7764e8b24 from frameworks
+picked!
+create change log file
+log: create P7_ALPS03108431.txt
+```
+
+如果没有任何冲突，效果如上面所示。
+
+如果运气不好，个别仓库合并失败，合并脚本会继续执行。
+
+```
+$ repopatch.sh droi pwork/changelogs/P8_ALPS03128418.txt
+loop patched projects...
+pick f60a45baf19182f79123778a2ba09ab7042fec96 from bionic
+picked!
+pick 849b7b693aaf0b0753f98da8857c0a4d72bd0b2e from bootable/recovery
+error: could not apply 849b7b6... [patch/apply] ALPS03128418(For_droi6755_66_n_alps-mp-n0.mp7-V1_P8)
+hint: after resolving the conflicts, mark the corrected paths
+hint: with 'git add <paths>' or 'git rm <paths>'
+Recorded preimage for 'mt_recovery.cpp'
+error: pick conflict, please fix it later, now we just skip
+pick b0287947170328802040e6b6e6482b404c44004b from device/droi
+picked!
+...
+create change log file
+log: create pwork/changelogs_new/P8_ALPS03128418.txt
+```
+
+冲突的仓库会红色高亮日志打印出来，请手动修复冲突：进入该仓库，执行`git mergetool`执行三方合并。
+
+```
+$ git config --global merge.tool meld
+$ git mergetool
+```
+
+手动处理完冲突之后，执行
+
+```
+$ git add -u
+$ git commit -m "[patch/apply] ALPS03128418(For_droi6755_66_n_alps-mp-n0.mp7-V1_P8)"
+```
+
+如果有冲突，修复冲突之后，请更新变更日志，没有冲突请跳过此步。
+
+```
+$ repopatch.sh logupdate pwork/changelogs_new/P8_ALPS03128418.txt
+```
+
+如果还有其他补丁包，请重复使用上述命令。
+
+### 上传
+
+上传代码到服务器
+
+```
+$ repo upload
+```
+
+### 代码合并
+
+在gerrit上将代码合并到仓库中。
+
+### 本地分支清理
+
+删除本地分支
+
+```
+$ repo abandon mtk
+$ repo abandon pcb_oversea
+```
