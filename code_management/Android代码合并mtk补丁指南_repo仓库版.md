@@ -26,16 +26,16 @@ MTK的repo仓库分拆了1100多个git子仓库，我司内部将其合并为30�
 
 ### patch原理
 
-当mtk repo有patch更新时：
+当mtk有patch更新时：
 
 1. 首先将mtk repo源码树更新到最新。此时mtk repo代码树将包含patch代码。
 2. 下载一份对应的freemeos-mtk分支的repo源码树
 3. 将mtk repo源代码树的.repo目录移动到其他位置保存，注意这一步很重要，因为重新下载一套mtk repo需要40个小时以上，因此需要妥善保存好。同时将mtk repo仓库目录下的所有.git仓库删除
 4. 将freemeos源码树下的.repo目录、以及所有子目录下的.git移动到原mtk repo源码树对应各个目录下。
 
-经过上述操作，此时原mtk repo源代码树就变身为一套 freemeos的repo。并且工作目录中含有了mtk reo源码树的最新patch。利用repo命令将所有有改动的git仓库提交并上传我司服务器即可。
+经过上述操作，此时`mtk`源代码树就实际上变身为`freemeos`的代码树，同时工作目录中含有了`mtk`源码树的最新patch。利用repo命令将所有存在改动的git仓库做本地提交并上传我司服务器即可。
 
-注意：根据上面的操作，patch合并完成后，两颗代码树都会被破坏。鉴于mtk repo的重要性，需要将其复原。这个在下文专门一节说明。
+注意：根据上面的操作，patch合并完成后，两棵代码树都会被破坏。鉴于mtk repo的重要性，需要将其复原。这个在下文专门一节说明。
 
 ### 拉取mtk repo代码
 
@@ -63,7 +63,7 @@ $ repo sync
 
 ### 合并patch之step1 仓库变身
 
-开始执行真正的动作之前，先说明下笔者当前目录结构如下：
+开始执行真正的动作之前，先说明笔者代码目录结构，如下：
 
 ```
 ~/work/mtk_git
@@ -71,21 +71,22 @@ $ repo sync
 └── mtk_57_N1， mtk repo n1代码，下文可能简称为mtk代码树
 ```
 
-本文命令均在`~/work/mtk_git/mtk_57_N1`路径上操作完成。
-
-创建`patch临时工作目录`用于合并patch，笔者在`pwork`，请根据自己喜好修改。
+创建`patch临时工作目录`用于合并patch，笔者使用`pwork`，你可以根据自己喜好修改。
 
 ```
+$ cd mtk_57_N1
 $ mkdir ../pwork
 ```
 
+除非明确说明，本文之后所有命令均在`mtk_57_N1`路径上执行。请读者知悉。
+
 注意：在合并patch过程中，会将mtk代码树下的.repo仓库移动到`patch临时工作目录`下，并重命名为`back_dot_repo`，请务必保证该工作目录下没有`back_dot_repo`，否则会报错。
 
-执行patch合并操作，该命令子命令为`git_mtk_move`，之后还有五个参数
+接下来执行仓库变身操作，这是合并patch的最重要一步，子命令为`git_mtk_move`，之后还有五个参数，如下所示
 
 ```
 $ repopatch.sh git_mtk_move \
-.repo/manifest.xml  
+.repo/manifest.xml \
 . \
 ../droi_57_N1/.repo/manifests/ALPS-MP-N1.MP5-V1.61_DROI_TK6757_66_N1/_common.xml \
 ../droi_57_N1 \
@@ -95,10 +96,10 @@ $ repopatch.sh git_mtk_move \
 这五个参数的含义如下：
 
 1. `.repo/manifest.xml`，指向mtk仓库的manifests.xml
-2. `.`，指向mtk代码树路径
+2. `.`，指当前mtk代码树路径
 3. `../droi_57_N1/.repo/manifests/ALPS-MP-N1.MP5-V1.61_DROI_TK6757_66_N1/_common.xml`，指向freemeos仓库的`manifests.xml`
 4. `../droi_57_N1`，指向freemeos代码树路径
-5. `../pwork`，patch临时工作目录
+5. `../pwork`，指向patch临时工作目录
 
 其中参数1-2用于在mtk代码树路径中生成辅助的配置文件、参数3-4用于在droi代码树目录下生成辅助的配置文件。
 
@@ -117,13 +118,13 @@ For_Droi6757_n1_mp5_n1-V1.61_P6
 请执行
 
 ```
-$ repopatch.sh git_mtk_commit For_Droi6757_n1_mp5_n1-V1.61_P6 pwork
+$ repopatch.sh git_mtk_commit For_Droi6757_n1_mp5_n1-V1.61_P6 ../pwork
 ```
 
 该命令子命令为`git_mtk_commit`，随后带两个参数：
 
 1. `patch-message`，即本次patch的全称，该信息将会作为git commit的提交信息。
-2. `pwork`，patch临时工作目录
+2. `../pwork`，patch临时工作目录
 
 执行完毕后，`patch临时工作目录`（本例中即pwork目录）下会生成
 
