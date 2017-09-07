@@ -43,7 +43,7 @@ function get_changed_projects() {
 function get_patch_id() {
     local patchname=$1
     local patchid=${patchname} | sed -n "s/.*\(ALPS[0-9]\+\)(.*_\(P[0-9]\+\)).*/\2_\1/p"
-    echo ${patchid:-${patchfullname}}
+    echo ${patchid:-${patchname}}
 }
 
 function commit_project() {
