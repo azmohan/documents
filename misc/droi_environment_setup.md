@@ -92,5 +92,69 @@ PS. 参考自：https://source.android.com/source/initializing.html
 
 ### 安装加密系统
 
-请联系公司IT配置加密系统。
+
+公司内部部署了加密系统，所有代码在本地加密。需要在本地安装加密客户端，并登陆账号密码。账号为`拼音全名+数字1`、密码为`12345678`，如刘德华的加密账号密码为：
+
+- 账号：liudehua1
+- 密码：12345678
+
+
+只有正确安装了加密客户端，才能从公司服务器上拉取代码。安装加密客户端命令如下，
+
+```
+sudo wget http://192.168.0.193/packages/linux/ultrasec_3.5.0_amd64.deb && sudo dpkg -i ultrasec_3.5.0_amd64.deb
+```
+
+确保使用加密系统支持的内核，查看内核版本命令为
+
+```
+uname -a
+```
+
+ubuntu 14.04请使用`3.13.0-24-generic`内核，如果使用高版本内核，请降级内核，命令如下，
+
+```
+sudo apt-get remove linux-image-3.13.0-144-generic
+```
+
+安装完成后重启系统
+
+确认加密客户端是否安装的方法是（仅以ubuntu系统为例），终端执行`usec`，是否出现：
+
+```
+1.Update policy
+2.Change password
+3.Set workspace
+4.View status
+5.Offline service
+6.Logout
+7.About
+8.Quit
+> Please choose:
+```
+
+首先输入设置加密服务器ip地址和端口:
+
+- ip： `192.168.0.128`
+- port：`80`
+
+设置账号密码, 如前面描述的刘德华，其账号密码分别是
+
+- 账号：liudehua1
+- 密码：12345678
+
+然后根据情况，设置workspace（即要被加密的目录，默认只加密 /home、/root两个目录, 如果代码位于/mnt分区下，请添加workspace）
+
+最后输入4，若出现类似以下输出，则表示加密客户端正确运行
+
+```
+Online: zhuzhongkai1
+```
+
+如果usec提示未知道匹配的内核，说明加密客户端不支持你的ubuntu系统当前使用的内核。请配置使用指定内核。
+
+如果打开本地代码发现都是乱码。有两种可能：
+
+1. 加密客户端未正常工作。请执行`usec`查看，内核升级、未登陆账号密码都可能导致该问题。请确保内核版本为`3.13.0-24-generic`、账号正确登陆。
+2. 加密客户端正常。但是源码所在路径没有被设置为加密目录。
 
