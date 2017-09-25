@@ -332,7 +332,6 @@ cat <<EOF
 ./device/intel/
 ./device/lge/
 ./device/linaro/
-./device/mediatek/
 ./device/moto/
 ./prebuilts/android-emulator/
 ./prebuilts/qemu-kernel/
@@ -376,7 +375,7 @@ function apply_patch_from_mtk_repo() {
     logi ">>> move .repo and sub gits from ${droi_repo_dir}"
     mv ${droi_repo_dir}/.repo ${mtk_repo_dir}
     move_projects_subgits ${droi_repo_dir}/project.list ${mtk_repo_dir}
-    logi ">>> now $droi_repo_dir has become a droi repo!"
+    logi ">>> now $mtk_repo_dir has become a droi repo!"
 
     # fix repo: 1) move changelogs 2) restore .gitignore 3) skip some projects. 
     if [ -d "${droi_repo_dir}/${CHANGLOGDIR}" ]; then
