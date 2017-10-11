@@ -14,14 +14,14 @@ function logw() {
     # purple
     local color=$'\E'"[0;35m"
     local color_reset=$'\E'"[00m"
-    echo "$color$@$color_reset"
+    echo "$color$@$color_reset" 1>&2
 }
 
 function loge() {
     # red
     local color=$'\E'"[0;31m"
     local color_reset=$'\E'"[00m"
-    echo "$color$@$color_reset"
+    echo "$color$@$color_reset" 1>&2
 }
 
 function get_delete_files() {
@@ -249,13 +249,13 @@ _scandir_py=${_dirpath:-"."}/scandir.py
 function scandir() {
     local manifest=$1
     if [ ! -f "$_scandir_py" ]; then
-        echo "error: cannot find scandir.py"
-        exit
+        loge "error: cannot find scandir.py"
+        exit 1
     fi
 
     if [ ! -f "$manifest" ]; then
-        echo "error: $manifest is not exsited!"
-        exit
+        loge "error: $manifest is not exsited!"
+        exit 1
     fi
 
     local _workdir
@@ -265,8 +265,8 @@ function scandir() {
         _workdir=$(readlink -f $2)
     fi
     if [ ! -d "$_workdir" ]; then
-        echo "error: $2 is not a directory!"
-        exit
+        loge "error: $2 is not a directory!"
+        exit 1
     fi
 
     cd ${_workdir}
