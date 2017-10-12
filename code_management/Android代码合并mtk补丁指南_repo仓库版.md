@@ -88,7 +88,27 @@ $ mkdir ../pwork
 
 除非明确说明，本文之后所有命令均在`mtk_57_N1`路径上执行。请读者知悉。
 
-注意：在合并patch过程中，会将mtk代码树下的.repo仓库移动到`patch临时工作目录`下，并重命名为`back_dot_repo`，请务必保证该工作目录下没有`back_dot_repo`，否则会报错。
+
+#### 创建`project.skip`文件
+
+mtk提供的repo仓库还包含了一些无关代码，为了减少代码体积，在代码部署到gerrit时将他们删除了。可以创建`project.skip`文件，在接下来的仓库变身时自动删除这些目录。命令如下：
+
+```
+$ echo "./device/asus/
+./device/google/
+./device/htc/
+./device/huawei/
+./device/intel/
+./device/lge/
+./device/linaro/
+./device/moto/
+./prebuilts/android-emulator/
+./prebuilts/qemu-kernel/" > project.skip
+```
+
+#### repopatch.sh git_mtk_move
+
+在合并patch过程中，会将mtk代码树下的.repo仓库移动到`patch临时工作目录`下，并重命名为`back_dot_repo`，请务必保证该工作目录下没有`back_dot_repo`，否则会报错。
 
 接下来执行仓库变身操作，这是合并patch的最重要一步，子命令为`git_mtk_move`，之后还有五个参数，如下所示
 
@@ -111,7 +131,24 @@ $ repopatch.sh git_mtk_move \
 
 其中参数1-2用于在mtk代码树路径中生成辅助的配置文件、参数3-4用于在droi代码树目录下生成辅助的配置文件。
 
-该步骤执行成功后，接下需要本地提交patch信息。
+本命令执行以下工作：
+
+1. 分别解析两个repo仓库的xml文件，生成辅助文件，其中记录各个子git仓库路径和
+2. 将mtk代码树下的.repo仓库移动到`patch临时工作目录`下，并重命名为`back_dot_repo`，删除mtk代码树下所有.git目录
+3. 移动freemeos代码树下.repo和所有.git目录到mtk代码树对应目录下
+4. 如果mtk代码树目录下存在`project.skip`，则将文件中的所有子目录删除。
+
+请务必仔细阅读本命令的打印日志，确认该命令正确执行。
+
+如果你在执行上面命令时看到以下输出，那么请手动删除这些目录。
+
+```
+should you remove the following projects under your-mtk-git-directory?
+```
+
+请检查是否创建了`project.skip`文件。
+
+该步骤执行成功后，接下需要本地提交patch。
 
 ### 合并patch之step2 本地提交
 
@@ -132,6 +169,8 @@ $ repopatch.sh git_mtk_commit For_Droi6757_n1_mp5_n1-V1.61_P6 ../pwork
 1. `patch-message`，即本次patch的全称，该信息将会作为git commit的提交信息。
 2. `../pwork`，patch临时工作目录
 
+该命令执行时间较长，大概在10分钟～30分钟之间，这段时间可以处理其他事情。
+
 执行完毕后，`patch临时工作目录`（本例中即pwork目录）下会生成
 
 ```
@@ -139,13 +178,9 @@ $ repopatch.sh git_mtk_commit For_Droi6757_n1_mp5_n1-V1.61_P6 ../pwork
 - back_dot_repo/：原mtk源码树下的.repo目录
 ```
 
+至此，patch已经在本地合并完成。接下来将修改推送到服务器。
+
 ### 上传
-
-提交补丁变更文件，注意，修改`pwork`为你的`patch临时工作目录`
-
-```
-$ repopatch.sh logcommit ../pwork/changelogs
-```
 
 上传代码到服务器
 
@@ -205,7 +240,7 @@ log: create For_Droi6757_n1_mp5_n1-V1.61_P6.txt
 如果运气不好，个别仓库合并失败，合并脚本会继续执行。
 
 ```
-$ repopatch.sh droi pwork/changelogs/For_Droi6757_n1_mp5_n1-V1.61_P7.txt
+$ repopatch.sh droi ../pwork/changelogs/For_Droi6757_n1_mp5_n1-V1.61_P7.txt
 loop patched projects...
 pick f60a45baf19182f79123778a2ba09ab7042fec96 from bionic
 picked!

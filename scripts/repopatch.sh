@@ -313,6 +313,9 @@ function move_projects_subgits() {
         if [ -d "${src_dir}/$p/.git" -a -d "${des_dir}/$p" ]; then
             mv ${src_dir}/$p/.git ${des_dir}/$p/
         else
+            if [[ $p/ == *${CHANGLOGDIR}* ]];then
+                continue
+            fi
             if [ ! -d "${src_dir}/$p/.git" ]; then
                 logw "warning: <${src_dir}/$p/.git> not exsited!"
             fi
