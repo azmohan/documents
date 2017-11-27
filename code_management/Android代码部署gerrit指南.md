@@ -8,6 +8,52 @@
 
 以AndroidN 6737M上线为例。步骤如下。
 
+## 安装/更新脚本
+
+本文操作需要使用脚本工具，请确认获取了最新的脚本/文档仓库，并正确配置`PATH`。
+
+### 首次安装
+
+1. 克隆脚本/文档仓库
+
+```
+$ cd ~
+$ git clone ssh://zhuzhongkai@gitlab.droi.com:29418/freemeos/common/documents freeme-documents && scp -p -P 29418 zhuzhongkai@gitlab.droi.com:hooks/commit-msg  freeme-documents/.git/hooks/
+```
+
+2. 添加脚本目录到`PATH`中
+
+```
+$ gedit ~/bin/.profile
+```
+
+在最后添加一行
+
+```
+PATH="$HOME/freeme-documents:$PATH"
+```
+
+保存退出。解析阿里测试下配置是否正确，打开终端，执行
+
+```
+$ . ~/.profile
+$ repopatch.sh
+fail: unknown subcommand! ; 出现该提示，则表明配置成功
+
+repopatch.sh: command not found； 出现该提示，则表明配置失败，请根据上述步骤排查。
+```
+
+配置成功后，请注销用户并重新登陆（或者重启计算机）重新加载.profile。
+
+PS. 如使shell为`zsh`，请执行`hash -r`，当前终端即可直接执行`repopatch.sh`
+
+### 非首次安装
+
+因为文档仓库经常更新，建议每次使用时前更新仓库，方法如下
+
+$ cd ~/freeme-documents
+$ git pull
+
 ## 代码准备
 
 将MTK提供的代码拷贝到工作目录中。笔者目录如下
@@ -38,8 +84,6 @@ $ cat ALPS-MP-N0.MP2-V1_DROI6580_WE_N_INHOUSE.tar.gz* | tar xf -
 
 ## 准备manifests文件
 
-将scripts目录下的creategit.sh和scandir.py脚本拷贝到~/bin目录下。
-
 如果本机没有`manifest`的`git`仓库，那么请`clone`该仓库。注意修改`zhuzhongkai`为你的名字。
 
 ```
@@ -66,7 +110,7 @@ manifest
 可见gerrit上已经上线的AndroidN项目包括`6780`、`6755`，讲`6580`项目目录复制为`6737`目录，命令如下。
 
 ```
-~/bin/creategit.sh clone mt6580 ALPS-MP-N0.MP2-V1_DROI6580_WE_N mt6737 ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N
+creategit.sh clone mt6580 ALPS-MP-N0.MP2-V1_DROI6580_WE_N mt6737 ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N
 ```
 
 ## 构造repo工程
@@ -80,7 +124,7 @@ $ cd ~/workplace/freemeos/droi6737/ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N
 ### 0. 生成辅助文件
 
 ```
-$ ~/bin/creategit.sh s0 ~/workplace/freemeos/manifest/ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N/_common.xml
+creategit.sh s0 ~/workplace/freemeos/manifest/ALPS-MP-N0.MP1-V1.0.2_DROI6737M_65_N/_common.xml
 ```
 
 该命令对比`_common.xml`和当前源代码目录结构，其输出类似如下效果：
@@ -111,7 +155,7 @@ diff xml with workplace over
 ### 1. 创建本地git仓库并添加代码
 
 ```
-~/bin/creategit.sh s1
+creategit.sh s1
 ```
 
 根据manifest.xml中执行的本地git仓库路径创建本地git仓库，并做本地提交。
@@ -143,7 +187,7 @@ $ cd ../
 ### 2. 在gerrit服务器上创建projects
 
 ```
-~/bin/creategit.sh s2
+creategit.sh s2
 ```
 
 本步执行完毕之后，打开gerrit服务器，进入`Porjects | list`页面，查看刚才创建的仓库，刚才创建的仓库全部属于`mt6737`项目，因此在`Filter`编辑框输入mt6737过滤查看。务必确保仓库路径创建正常。
@@ -159,7 +203,7 @@ git config --global pack.threads 6
 ```
 
 ```
-~/bin/creategit.sh s3
+creategit.sh s3
 ```
 
 这一步将本地git仓库代码推送到gerrit服务器上。
@@ -169,7 +213,7 @@ git config --global pack.threads 6
 ### 4. 在`gerrit`服务器上`review`提交
 
 ```
-~/bin/creategit.sh s4
+creategit.sh s4
 ```
 
 本步执行时间大概2～3分钟。执行完完毕后检查命令输出确保无错误。并检查gerrit网站的All | Merged页面的提交记录，确保没有遗漏的提交。

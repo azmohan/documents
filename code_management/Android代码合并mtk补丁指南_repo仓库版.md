@@ -2,14 +2,53 @@
 
 [TOC]
 
-## 准备
+## 安装/更新脚本
 
-将`scripts`目录下的`repopatch.sh`链接到~/bin目录下（或其他包含在系统`PATH`环境变量的路径中，例如：
+本文操作需要使用脚本工具，请确认获取了最新的脚本/文档仓库，并正确配置`PATH`。
+
+### 首次安装
+
+1. 克隆脚本/文档仓库
 
 ```
-$ cd ~/bin
-$ ln -s your-repopatch.sh
+$ cd ~
+$ git clone ssh://zhuzhongkai@gitlab.droi.com:29418/freemeos/common/documents freeme-documents && scp -p -P 29418 zhuzhongkai@gitlab.droi.com:hooks/commit-msg  freeme-documents/.git/hooks/
 ```
+
+2. 添加脚本目录到`PATH`中
+
+```
+$ gedit ~/bin/.profile
+```
+
+在最后添加一行
+
+```
+PATH="$HOME/freeme-documents:$PATH"
+```
+
+保存退出。
+
+测试下配置是否正确，打开终端，执行
+
+```
+$ . ~/.profile
+$ repopatch.sh
+fail: unknown subcommand! ; 出现该提示，则表明配置成功
+
+repopatch.sh: command not found； 出现该提示，则表明配置失败，请根据上述步骤排查。
+```
+
+配置成功后，请注销用户并重新登陆（或者重启计算机）重新加载.profile。
+
+PS. 如使shell为`zsh`，请执行`hash -r`，当前终端即可直接执行`repopatch.sh`
+
+### 非首次安装
+
+因为文档仓库经常更新，建议每次使用时前更新仓库，方法如下
+
+$ cd ~/freeme-documents
+$ git pull
 
 PS. 如使shell为`zsh`，请执行`hash -r`，当前终端即可直接执行`repopatch.sh`
 

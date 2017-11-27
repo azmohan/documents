@@ -2,24 +2,60 @@
 
 [TOC]
 
-## 准备
+## 安装/更新脚本
 
-将`scripts`目录下的`repopatch.sh`链接到~/bin目录下（或其他包含在系统`PATH`环境变量的路径中，例如：
+本文操作需要使用脚本工具，请确认获取了最新的脚本/文档仓库，并正确配置`PATH`。
+
+### 首次安装
+
+1. 克隆脚本/文档仓库
 
 ```
-$ cd ~/bin
-$ ln -s your-repopatch.sh
+$ cd ~
+$ git clone ssh://zhuzhongkai@gitlab.droi.com:29418/freemeos/common/documents freeme-documents && scp -p -P 29418 zhuzhongkai@gitlab.droi.com:hooks/commit-msg  freeme-documents/.git/hooks/
 ```
 
-说明：`scripts`目录下还提供了`gen.py`，用于生成`repopatch.sh`命令，具体用法在下文说明。
+2. 添加脚本目录到`PATH`中
+
+```
+$ gedit ~/bin/.profile
+```
+
+在最后添加一行
+
+```
+PATH="$HOME/freeme-documents:$PATH"
+```
+
+保存退出。
+
+测试下配置是否正确，打开终端，执行
+
+```
+$ . ~/.profile
+$ repopatch.sh
+fail: unknown subcommand! ; 出现该提示，则表明配置成功
+
+repopatch.sh: command not found； 出现该提示，则表明配置失败，请根据上述步骤排查。
+```
+
+配置成功后，请注销用户并重新登陆（或者重启计算机）重新加载.profile。
 
 PS. 如使shell为`zsh`，请执行`hash -r`，当前终端即可直接执行`repopatch.sh`
+
+### 非首次安装
+
+因为文档仓库经常更新，建议每次使用时前更新仓库，方法如下
+
+$ cd ~/freeme-documents
+$ git pull
 
 ## 1. patch文件备份
 
 ### 首次创建仓库
 
 注意修改yourname为你的名字，有两处。
+
 ```
 $ git clone ssh://yourname@10.20.40.19:29418/freemeos/mt6750/ALPS-MP-N0.MP7-V1_DROI6755_66_N/patch && scp -p -P 29418 yourname@10.20.40.19:hooks/commit-msg patch/.git/hooks/
 ```
@@ -76,6 +112,7 @@ $ mkdir pwork
 执行patch合并操作
 
 ```
+$ cd your-mtk-repo-code # 请根据实际情况修改
 $ repopatch.sh mtk ../patch/ALPS03108431\(For_droi6755_66_n_alps-mp-n0.mp7-V1_P7\).tar.gz pwork
 tar patch files... 
 override patch files... 
@@ -120,7 +157,7 @@ repopatch.sh mtk "../patch/ALPS03144423(For_droi6755_66_n_alps-mp-n0.mp7-V1_P25)
 $ bash run.sh
 ```
 
-### 检查是否有遗漏
+### 检查是否有遗漏（可选步骤，可跳过）
 
 查看当前的改动，添加`-o`选项，如果有未被任何git仓库跟踪的文件也列出来（例如.repo目录目录下新增文件或目录）
 
@@ -142,12 +179,6 @@ $ repo forall -c git status --ignored
 
 ### 上传
 
-提交补丁变更文件，注意，修改`pwork`为你的`patch临时工作目录`
-
-```
-$ repopatch.sh logcommit pwork/changelogs
-```
-
 上传代码到服务器
 
 ```
@@ -164,25 +195,38 @@ If you are sure you intend to do this, type 'yes': yes
 
 ### gerrit上合并提交
 
-打开gerrit网页，http://10.20.40.19:8080，登陆，确认代码提交成功，将代码review并submit到仓库中。
+打开gerrit网页，http://10.20.40.19:8080，登陆，确认代码提交成功。
+
+**注意**
+
+合并一个patch后，提交到gerrit上，可以看到，该patch会分拆成多个提交，包括：
+
+1. 一个或多个源代码目录git提交，提交信息固定为：`[patch/apply] ALPS03614759(For_droi6755_66_n_alps-mp-n0.mp7-V1_P83)`
+2. 一个变更日志提交，该提交总是提交到device_mediatek仓库，提交信息为：`[patch/log] add P83_ALPS03614759.txt`
+
+这两部分构成了一个patch提交。如果一次合并多个patch之后执行repo upload提交，在gerrit上以git仓库的上传顺序提交，请merge patch的leader务必按照patch顺序合并，以P83为例子，将P83的所有提交全部merge，并保证最后merge `[patch/log] add P83_ALPS03614759.txt`提交。然后再merge P84、P85...。
+
+请务必按照此顺序合并提交，因为如果后续发现patch有bug需要回退提交测试，需要保证个patch被完整回退。我们开发的repo roll回退脚本依赖该顺序。
 
 ## 3. 将patch合并到pcb分支
 
 ### 修改manifests
 
-首先修改`.repo/manifest.xml`，将`default revision="mtk"`修改成`default revision="pcb_oversea"`。注意，有些项目是`pcb`分支，务必确保本步正确。
-然后创建新的本地分支`pcb_oversea`用于执行本次的patch合并
+为了减少干扰，请重新拉取一套`pcb_oversea`仓库执行patch合并操作。
+
+创建新的本地分支`pcb_oversea`用于执行本次的patch合并
 
 ```
-$ repo start --all pcb_oversea
+$ repo start --all pcb
 ```
 
 ### 从changelog文件中合并patch
 
-例如，合并P7补丁，命令如下，修改`pwork`为你的`patch临时工作目录`
+例如，合并P7补丁，命令如下，修改`pwork`为你刚才在mtk仓库合并patch时指定的`patch临时工作目录`，
 
 ```
-$ repopatch.sh droi pwork/changelogs/P7_ALPS03108431.txt
+$ cd your-pcb-repo-code # 请根据实际情况修改
+$ repopatch.sh droi 刚才mtk仓库合并patch时生成的pwork目录/changelogs/P7_ALPS03108431.txt
 loop patched projects...
 pick 0a8e656a13740a8e15b79a4635ea95c7200cee03 from device/droi
 picked!
@@ -194,7 +238,7 @@ log: create P7_ALPS03108431.txt
 
 如果没有任何冲突，效果如上面所示。
 
-如果运气不好，个别仓库合并失败，合并脚本会继续执行。
+如果运气不好，个别仓库合并失败，合并脚本会继续执行，示例如下：
 
 ```
 $ repopatch.sh droi pwork/changelogs/P8_ALPS03128418.txt
@@ -214,7 +258,7 @@ create change log file
 log: create pwork/changelogs_new/P8_ALPS03128418.txt
 ```
 
-冲突的仓库会红色高亮日志打印出来，请手动修复冲突：进入该仓库，执行`git mergetool`执行三方合并。
+冲突的仓库会以红色高亮显示。请手动修复冲突：进入该仓库，执行`git mergetool`执行三方合并。
 
 ```
 $ git config --global merge.tool meld
@@ -228,10 +272,11 @@ $ git add -u
 $ git commit -m "[patch/apply] ALPS03128418(For_droi6755_66_n_alps-mp-n0.mp7-V1_P8)"
 ```
 
-如果有冲突，修复冲突之后，请更新变更日志，没有冲突请跳过此步。
+修复冲突之后，请更新变更日志，该命令会自动完成并更日志的本地git提交。注意，下面命令中，pwork后跟`changelogs_new`，而非`changelogs`
 
 ```
-$ repopatch.sh logupdate pwork/changelogs_new/P8_ALPS03128418.txt
+$ cd your-pcb-repo-code # 请根据实际情况修改
+$ repopatch.sh logupdate 刚才mtk仓库合并patch时生成的pwork目录/changelogs_new/P8_ALPS03128418.txt
 ```
 
 如果还有其他补丁包，请重复使用上述命令。
