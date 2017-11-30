@@ -42,7 +42,7 @@ function get_changed_projects() {
 
 function get_patch_id() {
     local patchname=$1
-    local patchid=${patchname} | sed -n "s/.*\(ALPS[0-9]\+\)(.*_\(P[0-9]\+\)).*/\2_\1/p"
+    local patchid=$(echo ${patchname} | sed -n "s/.*\(ALPS[0-9]\+\)(.*_\(P[0-9]\+\)).*/\2_\1/p")
     echo ${patchid:-${patchname}}
 }
 
@@ -435,6 +435,96 @@ function restore_mtk_repo() {
 }
 
 # ------------------------------------------------------------------------------
+gerrituser=$(git config user.name)
+
+function gerrit_query() {
+    local commitid=$1
+    ssh -p 29418 ${gerrituser}@10.20.40.19 gerrit query --current-patch-set ${commitid}
+}
+
+function gerrit_cherry_pick() {
+    local commitid=$1
+    local info=$(gerrit_query $commitid)
+    local refs=$(echo "$info" | grep "   ref:" | awk 'BEGIN {FS=":"} {print $2}')
+    local project=$(echo "$info" | grep "  project:" | awk 'BEGIN {FS=":"} {print $2}')
+    project=$(echo $project)
+    logi "----------------------------------------------------------------------"
+    logi "cherry-pick ${project} ${refs}"
+    git fetch ssh://${gerrituser}@10.20.40.19:29418/${project} ${refs} && git cherry-pick FETCH_HEAD
+}
+
+function git_remote_branch_exist() {
+    local branch=$1
+    git branch -a | grep "remotes/origin/$branch"
+}
+
+function merge_patch_from_changelog() {
+    local _changelog=$1
+    local _remote_branch=$2
+    local patchfullname=$(get_patchname_from_changelog $_changelog)
+    local _src_cmt_array=($(get_commits_from_changelog $_changelog))
+    local pick_no_conflicts="true"
+    local commit_array=""
+
+    logi "loop patched projects..."
+    for i in ${_src_cmt_array[*]}
+    do
+        local _project=$(echo $i | awk 'BEGIN {FS=":"} {print $1}')
+        local _commitid=$(echo $i | awk 'BEGIN {FS=":"} {print $2}')
+        cd ${_project}
+        local info=$(git_remote_branch_exist $_remote_branch)
+        if [ x"$info" == x ]; then
+            logw "warning: <${_project}> has no $_remote_branch, just skip, you may fix it by hand"
+            cd ${WORKDIR}
+            continue
+        fi
+
+        echo "pick ${_commitid} from ${_project}"
+        git checkout ${_remote_branch}
+        gerrit_cherry_pick ${_commitid}
+        if [ "$?" -ne 0 ]; then
+            #TODO: how to continue?
+            loge "error: <${_project}> pick conflict, please fix it later, now we just skip"
+            commit_array="$commit_array ${_project}:----------------------------------------"
+            pick_no_conflicts="false"
+        else
+            logi "picked!"
+            commit_array="$commit_array $_project:$(get_last_commitid)"
+            git push origin HEAD:refs/for/${_remote_branch}
+        fi
+
+        cd ${WORKDIR}
+    done
+
+    logi "create change log file"
+    local _srclogdir=$(dirname ${_changelog})
+    local logdir=${_srclogdir}_${_remote_branch}
+    mkdir -p ${logdir}
+
+    # check if there is a specified branch exsited in changelog's git"
+    local CHANGELOGDIR_P=$(dirname ${CHANGLOGDIR})
+    cd ${CHANGELOGDIR_P}
+    local info=$(git_remote_branch_exist $_remote_branch)
+    cd ${WORKDIR}
+    if [ x"$info" == x ]; then
+        logw "warning: <${CHANGLOGDIR}> has no ${_remote_branch}, don't save change logs"
+        return
+    fi
+
+    create_changelog ${patchfullname} "${commit_array}" ${logdir}
+
+    logi "commit change log file"
+    if [ "${pick_no_conflicts}" = "true" ]; then
+        commit_changelog ${logdir}/$(get_patch_id $patchfullname).txt
+        cd ${CHANGELOGDIR_P}
+        git push origin HEAD:refs/for/${_remote_branch}
+        cd ${WORKDIR}
+    else
+        logw "warning: run 'logupdate' to update commit chang log file after you fix pick confilct"
+    fi
+}
+
+# ------------------------------------------------------------------------------
 function help() {
 cat <<EOF
 usage: repopatch.sh <command> [<args>]
@@ -481,6 +571,14 @@ case $action in
             exit 1
         fi
         apply_patch_from_changelog $1
+        ;;
+    merge|mergepatch)
+        check
+        if [ ! -f "$1" ]; then
+            loge "error: $1 not existed!"
+            exit 1
+        fi
+        merge_patch_from_changelog $1 $2
         ;;
     log|logupdate)
         check
