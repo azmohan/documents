@@ -65,7 +65,9 @@ git reset --hard HEAD~1
 
 将上面红色圆圈，复制命令到粘贴板。拉取pcb_oversea仓库，命令行切换到相关仓库路径，粘贴命令。
 
-顺利的话，该提交被pick成功了，如果发生冲突了，请修复冲突。接下来请执行`git commit --amend`删除最后一行`changid`，以确保生成一个新的`changid`。然后上传服务器即可。
+顺利的话，该提交被pick成功了，如果发生冲突了，请修复冲突后上传服务器即可。
+
+如果上传提示被拒绝，可能是`changid`被重复使用了。请执行`git commit --amend`删除最后一行`changid`，以生成一个新的`changid`后从新上传。
 
 ### 方法4. 本地使用`git`命令合并
 
@@ -85,17 +87,47 @@ git reset --hard HEAD~1
 
 ## 多平台不同仓库提交同一个Feature改动
 
-### 1. 多份代码，同步提交
+### 1. 使用gerrit的`download`
 
-拉取多平台代码，使用比较工具（如beyond compare）手动合并提交。
+gerrit提供的Download功能，不仅可用于同一仓库，也可以本地仓库A中同步gerrit上远程仓库B的提交，这里所谓的同步，可以是检出（checkout）、、合并单一提交（cherry-pick）、合并分支（pull）等动作。
 
-### 2. 使用patch命令自动合并
+在gerrit上打开某提交页面，点击右上角的`download`按钮。
 
-在gerrit上打开driver分支提交页面，点击右上角的`download`按钮。
+![gerrit](3/gerrit_download1.png)
 
-![gerrit](3/gerrit_download2.png)
+可以看到有多行命令，点击右边的复制，然后打开命令行，切换到想要`download`的仓库目录下，粘贴命令回车执行，下面分别介绍下各自的含义：
 
-下载patch的zip包，解压后，然后进入相关代码目录下，执行
+1. Checkout
+
+    该命令的示例如下
+
+        git fetch ssh://zhuzhongkai@gitlab.droi.com:29418/freemeos/common/documents refs/changes/06/33506/1 && git checkout FETCH_HEAD  
+
+    该命令由两条命令构成。第一条命令`git fetch ...`代表的含义是获取刚提交节点（包括其所有父节点）的所有历史到本地；第二条`git checkout FETCH_HEAD`则表示取出到该节点。这样操作之后，执行命令的当前仓库的当前分支就会立刻变身为要download的那个提交。换言之，此时本地仓库的取出的代码与gerrit网页上提交的代码完全一样。如果执行这条命令之前你由未提交/或者提交但是未review通过提交，执行该命令后，你的提交将不可见，当前分支会变身为gerrit网页上那个提交。
+
+2. Pull
+
+    该命令的示例如下
+
+        git pull ssh://zhuzhongkai@gitlab.droi.com:29418/freemeos/common/documents refs/changes/06/33506/1
+
+    pull命令会将本地仓库的当前分支与gerrit上要download的那个提交的所在分支发生一次分支的merge。换言之，在当前分支上，你的本地提交和它的提交都会存在。
+
+3. Cherry-pick
+
+        git fetch ssh://zhuzhongkai@gitlab.droi.com:29418/freemeos/common/documents refs/changes/06/33506/1 && git FETCH_HEAD
+
+    跟Checkout类似，这条命令也由两条命令构成，区别在第二条命令是` cherry-pick`。cherry-pick命令顾名思义，是仅仅将要被pick的提交（差异）合并到你当前所在的分支。执行完该命令之后，在你本地所有提交的基础上增加了gerrit上的这条提交。
+
+利用gerrit的download命令，在协同开发、patch合并、合并历史提交等等诸多场景下有广泛应用。请读者留意，利用好该命令，在某些场景下，可以大大提高开发效率。
+
+### 2. 多份代码，同步提交
+
+拉取多平台代码，使用比较工具（如beyond compare）手动合并提交。这是传统做法，不建议使用。
+
+### 3. 使用patch命令
+
+unix/linux系统中自带了一对神奇的命令，可以生成两个文件的差异文件（diff文件）；也可以将差异文件合并到某个文件上，使之变成另外的文件，这就是`diff`与`patch`命令。
 
 ```
 patch -Np1 < xxxx.diff
