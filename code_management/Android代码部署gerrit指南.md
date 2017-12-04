@@ -8,6 +8,12 @@
 
 以AndroidN 6737M上线为例。步骤如下。
 
+## 获取权限
+
+本文操作需要操作人员具有相关权限，属于`gerrit`的代码管理组（`cm`组）。
+
+如果你不具有`cm`组权限，请具有`cm`权限的人帮忙将你添加进入该组。添加方法是打开`gerrit`，在`People` 进入`List Groups`，点击`cm`，将自己的名字加入。
+
 ## 安装/更新脚本
 
 本文操作需要使用脚本工具，请确认获取了最新的脚本/文档仓库，并正确配置`PATH`。
@@ -139,8 +145,8 @@ diff xml with workplace start...
 diff xml with workplace over
 ```
 
-上面的含义表示：当前源代码目录比_common.xml中多了个`kernel-4.4`，少了个`trusty`，请继续编辑`_common.xml`文件，上多出的目录项删除，并补足缺少的目录项。
-然后继续执行上面命令直到输出为为如下效果：
+上面的含义表示：当前源代码目录比_common.xml中多了个`kernel-4.4`，少了个`trusty`，请继续编辑`_common.xml`文件，删除多出的目录项，补足缺少的目录项。
+然后继续执行上面命令直到输出为如下效果：
 
 ```
 diff xml with workplace start...
@@ -162,7 +168,7 @@ creategit.sh s1
 
 本步执行总时间大概20分钟（机械硬盘）。
 
-本步执行完毕之后，会打印如下提示，请检查是否存在嵌套git目录。当前仓库git分拆方案，`device/`下的`droi/`、`mediatek/`都是独立的`git`仓库。
+本步执行完毕之后，会打印如下提示，请检查是否存在嵌套git仓库。当前仓库git分拆方案中，`device/`下的`droi/`、`mediatek/`都是独立的`git`仓库。
 
 ```
 Now, you may fix the git repo which has sub git repos, such as "device/", run:
