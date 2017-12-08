@@ -48,11 +48,11 @@ gerrit的download功能针对单一仓库。而一个MTK的patch通常由多个�
 
 2. 添加脚本目录到`PATH`中
 
-        $ gedit ~/bin/.profile
+        $ gedit ~/.profile
 
     在最后添加一行
 
-        PATH="$HOME/freeme-documents:$PATH"
+        PATH="$HOME/freeme-documents/scripts:$PATH"
 
     保存退出。
 

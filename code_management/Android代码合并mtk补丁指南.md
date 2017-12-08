@@ -10,38 +10,32 @@
 
 1. 克隆脚本/文档仓库
 
-```
-$ cd ~
-$ git clone ssh://zhuzhongkai@gitlab.droi.com:29418/freemeos/common/documents freeme-documents && scp -p -P 29418 zhuzhongkai@gitlab.droi.com:hooks/commit-msg  freeme-documents/.git/hooks/
-```
+    修改zhuzhongkai为你的名字，注意有两处。
+
+        $ cd ~
+        $ git clone ssh://zhuzhongkai@gitlab.droi.com:29418/freemeos/common/documents freeme-documents && scp -p -P 29418 zhuzhongkai@gitlab.droi.com:hooks/commit-msg  freeme-documents/.git/hooks/
 
 2. 添加脚本目录到`PATH`中
 
-```
-$ gedit ~/bin/.profile
-```
+        $ gedit ~/.profile
 
-在最后添加一行
+    在最后添加一行
 
-```
-PATH="$HOME/freeme-documents:$PATH"
-```
+        PATH="$HOME/freeme-documents/scripts:$PATH"
 
-保存退出。
+    保存退出。
 
-测试下配置是否正确，打开终端，执行
+    测试下配置是否正确，打开终端，执行
 
-```
-$ . ~/.profile
-$ repopatch.sh
-fail: unknown subcommand! ; 出现该提示，则表明配置成功
+        $ . ~/.profile
+        $ repopatch.sh
+        fail: unknown subcommand! ; 出现该提示，则表明配置成功
 
-repopatch.sh: command not found； 出现该提示，则表明配置失败，请根据上述步骤排查。
-```
+        repopatch.sh: command not found； 出现该提示，则表明配置失败，请根据上述步骤排查。
 
-配置成功后，请注销用户并重新登陆（或者重启计算机）重新加载.profile。
+    配置成功后，请注销用户并重新登陆（或者重启计算机）重新加载.profile。
 
-PS. 如使shell为`zsh`，请执行`hash -r`，当前终端即可直接执行`repopatch.sh`
+    PS. 如使shell为`zsh`，请执行`hash -r`，当前终端即可直接执行`repopatch.sh`
 
 ### 非首次安装
 
