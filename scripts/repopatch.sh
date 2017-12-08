@@ -496,20 +496,23 @@ function merge_patch_from_changelog() {
         cd ${WORKDIR}
     done
 
-    logi "create change log file"
-    local _srclogdir=$(dirname ${_changelog})
-    local logdir=${_srclogdir}_${_remote_branch}
-    mkdir -p ${logdir}
-
     # check if there is a specified branch exsited in changelog's git"
     local CHANGELOGDIR_P=$(dirname ${CHANGLOGDIR})
     cd ${CHANGELOGDIR_P}
     local info=$(git_remote_branch_exist $_remote_branch)
-    cd ${WORKDIR}
     if [ x"$info" == x ]; then
         logw "warning: <${CHANGLOGDIR}> has no ${_remote_branch}, don't save change logs"
+	cd ${WORKDIR}
         return
     fi
+
+    git checkout ${_remote_branch}
+    cd ${WORKDIR}
+
+    logi "create change log file"
+    local _srclogdir=$(dirname ${_changelog})
+    local logdir=${_srclogdir}_${_remote_branch}
+    mkdir -p ${logdir}
 
     create_changelog ${patchfullname} "${commit_array}" ${logdir}
 
