@@ -163,6 +163,7 @@ function apply_patch_from_tarball() {
         rm -rf $F
         echo "delete $F"
     done
+    loop_commit_modified_gits $patchfullname $dirname
 }
 
 function apply_patch_from_changelog() {
