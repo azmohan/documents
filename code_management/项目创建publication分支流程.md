@@ -52,4 +52,12 @@ PRODUCT_DEFAULT_DEV_CERTIFICATE := vendor/freeme/build/target/product/security/t
 
 编译mtk项目，修复编译错误
 
+### Step6 - 外发
+
+项目外发前必须执行一下命令，对代码树进行清理：
+```
+. build/envsetup.sh
+publication
+```
+
 # 展讯平台
