@@ -41,10 +41,11 @@ CONTAINER ID        IMAGE               COMMAND               CREATED           
 其中`04340f040aa8`即表示当前正在运行的docker的ID，执行如下命令登陆`docker`并运行shell
 
 ```
-$ sudo docker exec -it 04340f040aa8 /bin/bash  
+$ sudo docker exec -it 04340f040aa8 /bin/bash
 ```
 
 执行索引
+
 ```
 $ cd /var/opengrok
 $ OpenGrok index
@@ -53,6 +54,7 @@ $ OpenGrok index
 OpenGrok使用增量索引方式。一个AOSP项目，大概需要索引2-4小时，
 
 索引完毕后退出`docker`。
+
 ```
 $ exit
 ```
@@ -63,6 +65,7 @@ Opengrok使用docker部署，登陆docker的方法请参考本文第一节。公
 
 ### 配置OpenGrok工作目录
 找到OpenGrok安装目录，修改bin/OpenGrok（编辑/opengrok-0.12.1.5/bin/OpenGrok）
+
 ```
 OPENGROK_INSTANCE_BASE="${OPENGROK_INSTANCE_BASE:-/var/opengrok}"
 ```
@@ -70,6 +73,7 @@ OPENGROK_INSTANCE_BASE="${OPENGROK_INSTANCE_BASE:-/var/opengrok}"
 ### 配置tomcat
 
 修改配置文件`/var/lib/tomcat7/webapps/source/WEB-INF/web.xml`，如下：
+
 ```
   <context-param>
     <param-name>CONFIGURATION</param-name>
@@ -77,7 +81,6 @@ OPENGROK_INSTANCE_BASE="${OPENGROK_INSTANCE_BASE:-/var/opengrok}"
     <description>Full path to the configuration file where OpenGrok can read it's configuration</description>
   </context-param>
 ```
-
 
 ## 参考资料
 - http://www.cnblogs.com/pengdonglin137/p/4717903.html

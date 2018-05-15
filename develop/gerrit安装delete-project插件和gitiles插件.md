@@ -40,11 +40,12 @@ $ git checkout v2.12.2
 ```
 
 **下载delete-project插件代码**
+
 ```
 $ cd plugins
 $ git clone https://gerrit.googlesource.com/plugins/delete-project
 $ cd delete-project
-$ git checkout -b 2.12 remotes/origin/stable-2.12  
+$ git checkout -b 2.12 remotes/origin/stable-2.12
 ```
 
 ## 编译delete-project插件
@@ -54,11 +55,13 @@ $ /opt/projects/gerrit/buck/bin/buck build plugins/delete-project:delete-project
 ```
 
 1. Failed to read NDK version
+
 ```
 BUILD FAILED: Failed to read NDK version from /home/prife/workplace/aosp/android-ndk-r12b
 ```
 
 解决方法
+
 ```
 $ echo "r12b (64-bit)" /home/prife/workplace/aosp/android-ndk-r12b/RELEASE.TXT
 ```
@@ -91,6 +94,7 @@ java.lang.IllegalStateException: /home/prife/workplace/aosp/android-ndk-r12b/too
 ```
 
 解决方法是在gerrit目录下，编辑.buckconfig文件，最后添加
+
 ```
 [ndk]
     gcc_version = 4.9
@@ -133,18 +137,20 @@ $ git checkout -b stable-2.12 remotes/origin/stable-2.12
 ```
 
 编译
+
 ```
 $ cd ../
 $ /opt/projects/gerrit/buck/bin/buck build plugins/gitiles:gitiles
 
 编译完毕后，gitiles.jar位于buck-out/gen/plugins/gitiles/gitiles/目录下。
-
 ```
 
 安装
+
 ```
 ssh -p 29418 zhuzhongkai@10.20.40.19 gerrit plugin install -n xxxx.jar - < xxxx.jar
 ```
+
 经测试，该方法会出现“fatal: remote installation is disabled”
 
 因此最终还是登陆服务器，手动拷贝jar包安装。
@@ -162,11 +168,13 @@ ssh -p 29418 zhuzhongkai@10.20.40.19 gerrit plugin install -n xxxx.jar - < xxxx.
 编译、安装方法与上面相同。
 
 复制仓库，假定有个仓库`droi/test/test1`，要创建一个完全相同的仓库`droi/test/test2`，使用如下命令
+
 ```
 $ ssh -p 29418 zhuzhongkai@10.20.40.19 importer copy-project droi/test/test1 droi/test/test2
 ```
 
 一个完整的示例如下。
+
 ```
 $ ssh -p 29418 zhuzhongkai@10.20.40.19 importer copy-project freemeos/mt6750/ALPS-MP-N0.MP7-V1_DROI6755_66_N/pcb/freeme freemeos/common/freeme
 Check source project:   100% (1/1)

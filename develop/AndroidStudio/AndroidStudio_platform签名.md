@@ -6,11 +6,17 @@
 
 github 有开源的生成工具：[keytool-importkeypai](https://github.com/getfatday/keytool-importkeypair) 
 
-命令：```keytool-importkeypair -k your_keystore_name -p keystore_password -pk8 your.pk8 -cert your.pem -alias platform```
+命令：
+
+```
+keytool-importkeypair -k your_keystore_name -p keystore_password -pk8 your.pk8 -cert your.pem -alias platform
+```
 
 譬如：
 
-```keytool-importkeypair -k debug.keystore -p android -pk8 platform.pk8 -cert platform.x509.pem -alias platform```
+```
+keytool-importkeypair -k debug.keystore -p android -pk8 platform.pk8 -cert platform.x509.pem -alias platform
+```
 
 ### 集成keyStore
 
@@ -25,6 +31,7 @@ STORE_PASSWORD=your password
 KEY_ALIAS=your alias
 KEY_PASSWORD=your password
 ```
+
 ```sh
 # 举例：
 STORE_FILE=debug.keystore
@@ -93,9 +100,11 @@ def getSigningProperties(){
 
 #### target SDK问题
 
-> Error:Execution failed for task ':installDebug'.
->
-> com.android.builder.testing.api.DeviceException: com.android.ddmlib.InstallException: Failed to finalize session : -26: Package com.freeme.ota new target SDK 21 doesn't support runtime permissions but the old target SDK 23 does.
+```
+Error:Execution failed for task ':installDebug'.
+
+com.android.builder.testing.api.DeviceException: com.android.ddmlib.InstallException: Failed to finalize session : -26: Package com.freeme.ota new target SDK 21 doesn't support runtime permissions but the old target SDK 23 does.
+```
 
 出现该问题为，设备上应用目前target SDK 为23，而项目本身为21。**一般由于只设置minSdkVersion导致**
 
@@ -105,10 +114,17 @@ def getSigningProperties(){
 - 在项目中设置target SDK 为23，即可覆盖安装
 
 #### sharedUserId 问题
-> Error:Execution failed for task ':installDebug'.
->
-> com.android.builder.testing.api.DeviceException: com.android.ddmlib.InstallException: Failed to finalize session : INSTALL_FAILED_SHARED_USER_INCOMPATIBLE: Forbidding shared user change from SharedUserSetting{86535d0 android.uid.system/1000} to SharedUserSetting{85d79c9 android.uid.system.ota/10104}
 
-解决方案：在AndroidMainfast，中添加```android:sharedUserId="android.uid.system" ```
+```
+Error:Execution failed for task ':installDebug'.
+
+com.android.builder.testing.api.DeviceException: com.android.ddmlib.InstallException: Failed to finalize session : INSTALL_FAILED_SHARED_USER_INCOMPATIBLE: Forbidding shared user change from SharedUserSetting{86535d0 android.uid.system/1000} to SharedUserSetting{85d79c9 android.uid.system.ota/10104}
+```
+
+解决方案：在AndroidMainfast，中添加
+
+```
+android:sharedUserId="android.uid.system"
+```
 
 http://192.168.3.179/biantao/FreemeFactoryTest

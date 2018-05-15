@@ -3,7 +3,7 @@
 # Root华为P10
 
 ## 背景知识
-1. 手机连接电源 电源键 + 音量下键 进入Fastboot模式 
+1. 手机连接电源 电源键 + 音量下键 进入Fastboot模式
 2. 手机连接电源 电源键 + 音量上键 进入eRecovery模式
 3. 手机不连接电源 电源键 + 音量上键 进入Recovery模式
 
@@ -22,9 +22,11 @@
 地址：http://huawei-nova2-shuajibao.shuajizhijia.net/shuaji/17710.html
 
 ### 申请唯一解锁码
+
 - **到华为解锁网站申请解锁码**
 
   地址：http://www.emui.com/plugin/hwdownload/download
+
 - **获取解锁码**
 
   选择"EMUI5.0之前，EMUI5.1之后 "，然后按要求输入对应的 产品型号，序列号...点击提交,
@@ -41,6 +43,7 @@ fastboot oem unlock 解锁码
 ```
 fastboot oem get-bootinfo
 ```
+
 如果显示'''Bootloader Lock State: UNLOCKED'''，表示手机已经解锁，可以进行刷机操作
 
 ---
@@ -50,17 +53,18 @@ fastboot oem get-bootinfo
 ### 解压boot.img
 
 - **找到p10的boot.img**
-    
+
     有道云droi/utils/HwP10目录下vtr-al00-b172-boot.img
     百度云：https://pan.baidu.com/s/1mhHdE5M
 
 - **准备解压打包工具mkboot**
-   
+
    https://github.com/xiaolu/mkbootimg_tools
 
 - **解压**
+
 ```
-./mkboot boot.img boot  
+./mkboot boot.img boot
 ```
 
 ### 修改debuggale值
@@ -68,6 +72,7 @@ fastboot oem get-bootinfo
 - **/ramdisk/default.prop**
 
   修改ro.debuggable的值为1，表示能debug调试
+
 ```
 diff --git a/ramdisk/default.prop b/ramdisk/default.prop
 index 2c908e8..029fc77 100644
@@ -87,16 +92,18 @@ index 7ca66e7..728eb0b 100755
 ```
 
 ### 添加su权限
+
 - **/ramdisk/init.rc**
-  
+
   添加几个权限
+
 ```
 diff --git a/ramdisk/init.rc b/ramdisk/init.rc
 index 7ca66e7..728eb0b 100755
 --- a/ramdisk/init.rc
 +++ b/ramdisk/init.rc
 @@ -40,7 +40,10 @@ on early-init
- 
+
  on init
      sysclktz 0
 -
@@ -107,11 +114,15 @@ index 7ca66e7..728eb0b 100755
      copy /proc/cmdline /dev/urandom
      copy /default.prop /dev/urandom
 ```
+
 ### 打包boot.img
+
 ```
 ./mkboot boot boot.img
 ```
+
 ### 刷入手机
+
 ```
 fastboot flash boot boot.img
 fastboot reboot

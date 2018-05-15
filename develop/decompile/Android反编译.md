@@ -84,7 +84,7 @@ $ sudo mount -o loop -t ext4 system.img /mnt
 ## 安装
 
 ```
-$ cd ~ 
+$ cd ~
 $ git clone https://github.com/prife/fox.git
 $ mkdir -p ~/bin; cd ~/bin
 $ ln -fs ~/fox/fox
@@ -124,7 +124,9 @@ $ fox decrom all your-rom-directory
 这里从手机中pull出rom并逆向的方式为例，整个过程步骤如下：
 
 1. 连接手机，使能ADB调试
+
 2. pull出代码
+
 ```
     $ mkdir decompile-projects; cd decompile-projects
     $ mkdir rom; cd rom
@@ -132,7 +134,9 @@ $ fox decrom all your-rom-directory
     $ adb pull /system/priv-app
     $ adb pull /system/app
 ```
+
 3. 执行逆向
+
 ```
     $ cd ../
     $ mkdir decompile; cd decompile
@@ -177,25 +181,35 @@ jadx支持fallback模式，可以生成后缀为jadx的文件，风格类似于s
 逆向出来的java代码，会出现很多常量，如下：
 
 1. intent action常量
+
 ```
 action.equals("android.intent.action.SCREEN_OFF")
 ```
+
 2. context service常量
+
 ```
 this.mFingerprintManager = (FingerprintManager) getApplicationContext().getSystemService("fingerprint");
 ```
+
 3. intent flags常量
+
 ```
 intent.setFlags(872415232);
 ```
+
 4. LayoutParams常量
+
 ```
 if ((lp.flags & 4194304) != 0 || (lp.flags & 524288) != 0) {
 ```
+
 5. view visibility常量
+
 ```
 this.mAnimationBox.setVisibility(0);
 ```
+
 6. 其他
 
 `fixsrc`命令可以将java代码中的这些常量替换为标准写法。用法如下：

@@ -12,9 +12,17 @@
 
 ### 编译框架
 
-- 依赖库```libNativeMisc``` ：```NativeMisc与```INativeMisc``` 实现代码
+- 依赖库
 
-  ```
+```
+libNativeMisc
+NativeMisc
+INativeMisc
+```
+
+实现代码
+
+```
   ... ...
   LOCAL_MODULE:= libNativeMisc
   LOCAL_MODULE_TAGS := optional
@@ -33,14 +41,14 @@
       libnm_module_sensor \
       libnm_module_nvram \
   ... ...
-  ```
+```
 
   - 依赖库```libnm_module_sensor``` （```sensor```相关）
   - 依赖库```libnm_module_nvram```（读写```nvram```操作）
 
 - 主程序```NativeMisc```
 
-  ```
+```
   ... ...
   LOCAL_MODULE:= NativeMisc
   LOCAL_MODULE_TAGS := optional
@@ -49,19 +57,17 @@
   LOCAL_STATIC_LIBRARIES := \
       libNativeMisc
   ... ...
-  ```
+```
 
 - 配置文件```nativemisc_config.json```
 
-  ```
+```
   ... ...
   LOCAL_MODULE := nativemisc_config.json
   ... ...
   LOCAL_MODULE_PATH := $(TARGET_OUT)/etc
   ... ...
-  ```
-
-
+```
 
 ### 配置文件解析
 
@@ -91,10 +97,8 @@
 
 > 注：
 >
-> ```nvram``` 模块表示保存于Nvram中的key值及属性，顺序很重要，请勿轻易改变
->
-> ```dev-init``` 模块表示需要进行初始化的模块的的参数配置
->
+> - nvram：模块表示保存于Nvram中的key值及属性，顺序很重要，请勿轻易改变
+> - dev-init： 模块表示需要进行初始化的模块的的参数配置
 > - key：区分各项
 > - bootable：开机是否同步模块
 > - type：存储值类型
@@ -130,7 +134,7 @@ int main(int argc, const char * const argv[])
 {
   	// 初始化NativeMiscService
     NativeMiscService::instantiate();  /// 关键！！！
-  
+
     ProcessState::self()->startThreadPool();
     IPCThreadState::self()->joinThreadPool();
     return 0;
@@ -201,7 +205,7 @@ VirtualNvram::parse(const Json::Value& content)
         sp<NvramItem> item = new NvramItem(key, start, length);
       	// 将所有的NvramItem保存在 mSequence 中，而其是一个 Vector<sp<NvramItem>>
         mSequence.push_back(item);
-		
+
         // 更新起始位置，所以配置文件中 Nvram 顺序很重要，不能随便改
         start += length;
     }
@@ -227,19 +231,19 @@ NativeMiscService::parseDeviceStateConfiguration(const Json::Value& root)
         // bootable: true & false
         const char* bootable = jitem["bootable"].asCString();
         ... ...
-          
+
         // type: long & string & int
         const char* type = jitem["type"].asCString();
       	... ...
-          
+
         // node: Property & File
         const char* node = jitem["node"].asCString();
       	... ...
-          
+
         // persistent: nvram & specific & property
         const char* persistent = jitem["persistent"].asCString();
       	... ...
-        
+
         // default
         const Json::Value& vdefault = jitem["default"];
       	... ...

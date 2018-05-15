@@ -2,7 +2,9 @@
 通过添加一个按钮实现settings整体布局的切换，并在grid布局中添加三个常用功能。
 # 二、详细实现
 ## 1.切换按钮的实现
+
 //设置切换按钮的背景图片以及可见性
+
 ```
 public boolean onCreateOptionsMenu(Menu menu) {
     mChangeModeMenuItem = menu.findItem(R.id.mode_change);
@@ -43,7 +45,7 @@ SettingsActivity.java
 
 DashboardSummary.java
 
-rebuildUI() 
+rebuildUI()
 
 //grid与listview下不同的category布局
 
@@ -56,7 +58,6 @@ if(!ifGridMode){
 }
 ```
 
-
 //gridview设置显示的最大数
 
 ```
@@ -68,7 +69,6 @@ if(ifGridMode){
 }
 
 ```
-
 
 //gridview下添加DeviceInfoSettings和MoreSystemSettings
 
@@ -102,7 +102,6 @@ if((n == count - 1) && ifGridMode) {
   }
 ```
 
-
 DashboardTileView.java
 
 //grid与listview下不同的TileView
@@ -115,12 +114,11 @@ if(!ifGridMode){
 }
 ```
 
-
 ## 3.Grid view下三个常用功能
-DashboardSummary.java 
+DashboardSummary.java
 
  //三个常用功能获取与设置监听
- 
+
 ```
     commonAccessibilityExt = (TextView)rootView.findViewById(R.id.common_accessibility_ext);
   commonAccessibilityExt.setOnClickListener(this);
@@ -129,8 +127,6 @@ DashboardSummary.java
   commonNotification = (TextView)rootView.findViewById(R.id.common_notification);
   commonNotification.setOnClickListener(this);
 ```
-
-
 
 //三个常用功能的相关信息获取
 
@@ -162,7 +158,8 @@ DashboardSummary.java
     }
 ```
 
-
 //三个常用功能的启动
 
+```
 private void startLink(String link,int parentid,int titleid,String comment){.....}
+```

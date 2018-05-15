@@ -15,6 +15,7 @@ AOSP项目代码下载需要翻墙，国内用户可以通过[清华AOSP镜像](
 
 
 1. 安装必要命令
+
 ```bash
 sudo apt-get install git-core gnupg flex bison gperf build-essential \
 zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 \
@@ -26,7 +27,8 @@ libgl1-mesa-dev libxml2-utils xsltproc unzip
 
 根据官方说明，android5.0到android6.0使用jdk7，正在开发中AOSP主分支（以及未来的7.0）使用jdk8，官方推荐使用openjdk。
 
-ubuntu14.04系统使用软件仓库自带的openjdk7，直接安装即可使用，
+ubuntu14.04系统使用软件仓库自带的openjdk7，直接安装即可使用
+
 ```bash
 sudo apt-get install openjdk-7-jdk
 ```
@@ -53,6 +55,7 @@ $ wget -S -O - http://source.android.com/source/51-android.rules | sed "s/<usern
 ```
 
 将手机通过USB链接PC
+
 ```bash
 $ dmesg
 ...
@@ -70,11 +73,14 @@ $ dmesg
 [61322.895324] usb 3-10.3: SerialNumber: ZX1G228T9B
 ```
 
-修改51-android.rules，
+修改51-android.rules
+
 ```bash
 $ sudo vim /etc/udev/rules.d/51-android.rules
 ```
+
 根据**idVendor=18d1, idProduct=4ee7**添加一行，然后重新加载配置文件
+
 ```bash
 $ sudo udevadm control --reload-rules
 ```
@@ -116,6 +122,7 @@ Media, Audio, Thermal, Touch Screen, Sensors | Motorola|[Link]()|	f964dea317d30a
 GPS, Audio, Camera, Gestures, Graphics, DRM, Video, Sensors	|Qualcomm|[Link]()|	612d1921dd903cfa4870918e7c3b497c2349cdce2f3aee692d2c47d1358a4740
 
 下载完毕后放置到Android代码目录下，执行如下命令解压驱动程序。
+
 ```
 $ chmod a+x *.sh
 $ ./extract-moto-shamu.sh
@@ -190,14 +197,17 @@ $ make -j12
 1. 重启进入bootloader
 
 使用adb命令启动进入bootloader，或者关机后按住音量下和电源键开机进入
+
 ```bash
 $ adb reboot bootloader
 ```
 
 2. 解锁oem
+
 ```bash
 $ fastboot oem unlock
 ```
+
 此时根据提示操作解锁。
 
 3. 刷机

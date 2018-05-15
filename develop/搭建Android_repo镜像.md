@@ -11,17 +11,20 @@
 假设将AOSP镜像代码放在`/home/prife/mirror_aosp`目录下。
 
 创建工作目录
+
 ```
 mkdir ~/mirror_aosp
 cd ~/mirror_aosp
 ```
 
 初始化repo镜像仓库，注意最后的`--mirror`参数。
+
 ```
 repo init -u https://aosp.tuna.tsinghua.edu.cn/mirror/manifest --mirror
 ```
 
 拉取代码
+
 ```
 repo sync
 ```
@@ -58,6 +61,7 @@ sudo apt-get install git-daemon
 注意：`--base-path`后面跟AOSP镜像目录，根据自己的实际情况修改。
 
 接下来重启git server，使修改生效。
+
 ```
 sudo sv stop git-daemon
 sudo sv start git-daemon

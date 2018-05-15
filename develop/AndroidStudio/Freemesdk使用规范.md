@@ -3,6 +3,7 @@
 
 
 ## build.gradle配置
+
 ```
 buildscript {
     repositories {
@@ -137,9 +138,11 @@ git clone http://192.168.48.11/biantao/android-sdk-extra-freeme.git
 将android-sdk-extra-freeme添加到我们Android Sdk的extras中
 
 例如：
+
 ```
 mv ./android-sdk-extra-freeme ~/Android/Sdk/extras/freeme
 ```
+
 注：每个人的Android sdk路径可能不一样，请自寻查找下对应的路径。
 ## 替换android.jar包
 

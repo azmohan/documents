@@ -18,18 +18,19 @@
 
 修改tree源代码目录下的Makefile，主要是设定CC为刚才下载的arm gcc， toolchain，其次是为编译、链接参数添加`-static`。
 在笔者机器上改动如下：
+
 ```diff
  prefix = /usr
- 
+
 -CC=gcc
 +#CC=gcc
 +CC=~/software/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc
- 
+
  VERSION=1.7.0
  TREE_DEST=tree
 @@ -30,7 +31,8 @@ OBJS=tree.o unix.o html.o xml.o json.o hash.o color.o
  # Uncomment options below for your particular OS:
- 
+
  # Linux defaults:
 -CFLAGS=-ggdb -Wall -DLINUX -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 +CFLAGS=-ggdb -Wall -DLINUX -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -static
@@ -39,14 +40,16 @@
 ```
 
 修改完毕后，终端切换到该目录下，并执行`make`即可。
+
 ```bash
 $ cd tree-1.7.0
 $ make
 ```
 
 将静态编译的tree命令push到Android系统中，可以看到运行效果。
+
 ```
-root@shamu:/data/app/io.virtualapp-2 # tree                                    
+root@shamu:/data/app/io.virtualapp-2 # tree
 .
 |-- base.apk
 |-- lib
@@ -57,3 +60,4 @@ root@shamu:/data/app/io.virtualapp-2 # tree
     `-- arm
         `-- base.odex
 ```
+

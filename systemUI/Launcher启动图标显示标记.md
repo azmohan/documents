@@ -2,11 +2,13 @@
 
 三星设计了一套数据库，每当app增加未读数据的时候，都会向数据库中写入数据。Launcher中通过BadgeMonitor进行数据监听，实现界面更新。
 相关数据库：
-    
+
+```
     public static final Uri BADGE_INTERNAL_URI = Uri.parse("content://com.sec.badge/internal");
-    
-    
+
+
     public static final Uri BADGE_URI = Uri.parse("content://com.sec.badge/apps");
+```
 
 接下来的工作是：
 找到数据库实现的地方，在launcher中没有搜到
@@ -22,6 +24,7 @@ LauncherConnector（**更新标记**）
 
 
 先看BadgeMonitor的onChange（）
+
 ```
             pendingBadgeUpdate = false;
             uri = updateBadgeCounts();
@@ -33,7 +36,8 @@ LauncherConnector（**更新标记**）
             }
 ```
 
-再看LauncherConnector的onBadgeUpdated().
+再看LauncherConnector的onBadgeUpdated()
+
 ```
 if(launcheritem.getComponentName().equals(entry.getKey()) && launcheritem.getBadgeCount() != badgecount.getBadgeCount())
                         {
@@ -42,9 +46,8 @@ if(launcheritem.getComponentName().equals(entry.getKey()) && launcheritem.getBad
                         }
 ```
 
-
-
 Launcher监听数据库变化
+
 ```
 02-20 16:50:16.551 25590-25590/com.app.badgetest I/shanjibing: package:com.samsung.android.email.providerclass:com.samsung.android.email.ui.activity.MessageListXLbadgecount:0
 02-20 16:50:16.551 25590-25590/com.app.badgetest I/shanjibing: package:com.android.mmsclass:com.android.mms.ui.ConversationComposerbadgecount:0
@@ -69,6 +72,7 @@ Launcher监听数据库变化
 ```
 
 app发广播   action：android.intent.action.BADGE_COUNT_UPDATE
+
 ```
 02-21 11:54:06.433 26187-26187/com.app.badgetest I/shanjibing: count =4
                                                                package name =com.tencent.mobileqq
@@ -86,8 +90,4 @@ Launcher没有接受广播，而是监听数据库的改变更新数据
 
 最后，更新标记图标概述：
 app发广播并携带标记相关数据。系统会有数据哭保存相关数据，Launcher监听数据库并依据数据库中的数据更新界面。
-
-
-
-
 

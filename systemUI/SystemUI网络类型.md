@@ -15,12 +15,16 @@ device/droi/common/ProjectOption.ini
 [QSTileHost.java]
 frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/QSTileHost.java
 
+```
     FreemeFeature.isLocalSupported("feature.cellular.network.switch")
+```
 
 ### 备注
 开关行为值的可选项：** no/0/false/n/off（关闭）、yes/1/true/y/on（打开）**
 默认关闭该功能
 
+```
     feature.cellular.network.switch = no
+```
 
 Debug调试时可以修改 **feature.cellular.network.switch** 的值，以便打开或关闭该功能。

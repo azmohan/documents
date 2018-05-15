@@ -1,4 +1,6 @@
 RemoteView表示的是一种View结构，它可以在其他进程中显示（具体来讲是SystemServer进程），由于它是在其他进程中显示，为了更新它的界面，我们不能简单地使用普通View的那一套方法，RemoteView提供了一系列Set方法用于更新界面
+
+```
 private void sendNotification(){
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -44,6 +46,7 @@ private void sendNotification(){
         notificationManager.notify(1,notification);
 
     }
+```
 
 特殊Activity的处理
 仅当从通知中启动时，用户才会看到此 Activity。 从某种意义上说，Activity 是通过提供很难显示在通知本身中的信息来扩展通知。对于这种情况，请将 PendingIntent 设置为在全新任务中启动。但是，由于启动的 Activity 不是应用 Activity 流程的一部分，因此无需创建返回栈。点击“返回”仍会将用户带到主屏幕。
@@ -58,6 +61,8 @@ private void sendNotification(){
 对于此元素，请设置 android:name="android.support.PARENT_ACTIVITY"。 设置 android:value="<parent_activity_name>"，其中，<parent_activity_name> 是父 <activity> 元素的 android:name 值。请参阅下面的 XML 示例。
 同样添加对 Android 4.1 及更高版本的支持。为此，请将 android:parentActivityName 属性添加到正在启动的 Activity 的 activity 元素中。
 最终的 XML 应如下所示：
+
+```
 <activity
 
     android:name=".MainActivity"
@@ -75,6 +80,8 @@ private void sendNotification(){
         android:name="android.support.PARENT_ACTIVITY"
         android:value=".MainActivity"/>
 </activity>
+```
+
 根据可启动 Activity 的 Intent 创建返回栈：
 
 创建 Intent 以启动 Activity。
@@ -93,6 +100,7 @@ private void sendNotification(){
 
 以下代码段演示了该流程：
 
+```
 ...
 Intent resultIntent = new Intent(this, ResultActivity.class);
 
@@ -110,7 +118,7 @@ stackBuilder.addNextIntent(resultIntent);
 
 PendingIntent resultPendingIntent =
         stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        
+
 ...
 
 NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
@@ -119,8 +127,9 @@ builder.setContentIntent(resultPendingIntent);
 
 NotificationManager mNotificationManager =
     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-    
+
 mNotificationManager.notify(id, builder.build());
+```
 
 其实整个流程就是，在XML文件中设置parentActivityName属性，创建一个新栈，pendingIntent所启动的Activity在最上面，new builder封装后发送通知
 
@@ -130,22 +139,29 @@ mNotificationManager.notify(id, builder.build());
 
 在清单文件中，将以下属性添加到 Activity 的 <activity> 元素
 
+```
 android:name="activityclass"
+```
 
 Activity 的完全限定类名。
 
+```
 android:taskAffinity=""
+```
 
 与您在代码中设置的 FLAG_ACTIVITY_NEW_TASK 标志相结合，这可确保此 Activity
 
 不会进入应用的默认任务。任何具有应用默认关联的现有任务均不受影响。
 
+```
 android:excludeFromRecents="true"
+```
 
 将新任务从“最新动态”中排除，这样用户就不会在无意中导航回它。
 
 以下代码段显示了该元素：
 
+```
 <activity
 
     android:name=".ResultActivity"
@@ -154,10 +170,10 @@ android:excludeFromRecents="true"
     android:launchMode="singleTask"
     android:taskAffinity=""
     android:excludeFromRecents="true">
-    
-</activity>
 
+</activity>
 ...
+```
 
 构建并发出通知：
 
@@ -171,6 +187,7 @@ android:excludeFromRecents="true"
 
 以下代码段演示了该流程：
 
+```
 // Instantiate a Builder object.
 
 NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
@@ -179,7 +196,7 @@ NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
 Intent notifyIntent =
         new Intent(this, ResultActivity.class);
-        
+
 // Sets the Activity to start in a new, empty task
 
 notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -204,11 +221,12 @@ builder.setContentIntent(notifyPendingIntent);
 
 NotificationManager mNotificationManager =
     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-    
+
 // Builds an anonymous Notification object from the builder, and
 // passes it to the NotificationManager
 
 mNotificationManager.notify(id, builder.build())
+```
 
 在通知中显示进度
 
@@ -226,11 +244,12 @@ mNotificationManager.notify(id, builder.build())
 
 您可以在操作完成后仍保留显示进度栏，也可以将其删除。无论哪种情况，都请记住更新通知文本以显示操作已完成。 要删除进度栏，请调用 setProgress(0, 0, false)。例如：
 
+```
 ...
 
 mNotifyManager =
         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        
+
 mBuilder = new NotificationCompat.Builder(this);
 
 mBuilder.setContentTitle("Picture Download")
@@ -271,7 +290,7 @@ new Thread(
     }
 // Starts the thread by calling the run() method in its Runnable
 ).start();
-
+```
 
 显示持续 Activity 指示器
 
@@ -281,6 +300,7 @@ new Thread(
 
 要了解 Activity 指示器的工作方式，请参阅上述代码段。找到以下几行：
 
+```
 // Sets the progress indicator to a max value, the current completion
 // percentage, and "determinate" state
 
@@ -293,13 +313,13 @@ mNotifyManager.notify(0, mBuilder.build());
 将找到的这几行替换为以下几行：
 
  // Sets an activity indicator for an operation of indeterminate length
- 
+
 mBuilder.setProgress(0, 0, true);
 
 // Issues the notification
 
 mNotifyManager.notify(0, mBuilder.build());
-
+```
 
 通知元数据
 
@@ -326,11 +346,12 @@ addPerson() 允许您向通知添加人员名单。您的应用可以使用此�
 
 您的应用可以控制在安全锁定屏幕上显示的通知中可见的详细级别。 调用 setVisibility() 并指定以下值之一：
 
-VISIBILITY_PUBLIC 显示通知的完整内容。
 
-VISIBILITY_SECRET 不会在锁定屏幕上显示此通知的任何部分。
+- VISIBILITY_PUBLIC 显示通知的完整内容。
 
-VISIBILITY_PRIVATE 显示通知图标和内容标题等基本信息，但是隐藏通知的完整内容。
+- VISIBILITY_SECRET 不会在锁定屏幕上显示此通知的任何部分。
+
+- VISIBILITY_PRIVATE 显示通知图标和内容标题等基本信息，但是隐藏通知的完整内容。
 
 设置 VISIBILITY_PRIVATE 后，您还可以提供其中隐藏了某些详细信息的替换版本通知内容。例如，短信 应用可能会显示一条通知，指出“您有 3 条新短信”，但是隐藏了短信内容和发件人。要提供此替换版本的通知，请先使用 NotificationCompat.Builder 创建替换通知。创建专用通知对象时，请通过 setPublicVersion() 方法为其附加替换通知。
 
@@ -342,6 +363,7 @@ VISIBILITY_PRIVATE 显示通知图标和内容标题等基本信息，但是隐�
 
 要在 Android 5.0 系统的锁定屏幕上显示媒体播放控件，请将可见性设置为 VISIBILITY_PUBLIC，如上文所述。然后，添加操作并设置 Notification.MediaStyle 模板，如以下示例代码中所述：
 
+```
 Notification notification = new Notification.Builder(context)
 
     // Show controls on lock screen even when user hides sensitive content.
@@ -359,6 +381,8 @@ Notification notification = new Notification.Builder(context)
     .setContentText("My Awesome Band")
     .setLargeIcon(albumArtBitmap)
     .build();
+```
+
 注：弃用 RemoteControlClient 会对控制媒体产生进一步的影响
 
 自定义通知布局
@@ -389,6 +413,7 @@ Notification notification = new Notification.Builder(context)
 通知被用户取消时发送(清除所有，右滑删除)
 “自动取消(FLAG_AUTO_CANCEL)”不会产生该事件
 
+```
 Intent intent = new Intent(ACTION);
 
 intent.putExtra("op", op);
@@ -396,6 +421,7 @@ intent.putExtra("op", op);
 PendingIntent pi = PendingIntent.getBroadcast(this, 0, intent, 0);
 
 builder.setDeleteIntent(pi);
+```
 
 提醒通知到达
 
@@ -403,40 +429,45 @@ builder.setDeleteIntent(pi);
 
 使用默认提醒
 
-FLAG	描述
-
-Notification.DEFAULT_SOUND	添加默认声音提醒
-
-Notification.DEFAULT_VIBRATE	添加默认震动提醒
-
-Notification.DEFAULT_LIGHTS	添加默认呼吸灯提醒
-
-Notification.DEFAULT_ALL	同时添加以上三种默认提醒
+FLAG | 描述
+---|---
+Notification.DEFAULT_SOUND | 添加默认声音提醒
+Notification.DEFAULT_VIBRATE | 添加默认震动提醒
+Notification.DEFAULT_LIGHTS | 添加默认呼吸灯提醒
+Notification.DEFAULT_ALL | 同时添加以上三种默认提醒
 
 // 添加默认声音提醒
 
+```
 builder.setDefaults(Notification.DEFAULT_SOUND);
+```
 
 // 添加默认呼吸灯提醒，自动添加FLAG_SHOW_LIGHTS
 
+```
 builder.setDefaults(Notification.DEFAULT_LIGHTS);
+```
 
 添加自定义提醒
 
 // 添加自定义声音提醒
 
+```
 builder.setSound(Uri.parse("path/to/sound"));
+```
 
 // 添加自定义震动提醒
 
 // 延迟200ms后震动300ms，再延迟400ms后震动500ms
 
-long[] pattern = new long[]{200,300,400,500}; 
-
+```
+long[] pattern = new long[]{200,300,400,500};
 builder.setVibrate(pattern);
+```
 
 // 添加自定义呼吸灯提醒，自动添加FLAG_SHOW_LIGHTS
 
+```
 int argb = 0xffff0000;  // led灯光颜色
 
 int onMs = 300;         // led亮灯持续时间
@@ -444,30 +475,34 @@ int onMs = 300;         // led亮灯持续时间
 int offMs = 100;        // led熄灯持续时间
 
 builder.setLights(argb, onMs, offMs);
-
+```
 
 
 对Builder进行配置示例：
 
-mBuilder.setContentTitle("测试标题")//设置通知栏标题  
+```
+mBuilder.setContentTitle("测试标题")//设置通知栏标题
 
-    .setContentText("测试内容") /<span style="font-family: Arial;">/设置通知栏显示内容</span>  
-    .setContentIntent(getDefalutIntent(Notification.FLAG_AUTO_CANCEL)) //设置通知栏点击意图  
-//  .setNumber(number) //设置通知集合的数量  
-    .setTicker("测试通知来啦") //通知首次出现在通知栏，带上升动画效果的  
-    .setWhen(System.currentTimeMillis())//通知产生的时间，会在通知信息里显示，一般是系统获取到的时间  
-    .setPriority(Notification.PRIORITY_DEFAULT) //设置该通知优先级  
-//  .setAutoCancel(true)//设置这个标志当用户单击面板就可以让通知将自动取消    
-    .setOngoing(false)//ture，设置他为一个正在进行的通知。他们通常是用来表示一个后台任务,用户积极参与(如播放音乐)或以某种方式正在等待,因此占用设备(如一个文件下载,同步操作,主动网络连接)  
-    .setDefaults(Notification.DEFAULT_VIBRATE)//向通知添加声音、闪灯和振动效果的最简单、最一致的方式是使用当前的用户默认设置，使用defaults属性，可以组合  
-    //Notification.DEFAULT_ALL  Notification.DEFAULT_SOUND 添加声音 // requires VIBRATE permission  
-    .setSmallIcon(R.drawable.ic_launcher);//设置通知小ICON  
+    .setContentText("测试内容") /<span style="font-family: Arial;">/设置通知栏显示内容</span>
+    .setContentIntent(getDefalutIntent(Notification.FLAG_AUTO_CANCEL)) //设置通知栏点击意图
+//  .setNumber(number) //设置通知集合的数量
+    .setTicker("测试通知来啦") //通知首次出现在通知栏，带上升动画效果的
+    .setWhen(System.currentTimeMillis())//通知产生的时间，会在通知信息里显示，一般是系统获取到的时间
+    .setPriority(Notification.PRIORITY_DEFAULT) //设置该通知优先级
+//  .setAutoCancel(true)//设置这个标志当用户单击面板就可以让通知将自动取消
+    .setOngoing(false)//ture，设置他为一个正在进行的通知。他们通常是用来表示一个后台任务,用户积极参与(如播放音乐)或以某种方式正在等待,因此占用设备(如一个文件下载,同步操作,主动网络连接)
+    .setDefaults(Notification.DEFAULT_VIBRATE)//向通知添加声音、闪灯和振动效果的最简单、最一致的方式是使用当前的用户默认设置，使用defaults属性，可以组合
+    //Notification.DEFAULT_ALL  Notification.DEFAULT_SOUND 添加声音 // requires VIBRATE permission
+    .setSmallIcon(R.drawable.ic_launcher);//设置通知小ICON
+```
 
 RemoteView的使用
 android:使用RemoteView自定义Notification，在service中的情况
 step1 准备自定义layout
 
 常规的实现方式,并不会因为是用于notification的而在实现上有所不同.
+
+```
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -529,11 +564,15 @@ step1 准备自定义layout
             android:layout_height="40dp"/>
     </LinearLayout>
 </LinearLayout>
+```
+
 //以下内容均为service中的实现
 
 step2 使用以上layout文件创建一个RemoteView实例
+
+```
     private void initRemoteView() {
-    
+
         //创建一个RemoteView实例
         mRemoteViews = new RemoteViews(getPackageName(), R.layout.music_notification);
         mRemoteViews.setTextViewText(R.id.music_name, mMusicDatas.get(i).getName());
@@ -558,7 +597,11 @@ step2 使用以上layout文件创建一个RemoteView实例
         pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         mRemoteViews.setOnClickPendingIntent(R.id.btn_prev, pendingIntent);
     }
+```
+
 step3 使用RemoteView实例创建Nitification
+
+```
     private void initNotification() {
 
         //实例化一个Builder
@@ -570,17 +613,19 @@ step3 使用RemoteView实例创建Nitification
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
     }
+```
 step4 重写onStartCommand()用于处理Notification中按钮的点击事件,举例如下:
 
+```
  @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         String action = intent.getAction();
         String stringExtra = intent.getStringExtra(BUTTON_INDEX);
-        
-        //校验action 
+
+        //校验action
         if(TextUtils.equals(action, ACTION_NOTIFICATION)) {
-            //校验stringExtra 
+            //校验stringExtra
             if (TextUtils.equals(stringExtra, BUTTON_NEXT)) {
                 i = (i+1)>=mMusicDatas.size()? 0 : i+1;
                 mMediaPlayer.stop();
@@ -588,7 +633,7 @@ step4 重写onStartCommand()用于处理Notification中按钮的点击事件,举
                 if(isPlaying) {
                     mMediaPlayer.start();
                 }
-                 
+
                 //重置Notification显示的内容
                 mRemoteViews.setTextViewText(R.id.music_name, mMusicDatas.get(i).getName());
                 mRemoteViews.setTextViewText(R.id.singer_name, mMusicDatas.get(i).getSinger());
@@ -602,6 +647,5 @@ step4 重写onStartCommand()用于处理Notification中按钮的点击事件,举
         }
         return super.onStartCommand(intent, flags, startId);
     }
-
-
+```
 

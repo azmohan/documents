@@ -31,7 +31,7 @@ $ ./OppoDecrypt R11Plus_11_OTA_0270_all_UVSE4fXRYuxD_local.ozip -r11
 ## 3. 转换system.img
 
 ```
-$ sdat2img.py system.transfer.list system.new.dat system.img.ext4 
+$ sdat2img.py system.transfer.list system.new.dat system.img.ext4
 ```
 
 转换完成之后，即得到ext4格式的system.img文件。

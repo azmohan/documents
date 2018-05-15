@@ -2,18 +2,19 @@
   Network（公共陆地移动网络），而在运营商显示方面主要是指当前SIM所驻留的网络，比如当中国移动的SIM（46000）如果漫游到联通的网络（46001），那么虽然当前的SIM是中国移动，但是他的Plmn就应该是中国联通。
   也就是说，Plmn的名称与当前驻留的网络相关
   SPN(Service Provider Name)就是当前发行SIM卡的运营商的名称，可以从以下两个路径获取：
-  
+
   1、从SIM文件系统读取
-  
+
   2、从配置文件读取
 
 具体流程梳理
 
 一、入口或衔接作用之UiccController
 
-UiccController是整个UICC相关信息的控制接口，UiccController的实例化就是在RIL与UiccController 之间建立监听关系，这样的话，当SIM卡状态发生变化时，UiccController就可以马上知道并且做出相应的操作。 
+UiccController是整个UICC相关信息的控制接口，UiccController的实例化就是在RIL与UiccController 之间建立监听关系，这样的话，当SIM卡状态发生变化时，UiccController就可以马上知道并且做出相应的操作。
 UiccController对象是在PhoneFacotry.Java中的makeDefaultPhone()方法中初始化的，有个细节值得注意的是sCommandsInterfaces数组的i对应的是PhoneId。先进入PhoneFactory.java的makeDefaultPhone(Context context)：
 
+```
     /**
      * FIXME replace this with some other way of making these
      * instances
@@ -90,8 +91,11 @@ UiccController对象是在PhoneFacotry.Java中的makeDefaultPhone()方法中初�
             }
         }
     }
+```
+
 在UiccController.java的make()方法中new了一个UiccController对象：
 
+```
     public static UiccController make(Context c, CommandsInterface[] ci) {
         synchronized (mLock) {
             if (mInstance != null) {
@@ -148,11 +152,14 @@ UiccController对象是在PhoneFacotry.Java中的makeDefaultPhone()方法中初�
         }
         // MTK-END
     }
+```
+
 在上面UiccController的构造方法中可以看到，注册了三个事件EVENT_ICC_STATUS_CHANGED（监听SIM卡的状态变化），EVENT_RADIO_UNAVAILABLE（一旦radio变成不可用状态，就清空SIM卡的信息），EVENT_SIM_REFRESH。index对应的是PhoneId，当上面这三种消息上来时，就知道对应哪个Phone对象，也就对应那张卡。 
 当接收到EVENT_ICC_STATUS_CHANGED消息后，UiccController调用RIL.java的getIccCardStatus()方法给MODEM发送RIL_REQUEST_GET_SIM_STATUS消息，查询SIM卡的状态，看下与RIL.java交互的过程：
 
 UiccController.java本身UiccController extends Handler，所以会默认实现handleMessage (Message msg)：
 
+```
     @Override
     public void handleMessage (Message msg) {
         synchronized (mLock) {
@@ -184,9 +191,11 @@ UiccController.java本身UiccController extends Handler，所以会默认实现h
                     }
                     // MTK-END
                     break;
-              、、、、、、
+```
+
 mCis为PhoneFacotry.Java里方法makeDefaultPhone(Context context)定义的new RIL[numPhones]，所以为RIL实例：
 
+```
     @Override
     public void
     getIccCardStatus(Message result) {
@@ -198,8 +207,11 @@ mCis为PhoneFacotry.Java里方法makeDefaultPhone(Context context)定义的new R
 
         send(rr);
     }
+```
+
 这里要注意的是RILRequest.java对消息进行了处理，看下如何处理的：
 
+```
     static RILRequest obtain(int request, Message result) {
         RILRequest rr = null;
 
@@ -234,4 +246,6 @@ mCis为PhoneFacotry.Java里方法makeDefaultPhone(Context context)定义的new R
 
         return rr;
     }
+```
+
 再看下RIL.java如何接收处理消息RIL_REQUEST_GET_SIM_STATUS：

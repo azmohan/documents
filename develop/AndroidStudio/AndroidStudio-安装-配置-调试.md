@@ -3,17 +3,23 @@
 # 参考资料
 
 **官方网站**
+
 1. https://github.com/googlesamples/android-ndk, Android NDK官方参考代码
-1. http://tools.android.com/tech-docs， Android Studio技术文档
-1. http://code.google.com/p/android/issues/list， Android问题列表
-1. http://android-developers.blogspot.com/， Android官方博客
+
+2. http://tools.android.com/tech-docs， Android Studio技术文档
+
+3. http://code.google.com/p/android/issues/list， Android问题列表
+
+4. http://android-developers.blogspot.com/， Android官方博客
 
 # Android Studio 安装
 
 ## 安装JDK
 
 Android Studio不建议使用openjdk（因为其UI性能较差），因此从Oracle官网下载JDK，下载网址：
+
 - [JDK8 官方下载页面](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+
 笔者选择的是jdk-8uXXX-linux-x64.tar.gz。
 
 **下载后解压即可，不必配置`JAVA_HOME`等环境变量**
@@ -37,10 +43,13 @@ STUDIO_JDK="$HOME/software/jdk1.8.0_91/"
 
 ### 配置桌面图标
 用gedit编辑器编写桌面图标:
+
 ```
 gedit ~/.local/share/applications/android-studio.desktop
 ```
+
 输入内容如下:
+
 ```
 [Desktop Entry]
 Name = Android Studio
@@ -51,6 +60,7 @@ Terminal=false
 Type=Application
 StartupNotify=true
 ```
+
 注意：每行末端不能留空格，否则会失效
 
 
@@ -58,6 +68,7 @@ StartupNotify=true
 
 ### 插件
 笔者使用黑色系，选择黑色系，在settings菜单中，选择plugins，安装如下插件：
+
 - Material Theme UI，黑色主题插件，配置完成后新增菜单 tools | Material Theme，选择darker应用。
 - PlantUML，UML绘图插件，使用特殊的标记语法绘制各种类型的UML类图、时序图，并可以生成svg/eps/jpg/png等图片。[语法参考](http://plantuml.com/sequence.html)。
 
@@ -66,9 +77,11 @@ PlantUML绘制时序图效果参考：[VirtualAppDoc](https://github.com/prife/V
 ## 使用Android Studio编译NDK
 
 **官方文档**
+
 - [Experimental Plugin User Guide](http://tools.android.com/tech-docs/new-build-system/gradle-experimental)，出自上面**Android Studio技术文档**网站。
 
 **网友博客**
+
 - [使用AndroidStudio进行NDK开发](https://dailyios.com/article/Using_Android_Studio_for_NDK_development.html)
 
 # Android Studio调试技巧
@@ -78,6 +91,7 @@ PlantUML绘制时序图效果参考：[VirtualAppDoc](https://github.com/prife/V
 ### 调试应用
 
 首先在合适的地方设置断点，Android Studio中支持多种类型断点，包括
+
 - 普通断点
 - 方法断点
 - 条件断点
@@ -116,17 +130,19 @@ $ development/tools/idegen/idegen.sh
 ```
 
 
-
 ### 使用 Debug.waitForDebugger 调试
 
 可以应用于以下场景:
+
 - 被调试程序运行时会创建一个新进程，该进程很快执行完毕，来不及触发并attach
 - 被调试程序运行时会启动一个新进程，但是想要调试触发动作之前代码逻辑
 
-此时，可以使用Android提供的调试机制，
+此时，可以使用Android提供的调试机制
+
 ```java
 Debug.waitForDebugger();
 ```
+
 > Wait until a debugger attaches. As soon as the debugger attaches, this returns, so you will need to place a breakpoint after the waitForDebugger() call if you want to start tracing immediately.
 
 参考: https://developer.android.com/reference/android/os/Debug.html
@@ -145,12 +161,10 @@ Debug.waitForDebugger();
 
 #### 1.准备
 
-Android Studio 
-http://tools.android.com/download/studio
+[Android Studio下载](http://tools.android.com/download/studio)
 
-smalidea-v0.03.zip 
-https://bitbucket.org/JesusFreke/smali/downloads 
-https://github.com/JesusFreke/smali/wiki/smalidea
+[smalidea-v0.03.zip下载1](https://bitbucket.org/JesusFreke/smali/downloads)
+[smalidea-v0.03.zip下载2](https://github.com/JesusFreke/smali/wiki/smalidea)
 
 #### 2.安装插件
 
@@ -176,6 +190,7 @@ adb install debug.apk（或者用其他方式）
 启动应用，应用将挂起，等待调试器连接。
 
 **补充**：也可是使用am命令配合-D参数启动应用，与上面的效果相同。
+
 ```bash
 $adb shell am start -D -n com.droi.helloinstantrun/.MainActivity
 ```
@@ -191,6 +206,8 @@ $adb shell am start -D -n com.droi.helloinstantrun/.MainActivity
 1. 这样创建的工程不完整，无法在AS直接打开`Android Device Monitor`（该按钮是灰色的），那么可以另外打开一个完整的AS工程，并打开该菜单，或者在android sdk 的`tools`目录下手动执行ddms或者monitor命令。
 
 参考：
+
 - [Android Studio 调试 smali 代码](http://kiya.space/2016/08/07/use-studio-debug-smali/)
 - [使用android studio调试smali代码](http://www.cnblogs.com/gordon0918/p/5570811.html)
 - [AndroidStudio+ideasmali动态调试smali汇编](http://www.cnblogs.com/lanrenxinxin/p/4891424.html)
+
