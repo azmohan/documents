@@ -1,0 +1,1043 @@
+[TOC]
+
+
+基于android8.1版本
+
+## 前言
+在开始讲解蓝牙模块之前，先叨扰两句，Android O1设置模块架构改变很大，蓝牙里面的各个preference的显示， google都是通过类似BluetoothDeviceNamePreferenceController、BluetoothPairingPreferenceController等一系列Controller来统一控制。另外，之前的addPreference()方法依旧有效。
+
+## 正文
+
+蓝牙的界面入口是 **BluetoothSettings.java** 类，所加载的布局文件为 **bluetooth_settings.xml** 。
+
+首先明确几个蓝牙概念：
+
+- **1、蓝牙的开启和关闭**
+- **2、蓝牙的重命名**
+- **3、蓝牙的检测性和检测时间**
+- **4、加载已经配对的蓝牙设备**
+- **5、扫描附近可用的蓝牙设备**
+- **6、与设备配对、连接、通信**
+
+### 蓝牙布局实现
+
+```
+public class BluetoothSettings extends DeviceListPreferenceFragment implements Indexable {
+   ......
+
+    @Override
+    protected int getPreferenceScreenResId() {
+        //主界面的xml文件
+        return R.xml.bluetooth_settings;
+    }
+
+   ......
+
+}
+```
+
+### 1、蓝牙的开启和关闭
+
+首先，在 **BluetoothSettings.java** 中通过 **getSwitchBar()** 得到 **SwitchBar** 控件，再将控件传给 **SwitchBarController** ,然后将 **SwitchBarController** 开关控件传给 **BluetoothEnabler**
+
+```
+final SettingsActivity activity = (SettingsActivity) getActivity();
+mSwitchBar = activity.getSwitchBar();
+
+mBluetoothEnabler = new BluetoothEnabler(activity, new SwitchBarController(mSwitchBar),
+                mMetricsFeatureProvider, Utils.getLocalBtManager(activity),
+                MetricsEvent.ACTION_BLUETOOTH_TOGGLE);
+```
+
+进到 **BluetoothEnabler** 类里,会通过 **getSwitch()** 得到 **SwitchBar** 控件。
+
+```
+public BluetoothEnabler(Context context, SwitchWidgetController switchWidget,MetricsFeatureProvider metricsFeatureProvider, LocalBluetoothManager manager,int metricsEvent, RestrictionUtils restrictionUtils) {
+    mContext = context;
+    mMetricsFeatureProvider = metricsFeatureProvider;
+    mSwitchWidget = switchWidget;
+    //得到SwitchBar控件
+    mSwitch = mSwitchWidget.getSwitch();
+    mSwitchWidget.setListener(this);
+    mValidListener = false;
+    mMetricsEvent = metricsEvent;
+
+    ......
+}
+```
+
+**SwitchBar** 控件是如何传递，关联是在哪里？其中 **SwitchBarController** 继承自 **SwitchWidgetController**, **SwitchBarController** 重写了父类的  **getSwitch()** 方法。
+
+```
+public class SwitchBarController extends SwitchWidgetController implements SwitchBar.OnSwitchChangeListener {
+    ......
+
+    public SwitchBarController(SwitchBar switchBar) {
+        mSwitchBar = switchBar;
+    }
+
+    ......
+
+    @Override
+    //由BluetoothEnabler构造方法里SwitchWidgetController.getSwitch()调用此方法
+    public Switch getSwitch() {
+        return mSwitchBar.getSwitch();
+    }
+
+}
+```
+
+开关是如何控制蓝牙的打开和关闭的？下面我们还是进入到 **BluetoothEnabler** 类中查看。首先定义蓝牙状态改变的广播接接收器，在 **resume()** 里注册广播监听器，为开关设置监听器。当开关开启或者关闭，对本地蓝牙进行状态更新，在 **onSwitchToggled()** 方法里进行定义。
+
+```
+/**
+ * BluetoothEnabler is a helper to manage the Bluetooth on/off checkbox
+ * preference. It turns on/off Bluetooth and ensures the summary of the
+ * preference reflects the current state.
+ */
+public final class BluetoothEnabler implements SwitchWidgetController.OnSwitchChangeListener {
+
+......此处省略代码
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Broadcast receiver is always running on the UI thread here,
+            // so we don't need consider thread synchronization.
+            //定义蓝牙状态改变的接收器
+            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+            Log.d(TAG, "BluetoothAdapter state changed to" + state);
+            //根据不同的蓝牙状态，处理相应的事件
+            handleStateChanged(state);
+        }
+    };
+
+......此处省略代码
+
+    public void resume(Context context) {
+        if (mContext != context) {
+            mContext = context;
+        }
+
+        final boolean restricted = maybeEnforceRestrictions();
+
+        if (mLocalAdapter == null) {
+            //如果蓝牙适配器为空，则将resume方法返回，不进行resume方法中的剩余操作 
+            mSwitchWidget.setEnabled(false);
+            return;
+        }
+
+        // Bluetooth state is not sticky, so set it manually
+        if (!restricted) {
+            //必须手动的去监听蓝牙状态的改变，根据本地蓝牙适配器获取到此时蓝牙的状态，对switch进行设置
+            handleStateChanged(mLocalAdapter.getBluetoothState());
+        }
+
+        //为开关设置监听器
+        mSwitchWidget.startListening();
+        //注册蓝牙状态改变的广播
+        mContext.registerReceiver(mReceiver, mIntentFilter);
+        mValidListener = true;
+    }
+
+......此处省略代码
+
+    void handleStateChanged(int state) {
+        switch (state) {
+            case BluetoothAdapter.STATE_TURNING_ON:
+                mSwitchWidget.setEnabled(false);
+                break;
+            case BluetoothAdapter.STATE_ON:
+                /// M: receive bt status changed broadcast, set mUpdateStatusOnly true @{
+                mUpdateStatusOnly = true;
+                Log.d(TAG, "Begin update status: set mUpdateStatusOnly to true");
+                /// @}
+                //当蓝牙状态打开时，设置开关状态为开
+                setChecked(true);
+                mSwitchWidget.setEnabled(true);
+                /// M: after set the switch checked status, set mUpdateStatusOnly false @{
+                mUpdateStatusOnly = false;
+                Log.d(TAG, "End update status: set mUpdateStatusOnly to false");
+                /// @}
+                break;
+            case BluetoothAdapter.STATE_TURNING_OFF:
+                mSwitchWidget.setEnabled(false);
+                break;
+            case BluetoothAdapter.STATE_OFF:
+                /// M: receive bt status changed broadcast, set mUpdateStatusOnly true @{
+                mUpdateStatusOnly = true;
+                Log.d(TAG, "Begin update status: set mUpdateStatusOnly to true");
+                /// @}
+                //当蓝牙状态关闭时，设置开关状态为关
+                setChecked(false);
+                mSwitchWidget.setEnabled(true);
+                /// M: after set the switch checked status, set mUpdateStatusOnly false @{
+                mUpdateStatusOnly = false;
+                Log.d(TAG, "End update status: set mUpdateStatusOnly to false");
+                /// @}
+                break;
+            default:
+                setChecked(false);
+                mSwitchWidget.setEnabled(true);
+        }
+    }
+
+......此处省略代码
+
+    private void setChecked(boolean isChecked) {
+        //获取当前switch的状态
+        final boolean currentState =
+                (mSwitchWidget.getSwitch() != null) && mSwitchWidget.getSwitch().isChecked();
+        //如果当前的按钮状态和传进来的状态不一致，则设置为isChecked
+        if (isChecked != currentState) {
+            // set listener to null, so onCheckedChanged won't be called
+            // if the checked status on Switch isn't changed by user click
+            if (mValidListener) {
+                mSwitchWidget.stopListening();
+            }
+            mSwitchWidget.setChecked(isChecked);
+            if (mValidListener) {
+                mSwitchWidget.startListening();
+            }
+        }
+    }
+
+......此处省略代码
+
+    @Override
+    public boolean onSwitchToggled(boolean isChecked) {
+        if (maybeEnforceRestrictions()) {
+            return true;
+        }
+        Log.d(TAG, "onSwitchChanged to " + isChecked);
+        // Show toast message if Bluetooth is not allowed in airplane mode
+        if (isChecked &&
+                !WirelessUtils.isRadioAllowed(mContext, Settings.Global.RADIO_BLUETOOTH)) {
+            Toast.makeText(mContext, R.string.wifi_in_airplane_mode, Toast.LENGTH_SHORT).show();
+            // Reset switch to off
+            mSwitch.setChecked(false);
+            return false;
+        }
+
+        mMetricsFeatureProvider.action(mContext, mMetricsEvent, isChecked);
+
+        Log.d(TAG, "mUpdateStatusOnly is " + mUpdateStatusOnly);
+        /// M: if receive bt status changed broadcast, do not need enable/disable bt.
+        if (mLocalAdapter != null && !mUpdateStatusOnly) {
+            //当switch开关状态发生改变时，对系统本地蓝牙状态进行设置，当对本地蓝牙
+            //设置成功时，返回true,否则返回false。
+            boolean status = mLocalAdapter.setBluetoothEnabled(isChecked);
+            // If we cannot toggle it ON then reset the UI assets:
+            // a) The switch should be OFF but it should still be togglable (enabled = True)
+            // b) The switch bar should have OFF text.
+            //当本地蓝牙状态设置失败时，switch关闭且可用的状态，同时summary也要跟新
+            if (isChecked && !status) {
+                mSwitch.setChecked(false);
+                mSwitch.setEnabled(true);
+                mSwitchWidget.updateTitle(false);
+                return false;
+            }
+        }
+        //当switch状态进行改变时，让其不可点击
+        mSwitchWidget.setEnabled(false);
+        return true;
+    }
+
+......此处省略代码
+
+}
+```
+
+对本地蓝牙状态改变，实际是调用 **LocalBluetoothAdapter** 的 **setBluetoothEnabled()** 方法，下面我们进到此方法里查看。实则是调用的 **BluetoothAdapter** 的 **enable()** 和 **disable()** 方法进行本地蓝牙的状态更新。
+
+```
+public class LocalBluetoothAdapter {
+
+......此处省略代码
+
+    public boolean setBluetoothEnabled(boolean enabled) {
+        //根据switch的enable来开启或者关闭蓝牙，success返回执行结果
+        boolean success = enabled
+                ? mAdapter.enable()
+                : mAdapter.disable();
+
+        if (success) {
+            //如果系统蓝牙开启或者关闭操作成功，将状态更新
+            setBluetoothStateInt(enabled
+                ? BluetoothAdapter.STATE_TURNING_ON
+                : BluetoothAdapter.STATE_TURNING_OFF);
+        } else {
+            if (Utils.V) {
+                Log.v(TAG, "setBluetoothEnabled call, manager didn't return " +
+                        "success for enabled: " + enabled);
+            }
+
+            //如果系统蓝牙没有开启或者关闭成功，则将蓝牙状态进行更新保存为当前系统蓝牙的状态
+            syncBluetoothState();
+        }
+        return success;
+    }
+
+......此处省略代码
+
+}
+```
+
+蓝牙的初始状态默认值对应的是 **def_bluetooth_on** ，通过蓝牙服务 **BluetoothManagerService** 保存起来。一系列的开启关闭方法也是在 **BluetoothManagerService** 类里，有兴趣可以自行查询。
+
+### 2、蓝牙的重命名
+在 **BluetoothDeviceRenamePreferenceController** 类，通过 **updateDeviceName( )** 方法更新 **preference** 的 **summary** ,在 **handlePreferenceTreeClick( )** 处理点击事件，
+发送蓝牙名称改变的广播，与此同时，弹出一个 **dialog** ，给用户改名。
+其中改蓝牙名称的广播接收器注册在它的父类 **BluetoothDeviceNamePreferenceController** 里。
+
+```
+public class BluetoothDeviceRenamePreferenceController extends
+        BluetoothDeviceNamePreferenceController {
+......此处省略代码
+
+    @Override
+    protected void updateDeviceName(final Preference preference, final String deviceName) {
+        preference.setSummary(deviceName);
+    }
+
+......
+
+    @Override
+    public boolean handlePreferenceTreeClick(Preference preference) {
+        if (PREF_KEY.equals(preference.getKey())) {
+            mMetricsFeatureProvider.action(mContext,
+                    MetricsProto.MetricsEvent.ACTION_BLUETOOTH_RENAME);
+            LocalDeviceNameDialogFragment.newInstance()
+                    .show(mFragment.getFragmentManager(), LocalDeviceNameDialogFragment.TAG);
+            return true;
+        }
+
+        return false;
+    }
+
+......
+}
+```
+
+其中， **updateDeviceName( )** 重写了父类 **BluetoothDeviceNamePreferenceController** 里的方法。
+
+```
+public class BluetoothDeviceNamePreferenceController extends AbstractPreferenceController
+        implements PreferenceControllerMixin, LifecycleObserver, OnStart, OnStop {
+
+......
+
+    @Override
+    public void updateState(Preference preference) {
+        //由子类重写，来更新preference的蓝牙设备名称
+        updateDeviceName(preference, mLocalAdapter.getName());
+    }
+
+......
+
+    /**
+     * Receiver that listens to {@link BluetoothAdapter#ACTION_LOCAL_NAME_CHANGED} and updates the
+     * device name if possible
+     */
+    @VisibleForTesting
+    //注册监听蓝牙名称改变的广播，从而实时更新蓝牙名称
+    final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            if (TextUtils.equals(action, BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED)) {
+                if (mPreference != null && mLocalAdapter != null && mLocalAdapter.isEnabled()) {
+                    updateDeviceName(mPreference, mLocalAdapter.getName());
+                }
+            }
+        }
+    };
+
+......
+
+}
+```
+
+**updateState( )** 方法重写了父类 **AbstractPreferenceController** 方法。
+这里着重说明一下， **AbstractPreferenceController** 类是所有 **controller** 的父类，很多 **preference** 的事件都是在这个抽象类里定义的。当 **preference** 的状态改变时，就可以调用 **updateState( )** 方法，里面涉及到系统的一系列的回调，这里就不展开讲解了。
+
+```
+/**
+ * A controller that manages event for preference.
+ */
+ //所有Controller类的基类
+public abstract class AbstractPreferenceController {
+
+......
+
+    /**
+   * Updates the current status of preference (summary, switch state, etc)
+   */
+   public void updateState(Preference preference) {
+
+  }
+
+......
+
+}
+```
+
+那么打开了一个对话框，蓝牙名称改变具体是怎么实现的呢？首先从用户看到到的对话框开始说起，这个对话框的类是 **LocalDeviceNameDialogFragment.java** 我们进去里看一下。发现，拿到 **setDeviceName( )** 里的蓝牙设备名称参数，再调用 **LocalBluetoothAdapter** 类的 **setName( )** 方法重新设置的蓝牙的名称。
+
+```
+/** Provides a dialog for changing the advertised name of the local bluetooth adapter. */
+public class LocalDeviceNameDialogFragment extends BluetoothNameDialogFragment {
+
+......
+
+    @Override
+    protected void setDeviceName(String deviceName) {
+        mLocalAdapter.setName(deviceName);
+    }
+
+......
+
+}
+```
+
+其中， **setDeviceName( )** 方法是重写了父类 **BluetoothNameDialogFragment** 里的方法，这个父类做的事情就有意思了，监听 **EditText** 的编辑行为，实时更新蓝牙的名称，调用 **setDeviceName( )** 方法，把字符串传给此方法的参数，给 **LocalDeviceNameDialogFragment** 类里更改蓝牙名称的参数使用。下面我们进到父类里看一下。
+
+```
+/**
+ * Dialog fragment for renaming a Bluetooth device.
+ */
+abstract class BluetoothNameDialogFragment extends InstrumentedDialogFragment
+        implements TextWatcher {
+
+ ......
+
+    /**
+     * Set the device to the given name.
+     * @param deviceName the name to use
+     */
+    abstract protected void setDeviceName(String deviceName);
+
+ ......
+
+    private View createDialogView(String deviceName) {
+        final LayoutInflater layoutInflater = (LayoutInflater)getActivity()
+            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        //蓝牙重命名对话框的布局
+        View view = layoutInflater.inflate(R.layout.dialog_edittext, null);
+        mDeviceNameView = (EditText) view.findViewById(R.id.edittext);
+        mDeviceNameView.setFilters(new InputFilter[] {
+                new Utf8ByteLengthFilter(BLUETOOTH_NAME_MAX_LENGTH_BYTES)
+        });
+        //一打开对话框，显示的是初始的蓝牙名称
+        mDeviceNameView.setText(deviceName);    // set initial value before adding listener
+        if (!TextUtils.isEmpty(deviceName)) {
+            //编辑框中光标的位置移到末尾
+            mDeviceNameView.setSelection(deviceName.length());
+        }
+        mDeviceNameView.addTextChangedListener(this);
+        //实时监听用户的输入
+        mDeviceNameView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    //把编辑框中的名称作为参数传给setDeviceName()方法中
+                    setDeviceName(v.getText().toString());
+                    mAlertDialog.dismiss();
+                    return true;    // action handled
+                } else {
+                    return false;   // not handled
+                }
+            }
+        });
+        return view;
+    }
+
+......
+
+}
+```
+
+### 3、蓝牙的检测性和检测时间
+
+这个功能的实现，依赖于 **BluetoothAdapter** 和 **BluetoothDiscoverableEnabler** 类，下面讲解的属性都将在这2个类中进行定义，首先明确几个蓝牙检测性的概念：
+
+- **SCAN_MODE_NONE:**
+int值，大小为20，无法扫描其它设备，且不能被其它设备检测到
+
+
+- **SCAN_MODE_CONNECTABLE:**     int值，大小为21，能够扫描其它设备，且只能被已配对的设备扫描到
+
+
+- **SCAN_MODE_CONNECTABLE_DISCOVERABLE:**  int值，大小为23，能够扫描其它设备，且能被其它设备扫描到
+
+
+上述扫描模式，搭配 **ACTION_SCAN_MODE_CHANGED** 的 **action** 使用。
+
+- **DISCOVERABLE_TIMEOUT_TWO_MINUTES** = 120
+- **DISCOVERABLE_TIMEOUT_FIVE_MINUTES** = 300
+- **DISCOVERABLE_TIMEOUT_ONE_HOUR** = 3600
+- **DISCOVERABLE_TIMEOUT_NEVER** = 0
+
+系统定义了2min、5min、1h和永不设置时间这四种可选时间。进到 **BluetoothDiscoverableEnabler** 类中定义了 **setDiscoverableTimeout( )**
+用来设置被其它设备扫描的时间。首先在 **resume()** 里注册广播监听本地蓝牙扫描模式的改变。
+
+```
+final class BluetoothDiscoverableEnabler implements Preference.OnPreferenceClickListener {
+
+......
+
+    // Bluetooth advanced settings screen was replaced with action bar items.
+    // Use the same preference key for discoverable timeout as the old ListPreference.
+    private static final String KEY_DISCOVERABLE_TIMEOUT = "bt_discoverable_timeout";
+
+    private static final String VALUE_DISCOVERABLE_TIMEOUT_TWO_MINUTES = "twomin";
+    private static final String VALUE_DISCOVERABLE_TIMEOUT_FIVE_MINUTES = "fivemin";
+    private static final String VALUE_DISCOVERABLE_TIMEOUT_ONE_HOUR = "onehour";
+    private static final String VALUE_DISCOVERABLE_TIMEOUT_NEVER = "never";
+
+    //注册蓝牙扫描模式改变的广播
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (BluetoothAdapter.ACTION_SCAN_MODE_CHANGED.equals(intent.getAction())) {
+                int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE,
+                        BluetoothAdapter.ERROR);
+                if (mode != BluetoothAdapter.ERROR) {
+                    //进行蓝牙模式改变的处理
+                    handleModeChanged(mode);
+                }
+            }
+        }
+    };
+
+......
+
+    public void resume(Context context) {
+
+    ......
+        //注册蓝牙扫描模式改变的广播
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
+        mContext.registerReceiver(mReceiver, filter);
+
+    ......
+    }
+
+......
+
+    //设置蓝牙扫描时间
+    void setDiscoverableTimeout(int index) {
+        String timeoutValue;
+        switch (index) {
+            case 0:
+                mTimeoutSecs = DISCOVERABLE_TIMEOUT_TWO_MINUTES;
+                timeoutValue = VALUE_DISCOVERABLE_TIMEOUT_TWO_MINUTES;
+                break;
+
+            case 1:
+                mTimeoutSecs = DISCOVERABLE_TIMEOUT_FIVE_MINUTES;
+                timeoutValue = VALUE_DISCOVERABLE_TIMEOUT_FIVE_MINUTES;
+                break;
+
+            case 2:
+                mTimeoutSecs = DISCOVERABLE_TIMEOUT_ONE_HOUR;
+                timeoutValue = VALUE_DISCOVERABLE_TIMEOUT_ONE_HOUR;
+                break;
+
+            case 3:
+                mTimeoutSecs = DISCOVERABLE_TIMEOUT_NEVER;
+                timeoutValue = VALUE_DISCOVERABLE_TIMEOUT_NEVER;
+                break;
+
+            default:
+                mTimeoutSecs = DEFAULT_DISCOVERABLE_TIMEOUT;
+                timeoutValue = VALUE_DISCOVERABLE_TIMEOUT_TWO_MINUTES;
+                break;
+        }
+
+    }
+    //将蓝牙扫描的时间写到SharedPreferences里面
+    mSharedPreferences.edit().putString(KEY_DISCOVERABLE_TIMEOUT, timeoutValue).apply();
+    setEnabled(true);   // enable discovery and reset timer
+
+......
+
+}
+```
+
+值得一提的是，源码中 **setDiscoverableTimeout()** 方法的定义有些小bug，我这里已经是修正版，跟源码会有些出入，但基本逻辑思想没有变。
+
+这里通过 **"KEY_DISCOVERABLE_TIMEOUT"** **key** 值，也就是 **“bt_discoverable_timeout”** 存储到 **SharedPreferences** 里。用的时候，再通过 **getDiscoverableTimeout()** 方法获取，下面我们进到这个方法中看一下。
+
+```
+private int getDiscoverableTimeout() {
+        if (mTimeoutSecs != -1) {
+            return mTimeoutSecs;
+        }
+
+        int timeout = SystemProperties.getInt(SYSTEM_PROPERTY_DISCOVERABLE_TIMEOUT, -1);
+        if (timeout < 0) {
+            String timeoutValue = mSharedPreferences.getString(KEY_DISCOVERABLE_TIMEOUT,
+                    VALUE_DISCOVERABLE_TIMEOUT_TWO_MINUTES);
+
+            if (timeoutValue.equals(VALUE_DISCOVERABLE_TIMEOUT_NEVER)) {
+                timeout = DISCOVERABLE_TIMEOUT_NEVER;
+            } else if (timeoutValue.equals(VALUE_DISCOVERABLE_TIMEOUT_ONE_HOUR)) {
+                timeout = DISCOVERABLE_TIMEOUT_ONE_HOUR;
+            } else if (timeoutValue.equals(VALUE_DISCOVERABLE_TIMEOUT_FIVE_MINUTES)) {
+                timeout = DISCOVERABLE_TIMEOUT_FIVE_MINUTES;
+            } else {
+                timeout = DISCOVERABLE_TIMEOUT_TWO_MINUTES;
+            }
+        }
+        mTimeoutSecs = timeout;
+        return timeout;
+    }
+```
+
+在 **getDiscoverableTimeout()** 中，不难发现，就是通过之前 **setDiscoverableTimeout()** 方法中存储进去的 **key** 值，然后取出来的值经过 **case** 判断一下，返回检测时间值。
+
+检测性是怎么设定的呢？在 **BluetoothSettings.java** 的 **updateContent()** 中， 当蓝牙开启时，会传入一个 **switchPreference** 给 **BluetoothDiscoverableEnabler** 的构造方法中。
+
+```
+public class BluetoothSettings extends DeviceListPreferenceFragment implements Indexable {
+......
+
+    mDiscoverableEnabler = new BluetoothDiscoverableEnabler(mLocalAdapter,
+                                mDiscoverablePreference);
+
+......
+}
+```
+
+具体怎么实现蓝牙检测性的开启和关闭，下面我们具体进入到 **BluetoothDiscoverableEnabler** 类中一探究竟。在 **BluetoothDiscoverableEnabler** 构造方法中将刚刚传入的 **preference** 赋值给 **mDiscoverablePreference** 成员变量。且对 **mDiscoverablePreference** 进行监听。实际操作是在 **setEnabled()** 方法中。当为 **true** 时，通过本地蓝牙 **mLocalAdapter** 设置扫描模式为 **BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE** ，当为 **fasle** 时，设置蓝牙的扫描模式为 **BluetoothAdapter.SCAN_MODE_CONNECTABLE** 。
+
+```
+final class BluetoothDiscoverableEnabler implements Preference.OnPreferenceClickListener {
+
+······
+
+    BluetoothDiscoverableEnabler(LocalBluetoothAdapter adapter,
+            Preference discoveryPreference) {
+        mUiHandler = new Handler();
+        mLocalAdapter = adapter;
+        //将 discoveryPreference赋值给成员变量 mDiscoveryPreference
+        mDiscoveryPreference = discoveryPreference;
+        mSharedPreferences = discoveryPreference.getSharedPreferences();
+        discoveryPreference.setPersistent(false);
+    }
+
+······
+
+    //对 mDiscoveryPreference实行监听
+    mDiscoveryPreference.setOnPreferenceClickListener(this);
+
+······
+
+    public boolean onPreferenceClick(Preference preference) {
+        // toggle discoverability
+        mDiscoverable = !mDiscoverable;
+        //对蓝牙可检测性改变真正的处理在setEnabled()方法里
+        setEnabled(mDiscoverable);
+        return true;
+    }
+
+······
+
+    private void setEnabled(boolean enable) {
+        if (enable) {
+            int timeout = getDiscoverableTimeout();
+            long endTimestamp = System.currentTimeMillis() + timeout * 1000L;
+            LocalBluetoothPreferences.persistDiscoverableEndTimestamp(mContext, endTimestamp);
+
+            //当为true时，设置蓝牙扫描模式为BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE
+            mLocalAdapter.setScanMode(BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE, timeout);
+            updateCountdownSummary();
+
+            Log.d(TAG, "setEnabled(): enabled = " + enable + "timeout = " + timeout);
+
+            if (timeout > 0) {
+                BluetoothDiscoverableTimeoutReceiver.setDiscoverableAlarm(mContext, endTimestamp);
+            } else {
+                BluetoothDiscoverableTimeoutReceiver.cancelDiscoverableAlarm(mContext);
+            }
+
+        } else {
+            //当为false时，设置蓝牙的扫描模式为BluetoothAdapter.SCAN_MODE_CONNECTABLE
+            mLocalAdapter.setScanMode(BluetoothAdapter.SCAN_MODE_CONNECTABLE);
+            BluetoothDiscoverableTimeoutReceiver.cancelDiscoverableAlarm(mContext);
+        }
+    }
+
+······
+}
+```
+
+
+### 4、加载已经配对的蓝牙设备
+在 **BluetoothSettings** 类中，通过方法 **addDeviceCategory()** 方法加载已配对列表，此方法继承自父类 **DeviceListPreferenceFragment** ， **mPairedDevicesCategory** 是存放已配对设备的 **CategoryPreference** 容器。
+
+```
+public class BluetoothSettings extends DeviceListPreferenceFragment implements Indexable, Preference.OnPreferenceClickListener {
+
+    //加载已配对列表
+    addDeviceCategory(mPairedDevicesCategory,
+                        R.string.bluetooth_preference_paired_devices,
+                        BluetoothDeviceFilter.BONDED_DEVICE_FILTER, true);
+
+}
+```
+
+进到 **DeviceListPreferenceFragment** 父类中查看 **addDeviceCategory()** 方法。
+
+```
+public abstract class DeviceListPreferenceFragment extends
+        RestrictedDashboardFragment implements BluetoothCallback {
+
+......
+
+    public void addDeviceCategory(PreferenceGroup preferenceGroup, int titleId,
+            BluetoothDeviceFilter.Filter filter, boolean addCachedDevices) {
+        //SettingsPreferenceFragment父类中的方法
+        cacheRemoveAllPrefs(preferenceGroup);
+        //为preferenceCategory设置标题
+        preferenceGroup.setTitle(titleId);
+        //将preferenceGroup赋值给成员变量mDeviceListGroup，后面会在里面add设备
+        mDeviceListGroup = preferenceGroup;
+        //设置过滤器，赋值给 mFilter
+        setFilter(filter);
+        if (addCachedDevices) {
+            addCachedDevices();
+        }
+        preferenceGroup.setEnabled(true);
+        removeCachedPrefs(preferenceGroup);
+    }
+
+......
+
+    final void setFilter(BluetoothDeviceFilter.Filter filter) {
+        mFilter = filter;
+    }
+
+......
+
+    void addCachedDevices() {
+        //用于获取到缓存列表的复制
+        Collection<CachedBluetoothDevice> cachedDevices =
+                mLocalManager.getCachedDeviceManager().getCachedDevicesCopy();
+        for (CachedBluetoothDevice cachedDevice : cachedDevices) {
+            //添加已配对设备
+            onDeviceAdded(cachedDevice);
+        }
+    }
+
+......
+
+    @Override
+    public void onDeviceAdded(CachedBluetoothDevice cachedDevice) {
+        Log.d(TAG, "onDeviceAdded, Device name is " + cachedDevice.getName());
+        //假如列表里不存在当前设备，则添加。
+        if (mDevicePreferenceMap.get(cachedDevice) != null) {
+            Log.d(TAG, "Device name " + cachedDevice.getName() + " already have preference");
+            return;
+        }
+
+        // Prevent updates while the list shows one of the state messages
+        if (mLocalAdapter.getBluetoothState() != BluetoothAdapter.STATE_ON) return;
+
+        //调用BluetoothDeviceFilter类里的match方法进行过滤
+        if (mFilter.matches(cachedDevice.getDevice())) {
+            Log.d(TAG, "Device name " + cachedDevice.getName() + " create new preference");
+            //过滤之后，将已配对设备添加到列表中
+            createDevicePreference(cachedDevice);
+        }
+    }
+
+......
+
+    //真正添加设备的动作在此方法中
+    void createDevicePreference(CachedBluetoothDevice cachedDevice) {
+        if (mDeviceListGroup == null) {
+            Log.w(TAG, "Trying to create a device preference before the list group/category "
+                    + "exists!");
+            return;
+        }
+
+        String key = cachedDevice.getDevice().getAddress();
+        BluetoothDevicePreference preference = (BluetoothDevicePreference) getCachedPreference(key);
+
+        if (preference == null) {
+            preference = new BluetoothDevicePreference(getPrefContext(), cachedDevice, this);
+            preference.setKey(key);
+            //往传进来的preferenceCategory里添加设备，即之前被赋值的成员变量 mDeviceListGroup
+            mDeviceListGroup.addPreference(preference);
+        } else {
+            // Tell the preference it is being re-used in case there is new info in the
+            // cached device.
+            preference.rebind();
+        }
+
+        //在子类中重写此方法，为每个preference项添加点击监听事件
+        initDevicePreference(preference);
+        //将CachedBluetoothDevice设备作为key值，BluetoothDevicePreference作为value值，存储在弱引用的mDevicePreferenceMap成员变量。
+        //它本质是WeakHashMap，后面增加设备，删除设备，都会用到这个变量。
+        mDevicePreferenceMap.put(cachedDevice, preference);
+    }
+
+......
+
+}
+```
+
+**SettingsPreferenceFragment** 类主要是进行远程蓝牙设备的移除操作。对preferenceGroup整体的管理，诸如preference的增删该查操作。
+
+```
+public abstract class SettingsPreferenceFragment extends InstrumentedPreferenceFragment
+        implements DialogCreatable {
+
+......
+
+    //在DeviceListPreferenceFragment类的addDeviceCategory方法中调用此方法
+    //主要是把设备存进 mPreferenceCache成员变量里，以便于后面对这个变量操作，进行删除设备的操作
+    protected void cacheRemoveAllPrefs(PreferenceGroup group) {
+        mPreferenceCache = new ArrayMap<String, Preference>();
+        final int N = group.getPreferenceCount();
+        for (int i = 0; i < N; i++) {
+            Preference p = group.getPreference(i);
+            if (TextUtils.isEmpty(p.getKey())) {
+                continue;
+            }
+            mPreferenceCache.put(p.getKey(), p);
+            }
+        }
+    }
+
+......
+
+    //对 mPreferenceCache成员变量进行遍历，从而删除设备
+    protected void removeCachedPrefs(PreferenceGroup group) {
+        for (Preference p : mPreferenceCache.values()) {
+            group.removePreference(p);
+        }
+        mPreferenceCache = null;
+    }
+
+......
+
+}
+```
+
+ 关于 **matches()** 方法可以查看 **BluetoothDeviceFilter** 文件，位于 **SettingsLib** 下，不同的过滤器对应于不同的内部类，这些内部类实现了内部接口的  **matches()** 方法，对 **BluetoothDevice** 的配对状态进行匹配，比如，过滤已经配对的蓝牙设备过滤器对应的内部类如下。
+
+```
+public final class BluetoothDeviceFilter {
+
+    /** Filter that matches only bonded devices. */
+    private static final class BondedDeviceFilter implements Filter {
+        public boolean matches(BluetoothDevice device) {
+            return device.getBondState() == BluetoothDevice.BOND_BONDED;
+        }
+    }
+
+}
+```
+
+
+
+**CachedBluetoothDeviceManager** 类主要是对远程蓝牙设备的管理，进行添加，移除。稍后，我们再进行分析此类。
+
+```
+/**
+ * CachedBluetoothDeviceManager manages the set of remote Bluetooth devices.
+ */
+public class CachedBluetoothDeviceManager {
+
+    public synchronized Collection<CachedBluetoothDevice> getCachedDevicesCopy() {
+        //对成员变量 mCachedDevices <CachedBluetoothDevice> 进行复制
+        return new ArrayList<CachedBluetoothDevice>(mCachedDevices);
+    }
+
+
+
+    public CachedBluetoothDevice addDevice(LocalBluetoothAdapter adapter,
+            LocalBluetoothProfileManager profileManager,
+            BluetoothDevice device) {
+        CachedBluetoothDevice newDevice = new CachedBluetoothDevice(mContext, adapter,
+            profileManager, device);
+        synchronized (mCachedDevices) {
+            //成员变量 mCachedDevices由这里进行操作添加设备
+            mCachedDevices.add(newDevice);
+            mBtManager.getEventManager().dispatchDeviceAdded(newDevice);
+        }
+        return newDevice;
+    }
+
+}
+```
+
+这里讲解一下 **CachedBluetoothDeviceManager** 类中的 **addDevice()** 方法。
+
+
+
+
+### 5、扫描附近可用的蓝牙设备
+
+附近可用设备和已配对设备加载原理相同，其中 **mAvailableDevicesCategory** 表示附近可用设备。
+
+其中：
+
+- 已配对设备设置的过滤器为 **BluetoothDeviceFilter.BONDED_DEVICE_FILTER**
+
+- 附近可用设备设置的过滤器为 **BluetoothDeviceFilter.UNBONEDE_DEVICE_FILTER**
+
+
+```
+public class BluetoothSettings extends DeviceListPreferenceFragment implements Indexable, Preference.OnPreferenceClickListener {
+
+    //加载附近可用蓝牙设备列表
+    addDeviceCategory(mAvailableDevicesCategory,
+                        R.string.bluetooth_preference_found_devices,
+                        BluetoothDeviceFilter.UNBONDED_DEVICE_FILTER, mInitialScanStarted);
+
+}
+```
+
+引用的是 **BluetoothDeviceFilter** 中的内部类 **UnbondedDeviceFilter** 实现 **Filter** 接口。
+
+```
+public final class BluetoothDeviceFilter {
+
+
+    /** Filter that matches only unbonded devices. */
+    //匹配未连接的蓝牙设备
+    private static final class UnbondedDeviceFilter implements Filter {
+        public boolean matches(BluetoothDevice device) {
+            return device.getBondState() != BluetoothDevice.BOND_BONDED;
+        }
+    }
+
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+----- **未完待续...**
+
+**LocalBluetoothManager.java** 类里提供了蓝牙API的简化接口。
+
+```
+/**
+ * LocalBluetoothManager provides a simplified interface on top of a subset of
+ * the Bluetooth API. Note that {@link #getInstance} will return null
+ * if there is no Bluetooth adapter on this device, and callers must be
+ * prepared to handle this case.
+ */
+```
+
+**LocalBluetoothAdapter.java** 类里提供了设置app和本地蓝牙 **BluetoothAdapter** 功能调用的接口，特别是adapter自身状态的改变。
+
+```
+/**
+ * LocalBluetoothAdapter provides an interface between the Settings app
+ * and the functionality of the local {@link BluetoothAdapter}, specifically
+ * those related to state transitions of the adapter itself.
+ *
+ * <p>Connection and bonding state changes affecting specific devices
+ * are handled by {@link CachedBluetoothDeviceManager},
+ * {@link BluetoothEventManager}, and {@link LocalBluetoothProfileManager}.
+ */
+```
+
+**BluetoothAdapter** 类代表本地蓝牙适配器，能够开启设备扫描、请求已配对设备列表、实例化已知的mac地址、监听从其它设备发来的连接请求，扫描LE设备。其中各种 **action** 、蓝牙模式以及其它有关的其它的蓝牙行为都定义在此类中。
+
+```
+/**
+ * Represents the local device Bluetooth adapter. The {@link BluetoothAdapter}
+ * lets you perform fundamental Bluetooth tasks, such as initiate
+ * device discovery, query a list of bonded (paired) devices,
+ * instantiate a {@link BluetoothDevice} using a known MAC address, and create
+ * a {@link BluetoothServerSocket} to listen for connection requests from other
+ * devices, and start a scan for Bluetooth LE devices.
+ *
+ * <p>To get a {@link BluetoothAdapter} representing the local Bluetooth
+ * adapter, call the {@link BluetoothManager#getAdapter} function on {@link BluetoothManager}.
+ * On JELLY_BEAN_MR1 and below you will need to use the static {@link #getDefaultAdapter}
+ * method instead.
+ * </p><p>
+ * Fundamentally, this is your starting point for all
+ * Bluetooth actions. Once you have the local adapter, you can get a set of
+ * {@link BluetoothDevice} objects representing all paired devices with
+ * {@link #getBondedDevices()}; start device discovery with
+ * {@link #startDiscovery()}; or create a {@link BluetoothServerSocket} to
+ * listen for incoming connection requests with
+ * {@link #listenUsingRfcommWithServiceRecord(String,UUID)}; or start a scan for
+ * Bluetooth LE devices with {@link #startLeScan(LeScanCallback callback)}.
+ * </p>
+ * <p>This class is thread safe.</p>
+ * <p class="note"><strong>Note:</strong>
+ * Most methods require the {@link android.Manifest.permission#BLUETOOTH}
+ * permission and some also require the
+ * {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+ * </p>
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>
+ *  For more information about using Bluetooth, read the <a href=
+ * "{@docRoot}guide/topics/connectivity/bluetooth.html">Bluetooth</a> developer
+ * guide.
+ * </p>
+ * </div>
+ *
+ * {@see BluetoothDevice}
+ * {@see BluetoothServerSocket}
+ */
+```
+
+**BluetoothDevice** 类代表远程蓝牙设备，创建各种设备的连接以及名字、地址和连接的状态的请求。
+
+```
+/**
+ * Represents a remote Bluetooth device. A {@link BluetoothDevice} lets you
+ * create a connection with the respective device or query information about
+ * it, such as the name, address, class, and bonding state.
+ *
+ * <p>This class is really just a thin wrapper for a Bluetooth hardware
+ * address. Objects of this class are immutable. Operations on this class
+ * are performed on the remote Bluetooth hardware address, using the
+ * {@link BluetoothAdapter} that was used to create this {@link
+ * BluetoothDevice}.
+ *
+ * <p>To get a {@link BluetoothDevice}, use
+ * {@link BluetoothAdapter#getRemoteDevice(String)
+ * BluetoothAdapter.getRemoteDevice(String)} to create one representing a device
+ * of a known MAC address (which you can get through device discovery with
+ * {@link BluetoothAdapter}) or get one from the set of bonded devices
+ * returned by {@link BluetoothAdapter#getBondedDevices()
+ * BluetoothAdapter.getBondedDevices()}. You can then open a
+ * {@link BluetoothSocket} for communication with the remote device, using
+ * {@link #createRfcommSocketToServiceRecord(UUID)}.
+ *
+ * <p class="note"><strong>Note:</strong>
+ * Requires the {@link android.Manifest.permission#BLUETOOTH} permission.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>
+ * For more information about using Bluetooth, read the <a href=
+ * "{@docRoot}guide/topics/connectivity/bluetooth.html">Bluetooth</a> developer
+ * guide.
+ * </p>
+ * </div>
+ *
+ * {@see BluetoothAdapter}
+ * {@see BluetoothSocket}
+ */
+```
