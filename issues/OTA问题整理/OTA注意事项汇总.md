@@ -7,16 +7,20 @@
 [TOC]
 
 ### 支持平台
-平台信息可通过属性```ro.hardware```查看
+平台信息可通过属性 ```ro.hardware``` 查看
 
-- **"mt6752"**
-- **"mt6735/37"**
-- **"mt6755/50"**
+- **mt6752**
+- **mt6735/37**
+- **mt6755/50**
 
-> 注：如果平台不支持，则需要**适配**，否则系统无法进行升级
+> 注：如果平台不支持，则需要 **适配** ，否则系统无法进行升级
 
 ### 配置文件
-可对系统升级进行部分客制化，部分配置位于```vendor/droi/freeme/packages/apps/FreemeOTA/freeme_ota.properties```
+可对系统升级进行部分客制化，部分配置位于
+
+```
+vendor/droi/freeme/packages/apps/FreemeOTA/freeme_ota.properties
+```
 
 ```properties
 # External OTA Setting Properties
@@ -34,17 +38,23 @@ log.priority = 4
 #install.remind.force.interval= 10
 ```
 
-全部配置位于```vendor/droi/freeme/packages/apps/FreemeOTA/assets/ota.properties``` （不建议修改该文件）
+全部配置位于（不建议修改该文件）
+```
+vendor/droi/freeme/packages/apps/FreemeOTA/assets/ota.properties
+```
+
 
 - 国内外服务器配置
 
-  - 首先推荐：通过配置```build/tools/buildinfo``` 中```ro.build.ota.product``` 的第三个宏即```FREEME_OTA_LANGUAGE```来实现，如下：
+  - 首先推荐：通过配置 ```build/tools/buildinfo``` 中 ```ro.build.ota.product``` 的第三个宏即 ```FREEME_OTA_LANGUAGE``` 来实现，如下：
+
   ```sh
   echo "ro.build.ota.product=${PRODUCTMANUFACTURER}_${FREEME_PRODUCT_DEVICE}_${FREEME_OTA_LANGUAGE}_${FREEME_OTA_FLASH}"
 
   FREEME_OTA_LANGUAGE=zh：###默认为国内
   FREEME_OTA_LANGUAGE=非zh：###默认为海外，譬如en、zh-tw等
   ```
+
   - 其次可通过以下配置
 
   ```properties
@@ -54,6 +64,7 @@ log.priority = 4
   ```
 
 - 强制升级
+
   ```properties
   # Force install ignore user will:
   # - true  : Ignore user will, then will install automatic
@@ -62,7 +73,7 @@ log.priority = 4
   ```
 
 ### 查询出错
-匹配**本地版本**信息与**服务器上传**信息。
+匹配 **本地版本** 信息与 **服务器上传** 信息。
 
 - 本地版本信息
   ![](res/06.png)
@@ -80,8 +91,9 @@ log.priority = 4
 #####升级包损坏 或 升级包签名错误
 
   ![](res/03.jpg)
-- Freeme定制key位置：```vendor/droi/freeme/build/target/product/security/testkey```
-- ~~~Android 默认：```build/target/product/security/testkey```~~
+
+- Freeme定制key位置： ```vendor/droi/freeme/build/target/product/security/testkey```
+- ~~~Android 默认： ```build/target/product/security/testkey```~~
 
 
 #####存储位置问题
@@ -96,6 +108,7 @@ log.priority = 4
   或者
   Package expects build fingerprint of *** this device has ***
 ```
+
 ​    出现该问题，原因为俩个版本信息不一致，需要重新制作升级包
 
 #####Sepolicy 问题
@@ -113,10 +126,12 @@ log.priority = 4
 ##### 升级包制作过程出错
 
 ```
-system partition has unexpected non-zero contents after OTA update 
+system partition has unexpected non-zero contents after OTA update
 system partition has unexpected contents after OTA update
 ```
+
   原因可能为：
+
 - 使用的制作升级包命令不正确，请查看”OTA包制作SOP“
 - 其他
 
@@ -133,11 +148,11 @@ Ubuntu 12.04 的zipinfo 解析内容含有中文名称的zip包，可能出现�
 
 ##### system空间大小不足
 
-**现象**：升级完成后，开机完成时，```Luancher,```, ```SystemUI```等应用出错。提示出错log 如下：
+ **现象** ：升级完成后，开机完成时， ```Luancher,``` , ```SystemUI``` 等应用出错。提示出错log 如下：
 
 ![](res/13.png)
 
-执行`adb shell` 查看systemui apk 发现如下情况(SystemUI.apk => SystemUi.apk.patch)：
+执行 `adb shell` 查看systemui apk 发现如下情况(SystemUI.apk => SystemUi.apk.patch)：
 
 ![](res/11.png)
 
@@ -151,6 +166,6 @@ Ubuntu 12.04 的zipinfo 解析内容含有中文名称的zip包，可能出现�
 
 分区只剩16m
 
-**总结：**预留空间太小，导致更新部分系统核心应用出错。
+ **总结：** 预留空间太小，导致更新部分系统核心应用出错。
 
-**解决方案：**预留足够大的system分区
+ **解决方案：** 预留足够大的system分区

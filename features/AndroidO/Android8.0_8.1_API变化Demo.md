@@ -6,30 +6,41 @@
 |Return|Public Methods|
 |-- |--|
 |View | findViewById(int id)|
+
 ```
 findViewById(int id)
 Finds a view that was identified by the android:id XML attribute that was processed in onCreate(Bundle).
 ```
+
 举个栗子:
+
 ```
 //need cast to "android.widget.Button"
 Button btn = (Button)findViewById(R.id.btn_test);
 ```
+
 ---
 **api26&27**
+
 |Return|Public Methods|
 |-- |--|
 |<T extends View> T | findViewById(int id)|
+
 ```
 findViewById(int id)
 Finds a view that was identified by the android:id XML attribute that was processed in onCreate(Bundle).
 ```
+
 举个栗子:
+
 ```
 Button btn = findViewById(R.id.btn_test);
 ```
+
 **[Demo地址](https://github.com/chenxinsi/Android8.x_demo/tree/master/EditText_Demo)**
+
 ### Autosizing TextViews
+
 **api26&27**
 效果图展示
 |first picture |second picture| third picture|
@@ -42,11 +53,14 @@ Button btn = findViewById(R.id.btn_test);
 - **Default**
 
 在java中使用默认的自动大小的text
+
 ```
-TextViewCompat.setAutoSizeTextTypeWithDefaults(TextView textview, int autoSizeTextType) 
+TextViewCompat.setAutoSizeTextTypeWithDefaults(TextView textview, int autoSizeTextType)
 //TextView widget and one of the text types, such as TextViewCompat.AUTO_SIZE_TEXT_TYPE_NONE or TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM.
 ```
+
 在xml中使用
+
 ```
 <?xml version="1.0" encoding="utf-8"?>
 <TextView
@@ -54,16 +68,21 @@ TextViewCompat.setAutoSizeTextTypeWithDefaults(TextView textview, int autoSizeTe
     android:layout_height="200dp"
     android:autoSizeTextType="uniform" />
 ```
-**note**: The default dimensions for uniform scaling are minTextSize = 12sp, maxTextSize = 112sp, and granularity = 1px.
+
+**note** : The default dimensions for uniform scaling are minTextSize = 12sp, maxTextSize = 112sp, and granularity = 1px.
+
 - **Granularity**
 
 在java中定义text sizes的范围
+
 ```
-TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(int autoSizeMinTextSize, int autoSizeMaxTextSize, int autoSizeStepGranularity, int unit) 
+TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(int autoSizeMinTextSize, int autoSizeMaxTextSize, int autoSizeStepGranularity, int unit)
 ```
+
 maximum value, the minimum value, the granularity value, and any TypedValue dimension unit.
 
 在xml中定义text sizes的范围
+
 ```
 <?xml version="1.0" encoding="utf-8"?>
 <TextView
@@ -74,9 +93,11 @@ maximum value, the minimum value, the granularity value, and any TypedValue dime
     android:autoSizeMaxTextSize="100sp"
     android:autoSizeStepGranularity="2sp" />
 ```
+
 - **Preset Sizes**
 
 在res/values/arrays.xml中定义资源数组
+
 ```
 <resources>
   <array name="autosize_text_sizes">
@@ -88,7 +109,9 @@ maximum value, the minimum value, the granularity value, and any TypedValue dime
   </array>
 </resources>
 ```
+
 在autoSizePresetSizes属性中添加上面的资源数组
+
 ```
 <?xml version="1.0" encoding="utf-8"?>
 <TextView
@@ -97,18 +120,24 @@ maximum value, the minimum value, the granularity value, and any TypedValue dime
     android:autoSizeTextType="uniform"
     android:autoSizePresetSizes="@array/autosize_text_sizes />
 ```
+
 **[Demo地址](https://github.com/chenxinsi/Android8.x_demo/tree/master/EditText_Demo)**
+
 ### Fonts in XML
 **Api26&27**
+
 新特性，将fonts作为资源使用
 
 在java代码中:
+
 ```
 Typeface typeface = getResources().getFont(R.font.dancing_script);
 textView.setTypeface(typeface);
 ```
+
 在xml中使用
-``` 
+
+```
 <TextView
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -116,18 +145,22 @@ textView.setTypeface(typeface);
     android:textSize="50sp"
     android:text="@string/xinsichen" />
 ```
+
 效果图：
+
 |效果图1|
 |--|
 | <img width="300px" src="https://raw.githubusercontent.com/chenxinsi/Pictures/master/font_xinsichen.png"  /> |
 
 **[Demo地址](https://github.com/chenxinsi/Android8.x_demo/tree/master/EditText_Demo)**
+
 ### Shortcuts
 **api25**
 增加了app shortcuts
 
 **api26**
 增加了pinned shortcuts
+
 |展示图|Demo效果图|
 |-- |--|
 |  <img width="300px" src="https://raw.githubusercontent.com/chenxinsi/Pictures/master/pinned-shortcuts.png"  /> |<img width="300px" src="https://raw.githubusercontent.com/chenxinsi/Pictures/master/demo_pinned_shortcut.png"  />|
@@ -144,6 +177,7 @@ a. 如果该快捷方式已经存在，则创建一个ShortcutInfo只包含新�
 b.如果要固定新的快捷方式，请创建一个ShortcutInfo新快捷方式包含 ID，Intent， short label
 
 注意：如果用户不允许将快捷方式固定到启动器，则你的app不会收到callback
+
 ```
 ShortcutManager mShortcutManager =
         context.getSystemService(ShortcutManager.class);
@@ -171,6 +205,7 @@ if (mShortcutManager.isRequestPinShortcutSupported()) {
             successCallback.getIntentSender());
 }
 ```
+
 **[Demo地址](https://github.com/chenxinsi/Android8.x_demo/tree/master/Demo)**
 
 ### Picture in Picture
@@ -182,13 +217,13 @@ if (mShortcutManager.isRequestPinShortcutSupported()) {
 |--|--|--|
 |![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171211-154222.png)|![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171211-154144.png)|![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171211-154129.png)|
 
-[**Demo地址**](https://github.com/googlesamples/android-PictureInPicture)
+[ **Demo地址** ](https://github.com/googlesamples/android-PictureInPicture)
 
 ### AutofillFramework
 
 首先我们要选择我们的自动填充服务
 
-Settings > System > Languages & Input > Advanced > Auto-fill service 
+Settings > System > Languages & Input > Advanced > Auto-fill service
 
 展示图
 
@@ -196,7 +231,7 @@ Settings > System > Languages & Input > Advanced > Auto-fill service
 |-- |-- |-- |--|--|
 | ![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171214-144444.png)|![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171214-144637.png) |![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171214-144651.png) |![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171214-144729.png) |![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171214-144736.png) |
 
-[**Demo地址**](https://github.com/googlesamples/android-PictureInPicture)
+[ **Demo地址** ](https://github.com/googlesamples/android-PictureInPicture)
 
 ### JobScheduler
 
@@ -206,6 +241,7 @@ Settings > System > Languages & Input > Advanced > Auto-fill service
 | ![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/JobScheduler1.png)|![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/JobScheduler2.png) |![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/JobScheduler3.png) |
 
 log：
+
 ```
 12-18 11:50:21.828  1113  1113 I MyJobService: Service destroyed
 12-18 11:51:32.414  1113  1113 I MyJobService: Service created
@@ -224,16 +260,18 @@ log：
 12-18 11:56:21.473  1113  1113 I MyJobService: on start job: 3
 12-18 11:56:24.603  1113  1113 I MyJobService: Service destroyed
 ```
-[**Demo地址**](https://github.com/googlesamples/android-JobScheduler)
+
+[ **Demo地址** ](https://github.com/googlesamples/android-JobScheduler)
 
 ### Notifications
 
 展示图
+
 |picture1|picture2|picture3|picture4|
 |-- |-- |-- |--|
 | ![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Notification.png)|![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Notification1.png) |![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Notification3.png) |![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Notification4.png) |
 
-[**Demo地址**](https://github.com/googlesamples/android-NotificationChannels)
+[ **Demo地址** ](https://github.com/googlesamples/android-NotificationChannels)
 
 ## 参考
 1. shortcuts:

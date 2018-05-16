@@ -1,7 +1,10 @@
 ## 1.现象
+
 - 通知面板中，QQ消息显示一条黑条，无任何内容显示
 - 长按此消息，会弹出QQ扩展选项
+
 ## 2.分析
+
 - 视图树上看，QQ此条通知的Expand视图结构正常，含自己的扩展Layout(NotificationContentView)，但是其中的ImageView和Textview均布局为width 0，无内容显示
 - 反编译QQ apk，发现其中含有qapp_center_notification.xml，代码如下
 
@@ -42,12 +45,14 @@
     </LinearLayout>
 </LinearLayout>
 ```
+
 - 代码结构所显示的布局和视图树一致
 - 断点调试发现，该条通知的解析正常，所Load的视图也正常
 - QQ本身未发任何Action出来
 - 外面问过，还没做Android N，未遇到这个问题
 
 ## 继续分析
+
 - 查看Google源码更新补丁
 - 查为毛QQ不去更新这几个textview
 - MTK提个Case？

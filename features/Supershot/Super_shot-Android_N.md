@@ -53,6 +53,7 @@ Vendor/freeme/frameworks/base/core-export/java/com/freeme/util
 ```
 FREEME_SUPER_SHOT_SUPPORT=yes
 ```
+
 - [ProjectConfig.mk]
 
 device/droi/common
@@ -75,6 +76,7 @@ device/droi/common
 ```
 FREEME_SUPER_SHOT_SUPPORT=yes
 ```
+
 - [ProjectConfig.mk]
 
 device/droi/project_name
@@ -82,9 +84,11 @@ device/droi/project_name
 ###### ==2、默认值设置，配置时，请在相应的项目文件夹中重写该文件==
 ###### keyword: "SuperShot"
 - 开关配置，false为关闭，true为开启
+
 ```
 <integer name="def_supershot_mode_default" translatable="false">true</integer>
 ```
+
 - [defaults_freeme.xml]
 
 frameworks\base\packages\SettingsProvider\res\value

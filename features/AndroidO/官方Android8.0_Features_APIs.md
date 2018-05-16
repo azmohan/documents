@@ -2,15 +2,19 @@
 # Features and APIs
 ## 用户体验
 ### 通知
+
 - **通知渠道**
 
 允许您为要显示的每种通知类型创建用户可自定义的渠道
+
 - **通知标志**
- 
+
 引入了对在应用启动器图标上显示通知标志的支持。
+
 - **休眠**
 
 用户可以将通知置于休眠状态，以便稍后重新显示它。
+
 - **通知超时**
 
 现在，使用 setTimeoutAfter() 创建通知时您可以设置超时。
@@ -18,6 +22,7 @@
 - **通知清除**
 
 系统现在可区分通知是由用户清除，还是由应用移除。
+
 - **背景颜色**
 
 您现在可以设置和启用通知的背景颜色。
@@ -91,6 +96,7 @@ AnimatorSet API 现在支持寻道和倒播功能。
 寻道功能允许您将动画的位置设置为指定的时间点处。如果您的应用包含可撤消的操作的动画，倒播功能会很有用。现在，您不必定义两组独立的动画，而只需反向播放同一组动画
 
 ### 输入和导航
+
 - 键盘导航键区
 某个操作组件使用一种复杂的视图层次结构，可考虑将多组界面元素组成一个键区，简化键盘导航这些元素的操作。
 - 视图默认焦点
@@ -122,16 +128,19 @@ findViewById() 函数的全部实例均返回 <T extends View> T，而不是 Vie
 ### MediaPlayer
  为 MediaPlayer 类添加了多种新函数。
 ### 音频录制器
+
 - 音频录制器现在支持对流式传输有用的 MPEG2_TS 格式
 - MediaMuxer 现在可以处理任意数量的音频和视频流，而不再仅限于一个音频曲目和/或一个视频曲目。
 - MediaMuxer 还可以添加一个或多个包含用户定义的每帧信息的元数据曲目。
 
 ### 音频播放控制
+
 - Google 智能助理的新音频使用类型
 - 设备音频播放的变更
 - 显式请求音频焦点
 
 ### 增强的媒体文件访问功能
+
 - 自定义文档提供程序
 - 直接文档访问
 - 文档路径
@@ -142,6 +151,7 @@ findViewById() 函数的全部实例均返回 <T extends View> T，而不是 Vie
 在具有相应 WLAN 感知硬件的设备上，应用和附近设备可以通过 WLAN 进行搜索和通信，无需依赖互联网接入点。我们正在与硬件合作伙伴合作，以尽快将 WLAN 感知技术应用于设备。
 ### 蓝牙
 增强了平台对蓝牙的支持：
+
 - 支持 AVRCP 1.4 标准，该标准支持音乐库浏览。
 - 支持蓝牙低功耗 (BLE) 5.0 标准。
 - 将 Sony LDAC 编解码器集成到蓝牙堆叠中。
@@ -163,6 +173,7 @@ findViewById() 函数的全部实例均返回 <T extends View> T，而不是 Vie
 ### 字词级突出显示
 可以确定TextView对象中可见字符的位置
 ### 标准化单端范围值
+
 - 对于没有最小值的范围，Float.NEGATIVE_INFINITY 表示最小值。
 - 对于没有最大值的范围，Float.POSITIVE_INFINITY 表示最大值
 
@@ -190,11 +201,14 @@ Android 8.0 添加了对更多 OpenJDK Java API 的支持：
 
 - OpenJDK 8 中的 java.time。
 - OpenJDK 7 中的 java.nio.file 和 java.lang.invoke。
+
 ### 更新的 ICU4J Android Framework API
 您无需在 APK 中编译 ICU4J 库，从而减少 APK 占用空间。
+
 | Android API 级别 | ICU 版本 | CLDR 版本 |Unicode 版本  |
 |--|--|--|--|
 |Android 7.0（API 级别 24），Android 7.1（API 级别 25）|56|28|8.0|
 |Android 8.0|58.2|30.0.3|9.0|
+
 ## 参考文献
 [官方API概览](https://developer.android.google.cn/about/versions/oreo/android-8.0.html?hl=zh-cn#rt)

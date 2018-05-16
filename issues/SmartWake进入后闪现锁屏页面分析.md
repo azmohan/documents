@@ -135,9 +135,11 @@ private void finishScreenTurningOn() {
     ……
 }
 ```
+
 通过代码，我们发现，DisplayPowerController收到唤醒消息之后，会先交由PhoneWindowManager进行策略处理，PhoneWindowManager收到亮屏消息之后，先分发给锁屏，等待锁屏处理完毕后，通过waitForAllWindowsDrawn进行等待，直到所有窗口画完，才会调用onScreenOn进行点亮
 
 也就是说，会有两个等待
+
 - 等待锁屏
 - 等待所有窗口画完
 
@@ -182,6 +184,7 @@ public void waitForAllWindowsDrawn(Runnable callback, long timeout) {
     }
 }
 ```
+
 从如上代码可以看出，如果要加入等待列表，需满足如下条件
 
 ==if (win.isVisibleLw() && (win.mAppToken != null || isForceHiding))==
@@ -314,7 +317,7 @@ WindowSurfacePlacer.java
 ```
 // "Something has changed!  Let's make it correct now."
 private void performSurfacePlacementInner(boolean recoveringMemory) {
-    ……    
+    …
     mService.scheduleAnimationLocked();
     ……
 }
@@ -390,5 +393,6 @@ index d3b7707..ae9d7a0 100644
 Change-Id: I27afd4110357655a83ca40f4974696e53fc0cf7e
 
 ### 总结
+
 - 该问题牵涉到PMS, WMS和AMS的内容，添加基于锁屏之上，且显示优先于锁屏的窗口，需注意亮屏逻辑控制
 

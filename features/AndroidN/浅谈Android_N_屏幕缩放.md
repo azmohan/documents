@@ -48,13 +48,13 @@
 
 Device implementations are STRONGLY RECOMMENDED to provide users a setting to change the display size. If there is an implementation to change the display size of the device, it MUST align with the AOSP implementation as indicated below:
 
-- The display size MUST NOT be scaled any larger than 1.5 times the native density or produce an effective minimum screen dimension smaller than 320dp (equivalent to resource qualifier sw320dp), whichever comes first. 
-- Display size MUST NOT be scaled any smaller than 0.85 times the native density. 
-- To ensure good usability and consistent font sizes, it is RECOMMENDED that the following scaling of Native Display options be provided (while complying with the limits specified above) 
-- Small: 0.85x 
-- Default: 1x (Native display scale) 
-- Large: 1.15x 
-- Larger: 1.3x 
+- The display size MUST NOT be scaled any larger than 1.5 times the native density or produce an effective minimum screen dimension smaller than 320dp (equivalent to resource qualifier sw320dp), whichever comes first.
+- Display size MUST NOT be scaled any smaller than 0.85 times the native density.
+- To ensure good usability and consistent font sizes, it is RECOMMENDED that the following scaling of Native Display options be provided (while complying with the limits specified above)
+- Small: 0.85x
+- Default: 1x (Native display scale)
+- Large: 1.15x
+- Larger: 1.3x
 - Largest 1.45x
 
 ### 6、总结一下

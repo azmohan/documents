@@ -15,13 +15,13 @@
 Intent是一种消息传递对象，可以使用它从其它应用组件请求操作，可以通过多种方式促进组件之间通信，主要的是以下三中:
 
 - 启动Activity
-    
+
     通过startActivity(intent)s来启动activity 。如果需要返回值，则可以调用startActivityForResult()
 
 - 启动Service
 
     通过startService(intent)，如果服务旨在使用客户端-服务器接口， bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-    
+
 - 传递Broadcasts
 
     通过给sendBroadcast(intent)启动广播
@@ -31,19 +31,22 @@ Intent是一种消息传递对象，可以使用它从其它应用组件请求�
 Intent分为两种类型，如下:
 
 - 显示intent
-    
+
     按名称（完全限定类名）指定要启动的组件。 通常，您会在自己的应用中使用显式 Intent 来启动组件，这是因为您知道要启动的 Activity 或服务的类名。例如，启动新 Activity 以响应用户操作，或者启动服务以在后台下载文件。
 
     举例：
-    
+
     第一个Activity启动
+
     ```
     //显示启动
     Intent intent = new Intent(MainActivity.this,SecondActivity.class);
     intent.putExtra("name","第二个Activity");
-    startActivity(intent);    
+    startActivity(intent);
     ```
+
     第二个Activity接收处理：
+
     ```
     Intent intent = getIntent();
     String name = intent.getStringExtra("name");
@@ -63,23 +66,24 @@ Intent分为两种类型，如下:
     if (sendIntent.resolveActivity(getPackageManager()) !=null) {
             startActivity(sendIntent);
     }
-    
+
     Intent i = new Intent();
     //里面action需要在AndroidManifest.xml里面注册
     i.setAction("com.seconddemo.otheractivity");
     i.putExtra("test","xinxin");
     startActivity(i);
     ```
-    
+
 > 注意：用户可能没有任何应用处理您发送到 startActivity() 的隐式 Intent。如果出现这种情况，则调用将会失败，且应用会崩溃。要验证 Activity 是否会接收 Intent，请对 Intent 对象调用 resolveActivity()。如果结果为非空，则至少有一个应用能够处理该 Intent，且可以安全调用 startActivity()。 如果结果为空，则不应使用该 Intent。如有可能，您应停用发出该 Intent 的功能。
 
-    
+
 > 注意：为了确保应用的安全性，启动 Service 时，请始终使用显式 Intent，且不要为服务声明 Intent 过滤器。使用隐式 Intent 启动服务存在安全隐患，因为您无法确定哪些服务将响应 Intent，且用户无法看到哪些服务已启动。从 Android 5.0（API 级别 21）开始，如果使用隐式 Intent 调用 bindService()，系统会引发异常。
 
 
 #### 强制使用应用的选择器
 
 要显示选择器，可使用createChooser()创建Intent，并将其传递给StartActivity()
+
 ```
 Intent sendIntent = new Intent();
 sendIntent.setAction(Intent.ACTION_SEND);
@@ -100,6 +104,7 @@ if (sendIntent.resolveActivity(getPackageManager()) != null) {
 > 注：显示Intent始终会传递给其他目标，无论组件声明的Intent过滤器如果均是如此
 
 一般的我们按照下面添加
+
 ```
 <activity android:name=".OtherActivity">
     <intent-filter>
@@ -142,6 +147,7 @@ if (sendIntent.resolveActivity(getPackageManager()) != null) {
 这个就不多做说明了，主要是几种可用于执行的常见操作的隐式Intent，参考[通用Intennt](https://developer.android.google.cn/guide/components/intents-common.html)
 
 下面就举一个联系人例子
+
 ```
 static final int REQUEST_SELECT_CONTACT = 1;
 
@@ -177,9 +183,11 @@ Activity 是一个应用组件，用户可与其提供的屏幕进行交互，�
 需要继承Activity或者是继承Activiy子类，然后在其中实现Activity的生命周期各种状态转变时系统调用的回调方法。
 
 - onCreate()
+
 您必须实现此方法。系统会在创建您的 Activity 时调用此方法。您应该在实现内初始化 Activity 的必需组件。 最重要的是，您必须在此方法内调用 setContentView()，以定义 Activity 用户界面的布局。
 
 - onPause()
+
 系统将此方法作为用户离开 Activity 的第一个信号（但并不总是意味着 Activity 会被销毁）进行调用。 您通常应该在此方法内确认在当前用户会话结束后仍然有效的任何更改（因为用户可能不会返回）。
 
 
@@ -204,18 +212,22 @@ Activity 是一个应用组件，用户可与其提供的屏幕进行交互，�
     </intent-filter>
 </activity>
 ```
+
 可以在<intent-filter>使用Intentn过滤器，
 <action>元素指定这个是程序的“主”入口，<category>元素指定此 Activity 应列入系统的应用启动器内（以便用户启动该 Activity）。
 
 ##### 启动Activity
 调用StartActivity()启动Activity，下面例子是传值并且启动Activity
+
 ```
 Intent intent = new Intent(this, SecondClass.this);
 intent.putExtra("name","jack");
 startActivity(intent);
 ```
+
 ###### startActivityForResult()
 举例说明：
+
 ```
 //启动SecondActivity
 Intent intent = new Intent(MainActivity.this,SecondActivity.class);
@@ -243,7 +255,7 @@ setResult(2,intent);
 
 ##### 结束Activity
 
-调用finish()方法去结束Activity 
+调用finish()方法去结束Activity
 
 > PS:官方文档说还可以通过finishActivity(requestCode)方法去结束Activity，验证无效果,查资料也没有说清楚这个方法是咋用.......
 
@@ -252,13 +264,13 @@ setResult(2,intent);
 Activity一般以以下三种状态存在：
 
 - OnResume()
-    
+
     此Activity位于屏幕前台，并且具有用户焦点
 
 - onPause()
 
     另一个Activity位于屏幕前台并具有用户焦点，但此Activity仍可见。也就是说，另一个Activity显示在此Activity上方，并且该Activity部分透明或未覆盖整个屏幕。暂停的Activity处于完全活动状态(Activity对象保留在内存中，它保留了所有状态和成员信息，并与窗口管理器保持连接)，但是在内存极度不足的情况下，会被系统终止。
-    
+
 - onStop()
 
     该Activity被另一个Activity完全遮盖(该Activity目前位于“后台”)。已停止的Activity同样仍处于活动状态(Activity对象保留在内存中，它保留了所有状态和成员信息，但未与窗口管理器连接)。不过，它对用户不再可见，在其他需要内存是可能会被系统终止。
@@ -403,6 +415,7 @@ public class MyActivity extends Activity {
     }
 }
 ```
+
 在此示例中，onCreate() 添加了一个片段或恢复了对它的引用。此外，onCreate() 还将有状态的对象存储在片段实例内部。onDestroy() 对所保留的片段实例内的有状态对象进行更新。
 
 
@@ -446,6 +459,7 @@ public class MyActivity extends Activity {
 ```
 
 以下 onConfigurationChanged() 实现检查当前设备方向：
+
 ```
 @Override
 public void onConfigurationChanged(Configuration newConfig) {
@@ -461,42 +475,43 @@ public void onConfigurationChanged(Configuration newConfig) {
 ```
 
 不加android:configChanges横竖屏切换生命周期
+
 ```
 //第一次进入
-12-26 21:27:58.957 18323-18323/com.configurationchangesdemo D/liqiang: onCreate: 
-12-26 21:27:58.964 18323-18323/com.configurationchangesdemo D/liqiang: onStart: 
-12-26 21:27:58.968 18323-18323/com.configurationchangesdemo D/liqiang: onResume: 
+12-26 21:27:58.957 18323-18323/com.configurationchangesdemo D/liqiang: onCreate:
+12-26 21:27:58.964 18323-18323/com.configurationchangesdemo D/liqiang: onStart:
+12-26 21:27:58.968 18323-18323/com.configurationchangesdemo D/liqiang: onResume:
 //切换成横屏
-12-26 21:34:53.794 18323-18323/com.configurationchangesdemo D/liqiang: onPause: 
+12-26 21:34:53.794 18323-18323/com.configurationchangesdemo D/liqiang: onPause:
 12-26 21:34:53.796 18323-18323/com.configurationchangesdemo D/liqiang: onSaveInstanceState: name = jack
-12-26 21:34:53.801 18323-18323/com.configurationchangesdemo D/liqiang: onStop: 
-12-26 21:34:53.802 18323-18323/com.configurationchangesdemo D/liqiang: onDestroy: 
-12-26 21:34:53.930 18323-18323/com.configurationchangesdemo D/liqiang: onCreate: 
-12-26 21:34:53.932 18323-18323/com.configurationchangesdemo D/liqiang: onStart: 
+12-26 21:34:53.801 18323-18323/com.configurationchangesdemo D/liqiang: onStop:
+12-26 21:34:53.802 18323-18323/com.configurationchangesdemo D/liqiang: onDestroy:
+12-26 21:34:53.930 18323-18323/com.configurationchangesdemo D/liqiang: onCreate:
+12-26 21:34:53.932 18323-18323/com.configurationchangesdemo D/liqiang: onStart:
 12-26 21:34:53.933 18323-18323/com.configurationchangesdemo D/liqiang: onRestoreInstanceState: name = jack
-12-26 21:34:53.935 18323-18323/com.configurationchangesdemo D/liqiang: onResume: 
+12-26 21:34:53.935 18323-18323/com.configurationchangesdemo D/liqiang: onResume:
 //切换成竖屏
-12-26 21:35:44.087 18323-18323/com.configurationchangesdemo D/liqiang: onPause: 
+12-26 21:35:44.087 18323-18323/com.configurationchangesdemo D/liqiang: onPause:
 12-26 21:35:44.088 18323-18323/com.configurationchangesdemo D/liqiang: onSaveInstanceState: name = jack
-12-26 21:35:44.094 18323-18323/com.configurationchangesdemo D/liqiang: onStop: 
-12-26 21:35:44.094 18323-18323/com.configurationchangesdemo D/liqiang: onDestroy: 
-12-26 21:35:44.157 18323-18323/com.configurationchangesdemo D/liqiang: onCreate: 
-12-26 21:35:44.160 18323-18323/com.configurationchangesdemo D/liqiang: onStart: 
+12-26 21:35:44.094 18323-18323/com.configurationchangesdemo D/liqiang: onStop:
+12-26 21:35:44.094 18323-18323/com.configurationchangesdemo D/liqiang: onDestroy:
+12-26 21:35:44.157 18323-18323/com.configurationchangesdemo D/liqiang: onCreate:
+12-26 21:35:44.160 18323-18323/com.configurationchangesdemo D/liqiang: onStart:
 12-26 21:35:44.160 18323-18323/com.configurationchangesdemo D/liqiang: onRestoreInstanceState: name = jack
-12-26 21:35:44.166 18323-18323/com.configurationchangesdemo D/liqiang: onResume: 
+12-26 21:35:44.166 18323-18323/com.configurationchangesdemo D/liqiang: onResume:
 ```
 
 添加android:configChanges="orientation|screenSize"横竖屏切换生命周期
+
 ```
 //第一次进入
-12-26 21:36:49.237 18534-18534/? D/liqiang: onCreate: 
-12-26 21:36:49.238 18534-18534/? D/liqiang: onStart: 
-12-26 21:36:49.241 18534-18534/? D/liqiang: onResume: 
+12-26 21:36:49.237 18534-18534/? D/liqiang: onCreate:
+12-26 21:36:49.238 18534-18534/? D/liqiang: onStart:
+12-26 21:36:49.241 18534-18534/? D/liqiang: onResume:
 //切换成横屏
-12-26 21:41:38.632 18534-18534/com.configurationchangesdemo D/liqiang: onConfigurationChanged: 
+12-26 21:41:38.632 18534-18534/com.configurationchangesdemo D/liqiang: onConfigurationChanged:
 //切换成竖屏
-12-26 21:42:10.048 18534-18534/com.configurationchangesdemo D/liqiang: onConfigurationChanged: 
-
+12-26 21:42:10.048 18534-18534/com.configurationchangesdemo D/liqiang: onConfigurationChanged:
 ```
 
 
@@ -515,35 +530,37 @@ public void onConfigurationChanged(Configuration newConfig) {
 要想创建片段，必须创建Fragment子类(或者已有的子类)，通常我们需要是想Fragment以下的生命周期:
 
 - onCreate()
-    
-    系统会在创建Fragment的时候调用这个方法， 
+
+    系统会在创建Fragment的时候调用这个方法，
 
 - onCreateView()
 
     系统会在片段首次绘制其用户界面时调用此方法，要想为您的片段绘制 UI，您从此方法中返回的 View必须是片段布局的根视图。如果片段未提供 UI，您可以返回 null。
-    
+
 - onPause()
 
     系统将此方法作为用户离开片段的第一个信号（但并不总是意味着此片段会被销毁）进行调用。 您通常应该在此方法内确认在当前用户会话结束后仍然有效的任何更改（因为用户可能不会返回）
-    
+
 下面是几个扩展的子类：
 
 - DialogFragment
 
     显示浮动对话框。使用此类创建对话框可有效地替代使用 Activity 类中的对话框帮助程序方法，因为您可以将片段对话框纳入由 Activity 管理的片段返回栈，从而使用户能够返回清除的片段。
-    
+
 - ListFragment
 
     显示由适配器（如 SimpleCursorAdapter）管理的一系列项目，类似于 ListActivity。它提供了几种管理列表视图的方法，用于处理点击事件的  onListItemClick() 回调。
-    
+
 - PreferenceFragment
-    
+
     以列表形式显示 Preference 对象的层次结构，类似于 PreferenceActivity。这在为您的应用创建“设置” Activity 时很有用处。
 
 ##### Activity中添加Fragment
 
 - 静态添加Fragment
+
     在布局文件里面添加方法如下
+
 ```
 <fragment
     android:id="@+id/first_fragment"
@@ -552,13 +569,16 @@ public void onConfigurationChanged(Configuration newConfig) {
     android:layout_height="match_parent">
 </fragment>
 ```
+
 写demo验证的时候，没有添加id，一直报错如下
+
 ```
  Caused by: java.lang.IllegalArgumentException: Binary XML file line #9: Must specify unique android:id, android:tag, or have a parent with an id for com.fragment.FirstFragment
                                                                     at android.support.v4.app.FragmentManagerImpl.onCreateView(FragmentManager.java:3484)
 ```
 
 查看源码，可以看在FragmentManager里面有，这里面id,tag至少有一项不能为空，所以我们静态添加fragment的时候要加上id。（虽然大部分时候都是添加的........）
+
 ```
 if (containerId == View.NO_ID && id == View.NO_ID && tag == null) {
     throw new IllegalArgumentException(attrs.getPositionDescription()
@@ -567,6 +587,7 @@ if (containerId == View.NO_ID && id == View.NO_ID && tag == null) {
 ```
 
 >注：每个片段都需要一个唯一的标识符，重启 Activity 时，系统可以使用该标识符来恢复片段（您也可以使用该标识符来捕获片段以执行某些事务，如将其移除）。 可以通过三种方式为片段提供 ID：
+
 > - 为 android:id 属性提供唯一 ID。
 > - 为 android:tag 属性提供唯一字符串。
 > - 如果您未给以上两个属性提供值，系统会使用容器视图的 ID。
@@ -574,16 +595,17 @@ if (containerId == View.NO_ID && id == View.NO_ID && tag == null) {
 - 动态添加Fragment
 
     可以在Activity运行期间随时将fragment添加到Activity布局中去，只需要指定将fragment放入哪个ViewGroup。
-    
+
     具体如何在Activity里面添加移除或者替换fragment，需要使用FragmentTransaction中的API 。通过以下方法获取FragmentTransaction实例
-    
+
 ```
 //获取FragmentTransaction实例
 FragmentManager fragmentManager = getFragmentManager();
 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 ```
-    
+
     然后可以用add方法去添加一个fragment
+
 ```
 FragmentManager manager = getSupportFragmentManager();
 FragmentTransaction transaction = manager.beginTransaction();
@@ -598,10 +620,12 @@ transaction.commit();
 
 在Activity里面使用fragment最大的优点就是可以根据用户行为执行添加，移除替换。
 您可以像下面这样从 FragmentManager 获取一个 FragmentTransaction 实例：
+
 ```
 FragmentManager fragmentManager = getFragmentManager();
 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 ```
+
 每个事务都是您想要同时执行的一组更改。您可以使用 add()、remove() 和 replace() 等方法为给定事务设置您想要执行的所有更改。然后，要想将事务应用到 Activity，您必须调用 commit()。
 
 不过，在您调用 commit() 之前，您可能想调用 addToBackStack()，以将事务添加到片段事务返回栈。 该返回栈由 Activity 管理，允许用户通过按返回按钮返回上一片段状态。
@@ -623,7 +647,7 @@ FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 >注意：您只能在 Activity 保存其状态（用户离开 Activity）之前使用 commit() 提交事务。如果您试图在该时间点后提交，则会引发异常。 这是因为如需恢复 Activity，则提交后的状态可能会丢失。 对于丢失提交无关紧要的情况，请使用 commitAllowingStateLoss()。
 
 
-##### 与Activity通信 
+##### 与Activity通信
 
 Fragment可以通过getActivity()访问Activity实例，如下
 
@@ -682,7 +706,7 @@ Android3.0开始引入了Loaders，支持轻松在Activity或fragment中异步�
 
 - 支持异步加载数据
 
-- 监控其数据源并且在其改变时传递结果 
+- 监控其数据源并且在其改变时传递结果
 
 - 在某一配置更改后重建加载器时，会自动重新连接上一个加载器的游标。 因此，它们无需重新查询其数据
 
@@ -726,7 +750,7 @@ initLoader() 调用确保加载器已初始化且处于活动状态。这可能�
 
 无论何种情况，给定的 LoaderManager.LoaderCallbacks 实现均与加载器相关联，且将在加载器状态变化时调用。如果在调用时，调用程序处于启动状态，且请求的加载器已存在并生成了数据，则系统将立即调用 onLoadFinished()（在 initLoader() 期间），因此您必须为此做好准备。 有关此回调的详细介绍，请参阅 onLoadFinished。
 
-请注意，initLoader() 方法将返回已创建的 Loader，但您不必捕获其引用。LoaderManager 将自动管理加载器的生命周期。LoaderManager 将根据需要启动和停止加载，并维护加载器的状态及其相关内容。 这意味着您很少直接与加载器进行交互（有关使用加载器方法调整加载器行为的示例，请参阅 LoaderThrottle 示例）。当特定事件发生时，您通常会使用 LoaderManager.LoaderCallbacks 方法干预加载进程。有关此主题的详细介绍，请参阅使用 LoaderManager 回调 
+请注意，initLoader() 方法将返回已创建的 Loader，但您不必捕获其引用。LoaderManager 将自动管理加载器的生命周期。LoaderManager 将根据需要启动和停止加载，并维护加载器的状态及其相关内容。 这意味着您很少直接与加载器进行交互（有关使用加载器方法调整加载器行为的示例，请参阅 LoaderThrottle 示例）。当特定事件发生时，您通常会使用 LoaderManager.LoaderCallbacks 方法干预加载进程。有关此主题的详细介绍，请参阅使用 LoaderManager 回调
 
 
 ###### ReStarting a Loader
@@ -820,7 +844,7 @@ public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
 
 ###### onLoaderReset()：将在先前创建的加载器重置且其数据因此不可用时调用
-此方法将在先前创建的加载器重置且其数据因此不可用时调用。 通过此回调，您可以了解何时将释放数据，因而能够及时移除其引用。  
+此方法将在先前创建的加载器重置且其数据因此不可用时调用。 通过此回调，您可以了解何时将释放数据，因而能够及时移除其引用。
 
 此实现调用值为 null 的swapCursor()：
 
@@ -857,27 +881,27 @@ Android联系人其实很多地方用到了Loaders。
 
 在清单文件种声明Activity的启动模式，使用<activity>元素的launchMode属性去指定Activity应该如何与任务关联
 
-- standard (默认模式) 
-    
+- standard (默认模式)
+
     默认，系统在启动Activity的任务中创建Activity的新实例并向其传送Intent，Activity可以多次实例化，而每个实例均可属于不用任务，并且一个任务可以拥有多个实例。
 
 - singleTop
 
     如果当前任务的顶部已存在 Activity 的一个实例，则系统会通过调用该实例的 onNewIntent() 方法向其传送 Intent，而不是创建 Activity 的新实例。Activity 可以多次实例化，而每个实例均可属于不同的任务，并且一个任务可以拥有多个实例（但前提是位于返回栈顶部的 Activity 并不是 Activity 的现有实例。
-    
+
     例如，假设任务的返回栈包含根 Activity A 以及 Activity B、C 和位于顶部的 D（堆栈是 A-B-C-D；D 位于顶部）。收到针对 D 类 Activity 的 Intent。如果 D 具有默认的 "standard" 启动模式，则会启动该类的新实例，且堆栈会变成 A-B-C-D-D。但是，如果 D 的启动模式是 "singleTop"，则 D 的现有实例会通过 onNewIntent() 接收 Intent，因为它位于堆栈的顶部；而堆栈仍为 A-B-C-D。但是，如果收到针对 B 类 Activity 的 Intent，则会向堆栈添加 B 的新实例，即便其启动模式为 "singleTop" 也是如此。
-    
+
     > 注：为某个 Activity创建新实例时，用户可以按“返回”按钮返回到前一个 Activity。 但是，当 Activity 的现有实例处理新 Intent 时，则在新 Intent 到达 onNewIntent() 之前，用户无法按“返回”按钮返回到 Activity 的状态。
 
-    
+
 - singleTask
-    
+
     系统创建新任务并实例化位于新任务底部的 Activity。但是，如果该 Activity 的一个实例已存在于一个单独的任务中，则系统会通过调用现有实例的 onNewIntent() 方法向其传送 Intent，而不是创建新实例。一次只能存在 Activity 的一个实例。
 
-    singleTask模式下，Task栈中只能有一个对应Activity的实例。例如：现在栈的结构为：A B C D。此时D通过Intent跳转到B，则栈的结构变成了：A B C D B    
-    
+    singleTask模式下，Task栈中只能有一个对应Activity的实例。例如：现在栈的结构为：A B C D。此时D通过Intent跳转到B，则栈的结构变成了：A B C D B
+
 - singleInstance
-    
+
     与 "singleTask" 相同，只是系统不会将任何其他 Activity 启动到包含实例的任务中。该 Activity 始终是其任务唯一仅有的成员；由此 Activity 启动的任何 Activity 均在单独的任务中打开
 
     singleInstance模式下，会将打开的Activity压入一个新建的任务栈中。例如：Task栈1中结构为：A B C ，C通过Intent跳转到了D（D的模式为singleInstance），那么则会新建一个Task 栈2，栈1中结构依旧为A B C，栈2中结构为D，此时屏幕中显示D，之后D通过Intent跳转到D，栈2中不会压入新的D，所以2个栈中的情况没发生改变。如果D跳转到了C，那么就会根据C对应的launchMode的在栈1中进行对应的操作，C如果为standard，那么D跳转到C，栈1的结构为A B C C ，此时点击返回按钮，还是在C，栈1的结构变为A B C，而不会回到D。
@@ -886,17 +910,17 @@ Android联系人其实很多地方用到了Loaders。
 
 #### Service
 
-    
+
 Service是一个可以在后台执行长时间运行操作而不提供用户界面的应用组件。服务可以由其他应用组件启动，而且即使用户切换到其他应用，服务仍在后台继续运行。此外，组件可以绑定到服务以与之进行交互，甚至执行进程间通信。
 服务基本分为两种形式：
 
 - 启动服务
-    
+
 当应用组件（如 Activity）通过调用 startService() 启动服务时，服务即处于“启动”状态。一旦启动，服务即可在后台无限期运行，即使启动服务的组件已被销毁也不受影响。 已启动的服务通常是执行单一操作，而且不会将结果返回给调用方。例如，它可能通过网络下载或上传文件。 操作完成后，服务会自行停止运行。
 
-- 绑定服务 
+- 绑定服务
 
-当应用组件通过调用 bindService() 绑定到服务时，服务即处于“绑定”状态。绑定服务提供了一个客户端-服务器接口，允许组件与服务进行交互、发送请求、获取结果，甚至是利用进程间通信 (IPC) 跨进程执行这些操作。 仅当与另一个应用组件绑定时，绑定服务才会运行。 多个组件可以同时绑定到该服务，但全部取消绑定后，该服务即会被销毁。 
+当应用组件通过调用 bindService() 绑定到服务时，服务即处于“绑定”状态。绑定服务提供了一个客户端-服务器接口，允许组件与服务进行交互、发送请求、获取结果，甚至是利用进程间通信 (IPC) 跨进程执行这些操作。 仅当与另一个应用组件绑定时，绑定服务才会运行。 多个组件可以同时绑定到该服务，但全部取消绑定后，该服务即会被销毁。
 
 
 >注意：服务在其托管进程的主线程中运行，它既不创建自己的线程，也不在单独的进程中运行（除非另行指定）。 这意味着，如果服务将执行任何 CPU 密集型工作或阻止性操作（例如 MP3 播放或联网），则应在服务内创建新线程来完成这项工作。通过使用单独的线程，可以降低发生“应用无响应”(ANR) 错误的风险，而应用的主线程仍可继续专注于运行用户与 Activity 之间的交互
@@ -907,7 +931,7 @@ Service是一个可以在后台执行长时间运行操作而不提供用户界�
 创建Service子类(或者是一个现有的子类)，在Service里面需要写的回调方法有如下：
 
 - onStartCommand()
-    
+
     当另一个组件(如Activity)通过调用startService请求启动服务时，系统将会调用此方法，服务会启动并在后台无限期运行。如果实现此方法，则在服务工作完成后，需要通过调用stopSelf()或者stopService()方法来停止服务。
 
 - onBind()
@@ -915,7 +939,7 @@ Service是一个可以在后台执行长时间运行操作而不提供用户界�
     当另一个组件想通过调用bindService()与服务绑定时，系统将调用此方法。在此方法的实现中，必须通过返回的IBinder提供一个接口，供客户端用来与服务进行通信。
 
 - onCreate()
- 
+
     首次创建服务时，系统将调用此方法来执行一次性设置程序(在调用onStartCommand 或 onBind()之后)如果服务已运行，则不会调用该方法。
 
 - onDestory()
@@ -924,6 +948,7 @@ Service是一个可以在后台执行长时间运行操作而不提供用户界�
 
 
 清单文件中需要声明服务
+
 ```
 <manifest ... >
   ...
@@ -943,15 +968,14 @@ Service是一个可以在后台执行长时间运行操作而不提供用户界�
 
 可以扩展两个类来创建服务:
 
-- Service 
-    
+- Service
+
     这是适用于所有服务的基类。扩展此类时，必须创建一个用于执行所有服务工作的新线程，因为默认情况下，服务将使用应用的主线程，这会降低应用正在运行的所有 Activity 的性能。
 
 - IntentService
 
     这是 Service 的子类，它使用工作线程逐一处理所有启动请求。如果您不要求服务同时处理多个请求，这是最好的选择。 您只需实现 onHandleIntent() 方法即可，该方法会接收每个启动请求的 Intent，使您能够执行后台工作。
-    
-    
+
 ###### 继承IntentService
 
 继承IntentService需要实现onHandleIntent(),还需要加一个构造函数,以下就是实例
@@ -1009,6 +1033,7 @@ public class PlaysService extends Service{
 
 ```
 注意：IntentService 和 Service的区别：
+
 1. 首先IntentService是继承自Service;
 2. Service不是一个单独的进程，它和应用程序在同一个进程中；
 3. Service也不是一个线程，所以我们要避免在Service中进行耗时的操作；
@@ -1016,7 +1041,7 @@ public class PlaysService extends Service{
 IntentService会处理完成一个之后在处理第二个，每一个请求都会在一个单独的Worker Thread中处理，不会阻塞应用程序的主线程。
 因此，如果我们如果要在Service里面处理一个耗时的操作，我们可以用IntentService来代替使用。
 5. 使用IntentService 必须首先继承IntentService并实现onHandleIntent()方法，将耗时的任务放在这个方法执行，其他方面，IntentService和Service一样。
- 
+
 ```
 
 ##### Create BindService
@@ -1032,14 +1057,14 @@ IntentService会处理完成一个之后在处理第二个，每一个请求都�
 服务生命周期(从创建到销毁)可以遵循两条不同的路径：
 
 - 启动服务
-        
+
     该服务在其他组件调用startService时创建，然后无限期的运行，且必须通过stopSelf()来自行停止运行。此外，其他组件也可以通过调用stopService()来停止服务，服务停止后，系统会将其销毁
 
 - 绑定服务
 
     该服务在另一个组件(客户端)调用bindService()时创建，然后客户端通过Ibinder接口与服务进行通信。客户端可以通过调用unbindservice()来关闭服务。多个客户端可以绑定到相同的客户顿，当所有绑定取消之后，系统即会销毁该服务。
 
-    
+
 这两条路劲并非完全独立，也就是说，你可以绑定到已经使用startService()启动的服务。 例如，可以通过使用intent(标示要播放的音乐)调用startService()来启动后台音乐服务，随后，可能在用户需要稍加控制播放器或获取有关当前播放歌曲的信息时，Activity可以通过调用bindService()绑定到服务。在这种情况下，除非所有客户端均取消绑定，否则stopService()或stopSelf()不实际停止服务。
 
 
@@ -1048,7 +1073,7 @@ IntentService会处理完成一个之后在处理第二个，每一个请求都�
 
 ```
 public class ExampleService extends Service {
-    
+
     //创建服务
     @Override
     public void onCreate() {
@@ -1097,25 +1122,24 @@ public class ExampleService extends Service {
 
 ```
 //第一次startService
-12-27 10:47:22.404 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onCreate: 
-12-27 10:47:22.404 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStartCommand: 
-12-27 10:47:22.404 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStart: 
+12-27 10:47:22.404 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onCreate:
+12-27 10:47:22.404 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStartCommand:
+12-27 10:47:22.404 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStart:
 //连续启动startService
-12-27 10:48:02.810 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStart: 
-12-27 10:48:06.341 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStartCommand: 
-12-27 10:48:06.341 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStart: 
-12-27 10:48:06.728 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStartCommand: 
-12-27 10:48:06.728 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStart: 
-12-27 10:48:06.991 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStartCommand: 
-12-27 10:48:06.991 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStart: 
+12-27 10:48:02.810 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStart:
+12-27 10:48:06.341 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStartCommand:
+12-27 10:48:06.341 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStart:
+12-27 10:48:06.728 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStartCommand:
+12-27 10:48:06.728 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStart:
+12-27 10:48:06.991 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStartCommand:
+12-27 10:48:06.991 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onStart:
 //stopservice
-12-27 10:48:50.240 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onDestroy: 
+12-27 10:48:50.240 26624-26624/com.clinetservicedemo D/liqiang: UseStartService onDestroy:
 
 //第一次bindservice
-12-27 10:49:56.007 26624-26624/com.clinetservicedemo D/liqiang: UseBindService onCreate: 
-12-27 10:49:56.008 26624-26624/com.clinetservicedemo D/liqiang: UseBindService onBind: 
+12-27 10:49:56.007 26624-26624/com.clinetservicedemo D/liqiang: UseBindService onCreate:
+12-27 10:49:56.008 26624-26624/com.clinetservicedemo D/liqiang: UseBindService onBind:
 //继续调用bindservice不会回调任何方法
-
 ```
 
 #### Bound Services
@@ -1134,11 +1158,11 @@ BoundService服务是客户端-服务器接口中的服务器。BoundService可�
 - 使用Messenger
 
 如需要让接口跨进程工作，可以使用Messenger为服务创建接口。服务可以以这种方式定义对应于不同类型Message对象的Handler。此Handler时Messenger的基础，后者随后可与客户端分享一个IBinder，从而让客户端能利用Message对象向服务发送命令。此外，客户端还可以自定义由Messenger，以便服务回传消息。
-    
+
 这是执行进程通信的最简单方法，因为Messenger会在单一线程中创建包含所有请求的队列，这样就不必对服务进行线程安全设计
 
 - 使用AIDL
-    
+
 AIDL（Android 接口定义语言）执行所有将对象分解成原语的工作，操作系统可以识别这些原语并将它们编组到各进程中，以执行 IPC。 之前采用 Messenger 的方法实际上是以 AIDL 作为其底层结构。 如上所述，Messenger 会在单一线程中创建包含所有客户端请求的队列，以便服务一次接收一个请求。 不过，如果您想让服务同时处理多个请求，则可直接使用 AIDL。 在此情况下，您的服务必须具备多线程处理能力，并采用线程安全式设计。
 如需直接使用 AIDL，您必须创建一个定义编程接口的 .aidl 文件。Android SDK 工具利用该文件生成一个实现接口并处理 IPC 的抽象类，您随后可在服务内对其进行扩展。
 
@@ -1196,6 +1220,7 @@ public class LocalService extends Service{
 LocalBinder 为客户端提供 getService() 方法，返回 LocalService 的当前实例。这样，客户端便可调用服务中的公共方法。 例如，客户端可调用服务中的 getRandomNumber()。
 
 点击按钮时，以下这个 Activity 会绑定到 LocalService 并调用 getRandomNumber() ：
+
 ```
 public class BindActivity extends AppCompatActivity{
     LocalService mService;
@@ -1305,6 +1330,7 @@ public class MessengerService extends Service {
     }
 }
 ```
+
 服务端就一个Service，可以看到代码相当的简单，只需要去声明一个Messenger对象，然后onBind方法返回mMessenger.getBinder()；
 
 然后坐等客户端将消息发送到handleMessage方法，根据message.what去判断进行什么操作，然后做对应的操作，最终将结果通过 msgfromClient.replyTo.send(msgToClient);返回。
@@ -1350,7 +1376,7 @@ public class MessengerActivity extends AppCompatActivity{
             super.handleMessage(msgFromServer);
         }
     });
-    
+
     private int mA;
     TextView mTv_connection_status;
     LinearLayout mLyContainer;
@@ -1429,15 +1455,15 @@ public class MessengerActivity extends AppCompatActivity{
 因此，总结一下从客户端绑定到服务端所需步骤：
 
 1.实现ServiceConnection：
-    
+
     实现这个类然后重新两个回调方法，
-    
+
     onServiceConnected()
-    
+
     系统会调用该方法以传递服务的onBind()方法返回的IBinder。
-    
+
     onServiceDisConnected()
-    
+
     Android 系统会在与服务的连接意外中断时（例如当服务崩溃或被终止时）调用该方法。当客户端取消绑定时，系统“不会”调用该方法。
 
 2.调用 bindService()，传递 ServiceConnection 实现。
@@ -1452,11 +1478,11 @@ AIDL（Android 接口定义语言）与您可能使用过的其他 IDL 类似。
 >只有允许不同应用的客户端用 IPC 方式访问服务，并且想要在服务中处理多线程时，才有必要使用 AIDL。 如果您不需要执行跨越不同应用的并发 IPC，就应该通过实现一个 Binder 创建接口；或者，如果您想执行 IPC，但根本不需要处理多线程，则使用 Messenger 类来实现接口。无论如何，在实现 AIDL 之前，请您务必理解绑定服务。
 
 #####  定义AIDL接口
- 
+
 使用ADIL创建绑定服务，需要执行以下步骤：
 
 1.创建.aidl文件
-    
+
 此文件定义带有方法签名的编程接口。
 
 2.实现接口
@@ -1517,6 +1543,7 @@ private final IRemoteService.Stub mBinder = new IRemoteService.Stub() {
     }
 };
 ```
+
 现在，mBinder 是 Stub 类的一个实例（一个 Binder），用于定义服务的 RPC 接口。 在下一步中，将向客户端公开该实例，以便客户端能与服务进行交互。
 
 在实现 AIDL 接口时应注意遵守以下这几个规则：
@@ -1578,7 +1605,7 @@ private ServiceConnection mConnection = new ServiceConnection() {
 
 aidl的demo就不一一去写了，后续会把demo上传
 
- 
+
 
 ### ContentProvider
 
@@ -1642,7 +1669,6 @@ user_dictionary 字符串是提供程序的授权, words 字符串是表的路�
 
 ```
 Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
-
 ```
 
 在检索到一组行后想要更新或删除其中某一行时通常会用到 ID 值。
@@ -1667,8 +1693,7 @@ Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
 从提供程序中检索数据的下一步是构建查询。第一个代码段定义某些用于访问用户字典提供程序的变量：
 
 ```
-
-// 
+//
 A "projection" defines the columns that will be returned for each row
 String[] mProjection =
 {
@@ -1848,7 +1873,6 @@ if (mCursor != null) {
 ```
 // Defines a new Uri object that receives the result of the insertion
 Uri mNewUri;
-
 ...
 
 // Defines an object to contain the new values to insert
@@ -1875,7 +1899,8 @@ mNewUri = getContentResolver().insert(
 
 要更新行，请按照执行插入的方式使用具有更新值的 ContentValues 对象，并按照执行查询的方式使用选择条件。 您使用的客户端方法是 ContentResolver.update()。您只需将值添加至您要更新的列的 ContentValues 对象。 如果您要清除列的内容，请将值设置为 null。
 
-以下代码段会将语言区域具有语言“en”的所有行的语言区域更改为 null。 返回值是已更新的行数：
+以下代码段会将语言区域具有语言“en”的所有行的语言区域更改为 null。 返回值是已更新的行数
+
 ```
 // Defines an object to contain the updated values
 ContentValues mUpdateValues = new ContentValues();
@@ -1984,7 +2009,7 @@ Android应用程序可以发送或接收来自Android系统和其他Android应�
 ##### (1)按照发送的方式分类
 
 - 标准广播
-    
+
     标准广播是一种异步的方式来进行传播的，广播发出去之后，所有的广播接收者几乎是同一时间收到消息的。他们之间没有先后顺序可言，而且这种广播是没法被截断的。
 
 - 有序广播
@@ -2025,6 +2050,7 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
     }
 }
 ```
+
 主要就是继承一个BroadcastReceiver，实现onReceive方法，在其中实现自己的业务逻辑就可以了。
 
 ##### (2)注册广播
@@ -2043,7 +2069,7 @@ public class MainActivity extends AppCompatActivity {
         intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
         myBroadcastReceiver = new MyBroadcastReceiver();
         registerReceiver(myBroadcastReceiver, intentFilter);
-        
+
         Button button = (Button) findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -2082,15 +2108,19 @@ public class MainActivity extends AppCompatActivity {
 相关解释：
 
 - android:exported
+
 此BroadcastReceiver能否接收其他App发出的广播(其默认值是由receiver中有无intent-filter决定的，如果有intent-filter，默认值为true，否则为false);
 
 - android:name
+
 此broadcastReceiver类名;
 
 - android:permission
+
 如果设置，具有相应权限的广播发送方发送的广播才能被此broadcastReceiver所接收;
 
 - android:process
+
 broadcastReceiver运行所处的进程。默认为App的进程。可以指定独立的进程(Android四大组件都可以通过此属性指定自己的独立进程);
 
 
@@ -2105,6 +2135,7 @@ broadcastReceiver运行所处的进程。默认为App的进程。可以指定独
 #### 有序广播
 
 有序广播是异步方式传播的。指的是发送出去的广播被BroadcastReceiver按照先后循序接收。有序广播的定义过程与普通广播无异，只是其的主要发送方式变为：
+
 ```
 /**
      * Broadcast the given intent to all interested BroadcastReceivers, delivering
@@ -2140,7 +2171,7 @@ abortBroadcast();
 - 级别低的后接收到广播
 - 接收器不能截断广播的继续传播，也不能处理广播
 - 同级别动态注册（代码中注册）高于静态注册（AndroidManifest中注册）
-    
+
 
 #### 广播的安全性问题
 Android中的广播可以跨进程甚至跨App直接通信，且exported属性在有intent-filter的情况下默认值是true，由此将可能出现的安全隐患如下：
@@ -2171,10 +2202,10 @@ Helper to register for and send broadcasts of Intents to local objects within yo
 (2)It is not possible for other applications to send these broadcasts to your app, so you don't need to worry about having security holes they can exploit.
 (3)It is more efficient than sending a global broadcast through the system.
 ```
+
 也就是说，使用该机制发出的广播只能够在应用程序内部进行传递，并且广播接收器也只能接收来自本地应用程序发出的广播，这样所有的安全性问题都不存在了。
 
 ##### (2)LocalBroadcastManager使用范例
-
 
 ```
 public class MainActivity extends AppCompatActivity {
@@ -2215,12 +2246,11 @@ public class MainActivity extends AppCompatActivity {
     }
 }
 ```
+
 [LocalBroadcastManager官方文档](https://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html)
 
 
-
-
-##  应用清单 
+##  应用清单
 
 每个应用的根目录中都必须包含一个 AndroidManifest.xml 文件（且文件名精确无误）。 清单文件向 Android 系统提供应用的必要信息，系统必须具有这些信息方可运行应用的任何代码。
 
@@ -2232,30 +2262,30 @@ public class MainActivity extends AppCompatActivity {
 <manifest>
 
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
-    
+
     <permission android:name="com.example.project.DEBIT_ACCT" . . . />
 
     <permission-tree />
     <permission-group />
-    
-    
+
+
     <instrumentation />
-    
+
     <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="25" />
-    
+
     <!-- 指明应用程序的软硬件需求 -->
     <uses-configuration />
-    
+
     <!-- 声明应用使用的单一硬件或软件功能 -->
     <uses-feature android:name="android.hardware.bluetooth" />
     <uses-feature android:name="android.hardware.camera" />
 
     <!-- 定义应用程序支持的屏幕尺寸，并针对更大的屏幕启用 屏幕兼容模式 -->
-    <supports-screens />  
+    <supports-screens />
     <!-- 指定应用程序所兼容的屏幕参数 -->
-    <compatible-screens />  
+    <compatible-screens />
     <!-- 声明本应用程序支持的一种 GL 纹理压缩格式 -->
-    <supports-gl-texture />  
+    <supports-gl-texture />
 
     <application
         android:name="com.android.contacts.ContactsApplication"
@@ -2278,7 +2308,7 @@ public class MainActivity extends AppCompatActivity {
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            
+
             <intent-filter android:label="@string/editContactDescription">
                 <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -2328,7 +2358,9 @@ public class MainActivity extends AppCompatActivity {
 Android 可在各种具有不同屏幕尺寸和密度的设备上运行。对于应用，Android 系统在不同设备中提供一致的开发环境，可以处理大多数工作，将每个应用的用户界面调整为适应其显示的屏幕。 同时，系统提供 API，可用于控制应用适用于特定屏幕尺寸和密度的 UI，以针对不同屏幕配置优化 UI 设计。 例如，您可能想要不同于手机 UI 的平板电脑 UI。
 
 虽然系统为使您的应用适用于不同的屏幕，会进行缩放和大小调整，但您应针对不同的屏幕尺寸和密度优化应用。 这样可以最大程度优化所有设备上的用户体验，用户会 认为您的应用实际上是专为他们的设备而设计，而不是 简单地拉伸以适应其设备屏幕。
+
 ### 重要概念：
+
 - 什么是屏幕尺寸、屏幕分辨率、屏幕像素密度
 - 什么事dp、dip、dpi、sp、px ？ 他们之间关系是什么
 - 什么是mdpi、hdpi、xdpi、xxdpi？如何计算和区分？
@@ -2364,7 +2396,7 @@ mdpi、hdpi、xdpi、xxdpi
 mdpi、hdpi、xdpi、xxdpi用来修饰Android中的drawable文件夹及values文件夹，用来区分不同像素密度下的图片和dimen值。
 
 ### 支持的屏幕范围
-    
+
 Android 支持多种屏幕尺寸和密度，反映设备可能具有的多种不同屏幕配置。 您可以使用 Android 系统的功能优化应用在各种屏幕配置下的用户界面 ，确保应用不仅正常渲染，而且在每个屏幕上提供 最佳的用户体验。
 
 为简化您为多种屏幕设计用户界面的方式，Android 将实际屏幕尺寸和密度的范围 分为：
@@ -2419,7 +2451,7 @@ Android 系统可帮助您的应用以两种方式实现密度独立性：
 
 - 系统根据当前屏幕密度扩展 dp 单位数
 - 系统在必要时可根据当前屏幕 密度将可绘制对象资源扩展到适当的大小
- 
+
 在图 2 中，文本视图和位图可绘制对象具有以像素（px 单位）指定的尺寸，因此视图的物理尺寸在低密度屏幕上更大，在高密度 屏幕上更小。这是因为，虽然实际屏幕尺寸可能相同，但高密度屏幕 的每英寸像素更多（同样多的像素在一个更小的区域内）。在图 3 中，布局 尺寸以密度独立的像素（dp 单位）指定。由于 密度独立像素的基线是中密度屏幕，因此具有中密度屏幕的设备看起来 与图 2 一样。但对于低密度和高密度屏幕，系统 将分别增加和减少密度独立像素值，以适应 屏幕。
 
 
@@ -2432,14 +2464,16 @@ Android 系统可帮助您的应用以两种方式实现密度独立性：
 Android 支持多种屏幕的基础是它能够管理针对当前屏幕配置 以适当方式渲染应用的布局和位图 可绘制对象。系统可处理大多数工作，通过适当地 缩放布局以适应屏幕尺寸/密度和根据屏幕密度缩放位图可绘制对象 ，在每种屏幕配置中渲染您的应用。但是，为了更适当地处理不同的屏幕配置 ，还应该：
 
 - 为不同屏幕尺寸提供不同的布局
- 
+
     通过声明您的应用支持哪些屏幕尺寸，可确保只有 其屏幕受支持的设备才能下载您的应用。声明对 不同屏幕尺寸的支持也可影响系统如何在较大 屏幕上绘制您的应用 — 特别是，您的应用是否在屏幕兼容模式中运行。
 要声明应用支持的屏幕尺寸，应在清单文件中包含 <supports-screens> 元素。
+
 - 为不同屏幕尺寸提供不同的布局
- 
+
     默认情况下，Android 会调整应用布局的大小以适应当前设备屏幕。大多数 情况下效果很好。但有时 UI 可能看起来不太好，需要针对 不同的屏幕尺寸进行调整。例如，在较大屏幕上，您可能要调整 某些元素的位置和大小，以利用其他屏幕空间，或者在较小屏幕上， 可能需要调整大小以使所有内容纳入屏幕。
 可用于提供尺寸特定资源的配置限定符包括 small、normal、large 和 xlarge。例如，超大屏幕的布局应使用 layout-xlarge/。
 从 Android 3.2（API 级别 13）开始，以上尺寸组已弃用，您 应改为使用 sw<N>dp 配置限定符来定义布局资源 可用的最小宽度。例如，如果多窗格平板电脑布局 需要至少 600dp 的屏幕宽度，应将其放在 layout-sw600dp/ 中。声明适用于 Android 3.2 的平板电脑布局一节将进一步讨论如何使用新技术声明布局资源。
+
 - 为不同屏幕密度提供不同的位图可绘制对象
 
     默认情况下，Android 会缩放位图可绘制对象（.png、.jpg 和 .gif 文件）和九宫格可绘制对象（.9.png 文件），使它们以适当的 物理尺寸显示在每部设备上。例如，如果您的应用只为 基线中密度屏幕 (mdpi) 提供位图可绘制对象，则在高密度 屏幕上会增大位图，在低密度屏幕上会缩小位图。这种缩放可能在 位图中造成伪影。为确保位图的最佳显示效果，应针对 不同屏幕密度加入不同分辨率的替代版本。
@@ -2575,12 +2609,6 @@ res/mipmap-xxxhdpi/my_icon.png      // launcher icon for extra-extra-extra-high-
 有时您可能不希望 Android 预缩放 资源。避免预缩放最简单的方法是将资源放在 有 nodpi 配置限定符的资源目录中。例如：
 res/drawable-nodpi/icon.png
 当系统使用此文件夹中的 icon.png 位图时，不会 根据当前设备密度缩放。
-
-
-
-
-
-
 
 # 参考
 [android developer](https://developer.android.google.cn/guide/)

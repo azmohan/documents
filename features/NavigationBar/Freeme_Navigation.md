@@ -9,20 +9,21 @@ Freeme Navigation整合了虚拟导航栏和屏幕外导航键，用户可折叠
 ##### 屏幕外导航键
 
 指纹键作为导航键使用，支持导航键的设备可以使用导航键轻松完成基本的导航操作，可实现
+
 1. 轻触
-1. 长按
-1. 双击
-1. 上下左右滑动
- 
+2. 长按
+3. 双击
+4. 上下左右滑动
+
 具体业务逻辑视项目需求而异，包括但不限于
 
 1. 轻触返回上一级界面
-1. 长按返回主屏幕
-1. 接听电话
-1. 拍摄照片
-1. 左右滑动浏览照片
-1. 调出最近应用
-1. 停止闹钟
+2. 长按返回主屏幕
+3. 接听电话
+4. 拍摄照片
+5. 左右滑动浏览照片
+6. 调出最近应用
+7. 停止闹钟
 
 ##### 切换
 支持导航键的设备出厂默认关闭了导航栏，若要开启导航栏，请打开设置，点击导航键 > 屏幕内虚拟导航栏。
@@ -81,6 +82,7 @@ Freeme Navigation整合了虚拟导航栏和屏幕外导航键，用户可折叠
 ##### FeatureOption.FREEME_NAVIGATION
 
 全局宏，对应system.prop的ro.freeme.navigation，配置情况如下
+
 - 0 - Google自带导航栏
 - 1 - 可折叠虚拟导航栏，不带指纹导航键
 - 2 - 仅支持指纹导航键，无虚拟导航栏
@@ -89,6 +91,7 @@ Freeme Navigation整合了虚拟导航栏和屏幕外导航键，用户可折叠
 ##### FeatureOption.FREEME_HW_MENUKEY_ACTAS
 
 全局宏，对应system.prop的ro.freeme.hw_menukey_actas
+
 - 打开时，左实体按键为短按Menu，长按根据Home键配置行为而定，若Home配置为Recent，则左实体按键长按为VoiceAssist
 - 关闭时，左实体按键为短按Recent，长按menu，Home键此时只能配置为Recent
 - 注意，该宏依赖FREEME_NAVIGATION非0
@@ -161,18 +164,18 @@ InputReader中，我们新加了一个虚拟的硬件按键KEYCODE_RECENT，如�
 #### Framework
 
 ###### 1、启动FreemeInputManagerService和FreemeStatusBarManagerService
-###### Keyword: "Navigation." 
+###### Keyword: "Navigation."
 
 - [SystemServer.java]
- 
+
 frameworks/base/services/java/com/android/server
 
 ###### 2、创建FreemePhoneWindow
-###### Keyword: "Navigation." 
+###### Keyword: "Navigation."
 
 - [Activity.java]
 - [Dialog.java]
- 
+
 frameworks/base/core/java/android/app/
 
 ###### 3、默认值设置及读取
@@ -221,7 +224,7 @@ frameworks/base/services/core/java/com/android/server/wm
 public interface WindowState {
     ……
     boolean canCarryColors();
-    
+
     void setCanCarryColors(boolean canCarryColors);
 }
 
@@ -265,14 +268,14 @@ public int navigationBarColor;
 frameworks/base/core/java/android/view
 
 ###### 10、窗体逻辑控制
-###### Keyword: "Navigation." 
+###### Keyword: "Navigation."
 
 - [PhoneWindowManager.java]
 
 frameworks/base/services/core/java/com/android/server/policy
 
 ###### 11、添加按键转义，将Menu键转为Recent键
-###### Keyword: "Navigation - RecentKey." 
+###### Keyword: "Navigation - RecentKey."
 
 - [InputReader.cpp]
 - [InputReader.h]
@@ -280,7 +283,7 @@ frameworks/base/services/core/java/com/android/server/policy
 frameworks/native/services/Inputflinger
 
 ###### 12、添加KEYCODE_FINGERPRINT_*
-###### Keyword: "Navigation." 
+###### Keyword: "Navigation."
 
 - [attrs.xml]
 - [fpsensor.kl]
@@ -299,14 +302,14 @@ frameworks/native/include/input
 frameworks/base/core/java/android/view
 
 ###### 13、updateColorViewInt时强制关闭部分窗口动画
-###### Keyword: "Navigation." 
+###### Keyword: "Navigation."
 
 - [DecorView.java]
- 
+
 frameworks/base/core/java/com/android/internal/policy/
 
 ###### 14、设置状态栏和导航栏颜色时，主动刷新图标颜色
-###### Keyword: "Navigation." 
+###### Keyword: "Navigation."
 
 ```
 setStatusBarColor(int color) {
@@ -322,14 +325,14 @@ setNavigationBarColor(int color) {
 ```
 
 - [PhoneWindow.java]
- 
+
 frameworks/base/core/java/com/android/internal/policy/
 
 ###### 15、将filterInputEvent()/interceptKeyBeforeDispatching()/dispatchUnhandledKey()暴露给子类处理
 ###### Keyword: "Navigation."
 
 - [InputManagerService.java]
- 
+
 frameworks/base/services/core/java/com/android/server/input/
 
 ###### 16、辅助修改
@@ -376,14 +379,14 @@ vendor/freeme/packages/apps/FreemeSystemUI/SystemUI/src/com/android/systemui/sta
 vendor/freeme/packages/apps/FreemeSystemUI/SystemUI/src/com/android/systemui/statusbar/phone
 
 ###### 21、按键位置及可见性修改
-###### Keyword: "Navigation." 
+###### Keyword: "Navigation."
 
 - [StatusBarKeyguardViewManager.java]
 
 vendor/freeme/packages/apps/FreemeSystemUI/SystemUI/src/com/android/systemui/statusbar/phone
 
 ###### 22、使用FreemeKeyButtonView
-###### Keyword: "Navigation." 
+###### Keyword: "Navigation."
 
 - [back.xml]
 - [home.xml]
@@ -393,7 +396,7 @@ vendor/freeme/packages/apps/FreemeSystemUI/SystemUI/src/com/android/systemui/sta
 vendor/freeme/packages/apps/FreemeSystemUI/SystemUI/res/layout
 
 ###### 23、修改导航栏图标颜色
-###### Keyword: "Navigation." 
+###### Keyword: "Navigation."
 
 - [color.xml]
 - [freeme_min_bar.xml]
@@ -467,14 +470,14 @@ vendor/freeme/packages/apps/FreemeSystemUI/SystemUI/src/com/android/systemui/sta
 #### Setting
 
 ###### 30、入口
-###### Keyword: "Navigation." 
+###### Keyword: "Navigation."
 
 - [SettingsActivity.java]
 
 vendor/freeme/packages/apps/FreemeSettings/src/com/android/settings
 
 ###### 31、UI描述，Preference声明
-###### Keyword: "Navigation." 
+###### Keyword: "Navigation."
 
 - [freeme_navigation_settings.xml]
 - [list_picker_dialog.xml]
@@ -485,7 +488,7 @@ vendor/freeme/packages/apps/FreemeSettings/res_freeme/xml
 vendor/freeme/packages/apps/FreemeSettings/res_freeme/layout
 
 ###### 32、设置类
-###### Keyword: "Navigation." 
+###### Keyword: "Navigation."
 
 - [FreemeNavigationSettingsFragment.java]
 
@@ -644,12 +647,12 @@ frameworks\base\packages\SettingsProvider\res\value
 驱动请按照frameworks/base/data/keyboards/fpsensor.kl中定义的键值来上报
 
 1. key 188 FINGERPRINT_UP
-1. key 189 FINGERPRINT_DOWN
-1. key 190 FINGERPRINT_LEFT
-1. key 191 FINGERPRINT_RIGHT
-1. key 192 FINGERPRINT_SINGLE_TAP
-1. key 193 FINGERPRINT_DOUBLE_TAP
-1. key 194 FINGERPRINT_LONGPRESS
+2. key 189 FINGERPRINT_DOWN
+3. key 190 FINGERPRINT_LEFT
+4. key 191 FINGERPRINT_RIGHT
+5. key 192 FINGERPRINT_SINGLE_TAP
+6. key 193 FINGERPRINT_DOUBLE_TAP
+7. key 194 FINGERPRINT_LONGPRESS
 
 ## 八、总结
 

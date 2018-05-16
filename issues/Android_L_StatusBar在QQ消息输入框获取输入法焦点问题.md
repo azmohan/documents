@@ -7,10 +7,12 @@
 [仿QQ5.0Android版 在锁屏桌面显示消息框](http://cloay.com/blog/2014/08/25/fang-qq5-dot-0androidban-zai-suo-ping-zhuo-mian-xian-shi-xiao-xi-kuang/)
 
 ### 分析流程
+
 1. 根据上报的现象，复现并确认所有Android L手机均有该类BUG
 2. 观察到点击密码输入框时，背景中出现输入法阴影，判断输入法已经弹出
 3. 通过dumpsys window windows 查看当前输入法layer等级，其与qq弹框layer一致
 4. 查看密码锁屏界面(KeyguardPasswordView.java)如何调出输入法。
+
 ```java
 @Override
 public void onResume(final int reason) {
@@ -33,7 +35,9 @@ public void onResume(final int reason) {
     });
 }
 ```
+
 查看InputMethodManager.java
+
 ```java
 public boolean showSoftInput(View view, int flags, ResultReceiver resultReceiver) {
     checkFocus();
@@ -49,12 +53,14 @@ public boolean showSoftInput(View view, int flags, ResultReceiver resultReceiver
             return mService.showSoftInput(mClient, flags, resultReceiver);
         } catch (RemoteException e) {
         }
-        
+
         return false;
     }
 }
 ```
+
 关键在于 mClient 对象是什么，发现其在 onWindowFocus 发生变化
+
 ```java
 /**
  * Called by ViewAncestor when its window gets input focus.
@@ -77,8 +83,10 @@ public void onWindowFocus(View rootView, View focusedView, int softInputMode,
     }
 }
 ```
+
 查看 log 如下：
-```java 
+
+```java
 Log.v(TAG, "onWindowFocus: " + focusedView
                 + " softInputMode=" + softInputMode
                 + " first=" + first + " flags=#"
@@ -88,14 +96,17 @@ Log.v(TAG, "onWindowFocus: " + focusedView
 - 在点击后，出现PasswordEntry ，但是onWindowFocus 并未变调用，此时输入法的mcilent 对象任然是qq弹框，所以其出现在qq弹框上面，而不是密码解锁界面
 - 而正常情况下该函数被正常调用，新的focusedView变化为statusbar，输入法正常显示
 调查onWindowFocus（）函数的调用栈情况如下：
+
 ```java
-imm.onWindowFocus(mView, mView.findFocus(),                                 ViewRootImpl.java 
-case MSG_WINDOW_FOCUS_CHANGED: {                                            ViewRootImpl.java 
+imm.onWindowFocus(mView, mView.findFocus(),                                 ViewRootImpl.java
+case MSG_WINDOW_FOCUS_CHANGED: {                                            ViewRootImpl.java
 public void windowFocusChanged() {                                          ViewRootImpl.java
 public void reportFocusChangedSerialized()                                  WindowState.java
  case REPORT_FOCUS_CHANGE: {                                            WindowManagerService.java
 ```
+
 结合以上调用情况，可以看出系统整体焦点变化的一个调用情况，通过打log发现 ViewRootImpl.java  中在下拉通知栏时，focus确实发生了变化，但是最终调用到 ViewRootImpl.java 时，并没有调用onWindowFocus函数。查看接受到消息后，ViewRootImpl的 处理
+
 ```java
 mLastWasImTarget = WindowManager.LayoutParams
         .mayUseInputMethod(mWindowAttributes.flags);
@@ -138,13 +149,17 @@ if (hasWindowFocus) {
     mHasHadWindowFocus = true;
 }
 ```
-onPostWindowFocus 的调用受三个变量控制 imm != null && mLastWasImTarget && !isInLocalFocusMode() 
+
+onPostWindowFocus 的调用受三个变量控制 imm != null && mLastWasImTarget && !isInLocalFocusMode()
 通过log发现 mLastWasImTarget此时false。而
+
 ```java
  mLastWasImTarget = WindowManager.LayoutParams
                             .mayUseInputMethod(mWindowAttributes.flags);
 ```
+
 所以查看 WindowManager 的mayUseInputMethod 函数
+
 ```java
 public static boolean mayUseInputMethod(int flags) {
     switch (flags&(FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM)) {
@@ -154,10 +169,11 @@ public static boolean mayUseInputMethod(int flags) {
     }
     return false;
 }
-
 ```
+
 关键在于FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM 属性
 查看Systemui中关于这俩个属性的定义，发现在StatusBarWindowManager.java 中
+
 ```
 private void applyFocusableFlag(State state) {
     if (state.isKeyguardShowingAndNotOccluded() && state.keyguardNeedsInput
@@ -173,7 +189,9 @@ private void applyFocusableFlag(State state) {
     }
 }
 ```
+
 可以看到isKeyguardShowingAndNotOccluded 受qq弹框或闹钟影响，对比M上现有改动：
+
 ```diff
      private void applyFocusableFlag(State state) {
 -        if (state.isKeyguardShowingAndNotOccluded() && state.keyguardNeedsInput
@@ -182,40 +200,44 @@ private void applyFocusableFlag(State state) {
              mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
              mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 ```
+
 替换后，验证输入法正常弹出，但是输入框未被顶起
 验证AS上5.1虚拟机也存在同样问题
 在Android源码下查看StatusBarWindowManager.java 的修改提交记录，发现有以下提交
+
 ```
 commit aa8061448ec5a0e3cef9685f4186fc94e09eb78e
 Author: Jorim Jaggi <jjaggi@google.com>
 Date:   Wed May 20 18:04:16 2015 -0700
 
     Fix status bar window IME flags & layout
-    
+
     When bouncer was showing, but keyguard was occluded, staus bar
     window couldn't receive input, and thus the IME window was placed
     below the status bar window. In addition to that, fix the layout when
     IME is showing up on the bouncer screen.
-    
+
     Bug: 19969474
 .../statusbar/phone/StatusBarWindowManager.java       |  4 ++--
 .../systemui/statusbar/phone/StatusBarWindowView.java |  5 ++++-
 .../com/android/server/policy/PhoneWindowManager.java | 19 ++++++++++++++-----
 ```
+
 查看该次提交所修改文件，并何入patch，验证有效
 合入patch如下：
+
 ```diff
 commit aa8061448ec5a0e3cef9685f4186fc94e09eb78e
 Author: Jorim Jaggi <jjaggi@google.com>
 Date:   Wed May 20 18:04:16 2015 -0700
 
     Fix status bar window IME flags & layout
-    
+
     When bouncer was showing, but keyguard was occluded, staus bar
     window couldn't receive input, and thus the IME window was placed
     below the status bar window. In addition to that, fix the layout when
     IME is showing up on the bouncer screen.
-    
+
     Bug: 19969474
     Change-Id: I38d21647801b57608d49c3f525d4840e6ba58296
 ---
@@ -229,7 +251,7 @@ index 4f1c652..de42643 100644
 --- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBarWindowManager.java
 +++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBarWindowManager.java
 @@ -115,8 +115,8 @@ public class StatusBarWindowManager {
- 
+
      private void applyFocusableFlag(State state) {
          boolean panelFocusable = state.statusBarFocusable && state.panelExpanded;
 -        if (state.isKeyguardShowingAndNotOccluded() && state.keyguardNeedsInput
@@ -270,7 +292,7 @@ index 17368aa..06b30b6 100644
 @@ -3642,15 +3642,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
          }
      }
- 
+
 +    private boolean canReceiveInput(WindowState win) {
 +        boolean notFocusable =
 +                (win.getAttrs().flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) != 0;

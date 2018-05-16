@@ -4,7 +4,7 @@
 
 1.整编之后无法开机，是因为PowerGuruServices.java中
 
-
+```
             /**
             * getIntent need android.permission.GET_INTENT_SENDER_INTENT
             * so clearCallingIdentity first
@@ -27,19 +27,20 @@
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+```
 
 
 ## 算法优化建议
 
 ### 1.对于 **mPowerGuruSavedSchedules** 列表 优化建议
 
-目前策略是关机不保存已经学习的列表。建议在代码中 在每次学习之后不同步保存到 mPowerGuruSavedSchedules列表中。但是关于mPowerGuruSavedSchedules的借口建议保存，已备后期有此类需求 
+目前策略是关机不保存已经学习的列表。建议在代码中 在每次学习之后不同步保存到 mPowerGuruSavedSchedules列表中。但是关于mPowerGuruSavedSchedules的借口建议保存，已备后期有此类需求
 
-
+```
                     if (!isSavedHeartbeatAlarm(alarm)) {
                         //keep the mPowerGuruSavedSchedules empty forever,
                         //mPowerGuruSavedSchedules.add(alarm);
-
+```
 
 ### 2.对 **GMS APP** 处理的算法优化建议
 
@@ -51,7 +52,7 @@
 
 基于上述原则，目前问题：对中国网络情况下（没有 **VPN和数据链接**  **同时** 连接的时候），我们直接添加到心跳列表中了
 
-
+```
     private boolean processGMSAlarm(AlarmInfoInternal alarm) {
         /**check if in china network */
         if (isChinaNetworkOperator() && !(mVpnNetworkConnected && mDataNetworkConnected)) {
@@ -68,12 +69,13 @@
         mGmsAppsAlarmAllAdjusted = false;
         return false;
     }
-
+```
 
 ### 3.对于isAlarmMatched 的改进建议
 
 有两个isAlarmMatched 方法，isAlarmMatched()
 
+```
     private boolean isAlarmMatched(AlarmInfoInternal a1, AlarmInfoInternal a2, boolean isRepeat) {
         if (a1 == null || a2 == null) return false;
 
@@ -118,17 +120,9 @@
 
             return true;
         }
-
+```
 
 
 ## LOG 优化建议
 
 ###1.PowerGuruHelper 添加Tracer log , powergure.log文件中。
-
-
-
-
-
-
-
-

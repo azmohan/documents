@@ -5,10 +5,10 @@
 使用80N wf8公版执行cts启动时间测试时，测试失败，cts控制台的日志如下：
 
 ```
-$ ./cts-tradefed 
+$ ./cts-tradefed
 Android Compatibility Test Suite 7.0_r9 (3943095)
 05-09 21:33:14 I/DeviceManager: Detected new device TSS8TW8LAEI7E699
-cts-tf > 
+cts-tf >
 cts-tf >
 cts-tf > run cts -m CtsAppSecurityHostTestCases  -t android.appsecurity.cts.DirectBootHostTest#testDirectBootNone
 
@@ -119,7 +119,6 @@ at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:19
 05-09 21:41:33 I/ResultReporter: Invocation finished in 8m 17s. PASSED: 0, FAILED: 1, MODULES: 1 of 1
 05-09 21:41:34 I/ResultReporter: Test Result: /home/prife/sharedir/projects/cts/android-cts/results/2017.05.09_21.33.16/test_result_failures.html
 05-09 21:41:34 I/ResultReporter: Full Result: /home/prife/sharedir/projects/cts/android-cts/results/2017.05.09_21.33.16.zip
-
 ```
 
 - 已知37平台上此项测试可以通过。
@@ -146,10 +145,10 @@ ln -s /home/prife/Android/Sdk/build-tools/24.0.2/aapt ~/bin/aapt
 
 ```
 $ cd android-cts/tools
-$ ./cts-tradefed  
+$ ./cts-tradefed
 Android Compatibility Test Suite 7.0_r9 (3943095)
 05-09 21:33:14 I/DeviceManager: Detected new device TSS8TW8LAEI7E699
-cts-tf > 
+cts-tf >
 ```
 
 此时连接手机，并关闭锁屏。然后执行
@@ -185,7 +184,11 @@ at com.android.cts.encryptionapp.EncryptionAppTest.testVerifyUnlockedAndDismiss(
 ```
 
 根据打印的log查看代码如下：
-```cts/hostsidetests/appsecurity/test-apps/EncryptionApp/src/com/android/cts/encryptionapp/EncryptionAppTest.java```
+
+```
+cts/hostsidetests/appsecurity/test-apps/EncryptionApp/src/com/android/cts/encryptionapp/EncryptionAppTest.java
+```
+
 ```
 public void assertUnlocked() throws Exception {
     awaitBroadcast(Intent.ACTION_LOCKED_BOOT_COMPLETED);
@@ -207,8 +210,13 @@ private void awaitBroadcast(String action) throws Exception {
     throw new AssertionError("Failed to find " + probe);
 }
 ```
+
 测试失败的原因是由于ACTION_BOOT_COMPLETED广播对应的标记文件未生成，而此文件是由`splitapp` 生成
-```cts/hostsidetests/appsecurity/test-apps/SplitApp/src/com/android/cts/splitapp/BaseBootReceiver.java```
+
+```
+cts/hostsidetests/appsecurity/test-apps/SplitApp/src/com/android/cts/splitapp/BaseBootReceiver.java
+```
+
 ```
     public void onReceive(Context context, Intent intent) {
         try {
@@ -225,6 +233,7 @@ private void awaitBroadcast(String action) throws Exception {
 ```
 
 查看开机过程的log中关于开机广播信息
+
 ```
 05-10 23:17:24.270   990  1029 V ActivityManager: broadcast BOOT_COMPLETED intent
 05-10 23:17:24.278   990  1029 V ActivityManager: Broadcast: Intent { act=android.intent.action.LOCKED_BOOT_COMPLETED flg=0x9000010 (has extras) } ordered=true userid=0 callerApp=null
@@ -335,6 +344,7 @@ private void awaitBroadcast(String action) throws Exception {
 05-10 23:19:57.778   990  1000 D ActivityManager: BroadcastRecord{8994db4 u0 android.intent.action.BOOT_COMPLETED}, spend: 14, android.os.BinderProxy@3e6cc42, ActivityInfo{dc96e9d com.baidu.simeji.alive.AliveReceiver}
 05-10 23:19:57.926   990  1562 D ActivityManager: BroadcastRecord{8994db4 u0 android.intent.action.BOOT_COMPLETED}, spend: 146, android.os.BinderProxy@58f0e3f, ActivityInfo{15ee6e3 com.android.cts.splitapp.BootReceiver}
 ```
+
 可以看到有几个广播之间间隔很久（15s）
 
 ```
@@ -365,7 +375,10 @@ private void awaitBroadcast(String action) throws Exception {
 通过log发现，广播处理完后，进程并没有直接进行下一次广播，而是等待mStartingBackground中service创建，而此service不知为何一直未执行完成，最终导致ActivityManager等待超时，强行执行下一次广播。
 
 查看代码
-```frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java```
+
+```
+frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+```
 
 ```java
     public void finishReceiver(IBinder who, int resultCode, String resultData,
@@ -406,7 +419,9 @@ private void awaitBroadcast(String action) throws Exception {
         }
     }
 ```
+
 ```frameworks/base/services/core/java/com/android/server/am/BroadcastQueue.java```
+
 ```java
 	public boolean finishReceiverLocked(BroadcastRecord r, int resultCode,
             String resultData, Bundle resultExtras, boolean resultAbort, boolean waitForServices) {
@@ -426,7 +441,7 @@ private void awaitBroadcast(String action) throws Exception {
             if (receiver == null || nextReceiver == null
                     || receiver.applicationInfo.uid != nextReceiver.applicationInfo.uid
                     || !receiver.processName.equals(nextReceiver.processName)) {
-  
+
               	///  判断当前是否存在后台服务
                 if (mService.mServices.hasBackgroundServices(r.userId)) {
                     /// M: broadcast log enhancement @{
@@ -450,6 +465,7 @@ private void awaitBroadcast(String action) throws Exception {
 		... ...
     }
 ```
+
 ```hasBackgroundServices()``` 函数实现于
 
 ```/frameworks/base/services/core/java/com/android/server/am/ActiveServices.java```

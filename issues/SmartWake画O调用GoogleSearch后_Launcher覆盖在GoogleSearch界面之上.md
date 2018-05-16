@@ -4,6 +4,7 @@
 
 ### 原因分析:
 #### 1.1 Z序
+
 - Window的显示层级由Z序控制，Launcher此时的Z序高于GoogleSearch，故打开WMS LOG开关从Log追踪Z序构成(打开Log请在WindowManagerDebugConfig.java中将DEBUG开关置为True)
 
 ```
@@ -39,7 +40,9 @@
 03-01 19:41:49.722 26315-27019/system_process V/WindowManager: Assign layer Window{74155e1 u0 NavigationBar}: mBase=211000 mLayer=211000 =mAnimLayer=211000
 03-01 19:41:49.722 26315-27019/system_process V/WindowManager: Assign layer Window{2d8e7c3 u0 SmartWake}: mBase=291000 mLayer=291000 =mAnimLayer=291000
 ```
+
 - 此时插入googlequicksearchbox后再排序，根据Z序逻辑被插入到了ImageWallpaper前面，id为4，且mLayer为21000
+
 ```
 03-01 19:41:49.725 26315-27019/system_process V/WindowManager: addWindow: New client android.os.BinderProxy@43e36d2: window=Window{b9d83a3 u0 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.queryentry.QueryEntryActivity} Callers=com.android.server.wm.Session.addToDisplay:177 android.view.IWindowSession$Stub.onTransact:124 com.android.server.wm.Session.onTransact:139 android.os.Binder.execTransact:570 <bottom of call stack> 
 03-01 19:41:49.727 26315-26608/system_process V/WindowManager: Win #8 Window{2d8e7c3 u0 SmartWake}: isOnScreen=true mDrawState=4
@@ -82,8 +85,10 @@
 03-01 19:41:49.756 26315-26608/system_process V/WindowManager: Found wallpaper target: #0=Window{e7eedd0 u0 com.android.launcher3/com.android.launcher3.Launcher}
 03-01 19:41:49.756 26315-26608/system_process V/WindowManager: New wallpaper target: Window{e7eedd0 u0 com.android.launcher3/com.android.launcher3.Launcher} oldTarget: Window{217dcd7 u0 StatusBar}
 ```
+
 - 直到此时Launcher被作为Wallpaper Target, 即Launcher被显示出来
 - 重新排序，ImageWallpaper拉到最底，Launcher叠于之上，+5Z序，成了21005
+
 ```
 03-01 19:41:49.756 26315-26608/system_process V/WindowManager: New animation: true old animation: true
 03-01 19:41:49.756 26315-26608/system_process V/WindowManager: New i: 0 old i: 6

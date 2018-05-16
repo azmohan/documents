@@ -7,27 +7,32 @@
 ## 1.通知
 
 [通知详解地址](https://developer.android.com/guide/topics/ui/notifiers/notifications.html)
-- [**通知渠道**](https://developer.android.com/guide/topics/ui/notifiers/notifications.html#ManageChannels)
+- [ **通知渠道** ](https://developer.android.com/guide/topics/ui/notifiers/notifications.html#ManageChannels)
 
   允许你为要显示的每种通知类型创建用户自定义的渠道
 
-- [**通知标志**](https://developer.android.com/guide/topics/ui/notifiers/notifications.html#Badges)
-  
+- [ **通知标志** ](https://developer.android.com/guide/topics/ui/notifiers/notifications.html#Badges)
+
   在应用启动器图标上显示的通知
+
 - **休眠**
-  
+
   将通知置于休眠状态
+
 - **通知超时**
-  
+
   setTimeoutAfter()
+
 - **通知清除**
 
   onNotificationRemoved()
+
 - **背景颜色**
-  
+
   a. setColor() (通知设置)
-  
+
   b. setColorized() (启用通知)
+
 - **消息样式**
 
   MessagingStyle类
@@ -44,54 +49,58 @@
 2.NotificationListenerService和 ConditionProviderService 不支持低内存的设备
 
 **Demo效果图：**
+
 |picture1|picture2|picture3|picture4|
 |-- |-- |-- |--|
 | ![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Notification.png)|![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Notification1.png)|![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Notification3.png)|![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Notification4.png)|
 
 
 
-[**Demo地址**](https://github.com/googlesamples/android-NotificationChannels)
+[ **Demo地址** ](https://github.com/googlesamples/android-NotificationChannels)
 
 ## 2.自动填充框架
 
 [自动填充框架详解地址](https://developer.android.com/guide/topics/text/autofill.html#benefits)
 
 - **优点**
-  
+
   a.帮助用户避免重新输入信息
-  
+
   b.最大限度地减少用户输入的错误
 
 - **先决条件**
-  
+
   path:
-  
+
   Settings > System > Languages & input > Advanced > Input assistance > Autofill service
 - **优化应用以进行自动填充**
-  
+
   a.确保数据可用
-  
+
   b.提供自动填充的提示
-  
+
   c.将字段标记为自动填充的重要内容
-  
+
   d.强制自动填充请求
-  
+
   e.确定是否启用自动填充
-  
+
   f.关联网站和移动应用数据
+
 - **支持自定义视图**
-  
+
   自定义视图可以使用自动填充API来指定公开给自动填充框架的元数据。
+
 - **在自动填充事件上使用回调**
-  
+
   AutofillCallback
-  
+
 - **解决已知问题**
 
   a.检查设备是否支持自动填充并为当前用户启用
-  
+
   b.调整大小的对话框不考虑自动填充
+
 **Demo展示图：**
 
 |picture1|picture2|picture3|picture4|
@@ -99,13 +108,14 @@
 |![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171214-144637.png) |![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171214-144651.png) |![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171214-144729.png) |![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171214-144736.png) |
 
 
-[**Demo地址**](https://github.com/googlesamples/android-PictureInPicture)
+[ **Demo地址** ](https://github.com/googlesamples/android-PictureInPicture)
 
 ## 3. 画中画模式
 
 [画中画模式](https://developer.android.com/guide/topics/ui/picture-in-picture.html)
 
 **简介：**
+
 pip是主要用于视频播放的一种特殊类型的多窗口模式。Pip利用Android7.0中提供的多窗口API来提供固定的视频覆盖窗口。要将PIP添加到您的应用程序中，您需要注册支持PIP的activities，根据需要将activity切换到PIP模式，并确保UI元素处于隐藏状态，当activity处于pip模式继续播放视频。
 
 
@@ -121,13 +131,15 @@ pip是主要用于视频播放的一种特殊类型的多窗口模式。Pip利�
   a. enterPictureInPictureMode()
 
   b. onUserLeaveHint()
+
 - **在画中画中处理用户界面**
 
   a. Activity.onPictureInPictureModeChanged()
- 
+
   b. Fragment.onPictureInPictureModeChanged()
- 
+
   c. 遵循原则
+
 - **在画中画中继续播放视频**
 
   a. isInPictureInPictureMode()
@@ -135,7 +147,7 @@ pip是主要用于视频播放的一种特殊类型的多窗口模式。Pip利�
 - **最佳做法**
 
   a. PIP适用于播放全屏视频的活动
- 
+
   b. PIP模式下接收输入事件
 
   c. PIP模式下导致音频干扰其他应用程序
@@ -146,18 +158,23 @@ pip是主要用于视频播放的一种特殊类型的多窗口模式。Pip利�
 |--|--|--|
 |![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171211-154222.png)|![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171211-154144.png)|![image](https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171211-154129.png)|
 
-[**Demo地址**](https://github.com/googlesamples/android-PictureInPicture)
+[ **Demo地址** ](https://github.com/googlesamples/android-PictureInPicture)
 
 ## 4.自适应TextView
 [自适应TextView详解地址](https://developer.android.com/guide/topics/ui/look-and-feel/autosizing-textview.html)
+
 - **默认**
 
 1. android:autoSizeTextType="uniform"
+
 - **粒度**
+
 1. android:autoSizeStepGranularity="2sp"
+
 - **预设尺寸**
 
 res/values/arrays.xml:
+
 ```
 <resources>
   <array name="autosize_text_sizes">
@@ -169,7 +186,9 @@ res/values/arrays.xml:
   </array>
 </resources>
 ```
+
 **效果图：**
+
 |picture1 |picture2 | picture3|
 |-- |-- |-- |
 |<img src="https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171205-112839.png" /> |<img src="https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171205-113006.png" /> |<img src="https://raw.githubusercontent.com/chenxinsi/Pictures/master/Screenshot_20171205-113126.png" /> |
@@ -200,12 +219,15 @@ res/values/arrays.xml:
 XML中的字体，可让您将字体用作资源。您可以在font文件res/font/夹中添加文件以将字体捆绑为资源。例如，要访问字体资源，请使用@font/myfont或R.font.myfont。
 
 在java代码中:
+
 ```
 Typeface typeface = getResources().getFont(R.font.dancing_script);
 textView.setTypeface(typeface);
 ```
+
 在xml中使用
-``` 
+
+```
 <TextView
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -213,6 +235,7 @@ textView.setTypeface(typeface);
     android:textSize="50sp"
     android:text="@string/xinsichen" />
 ```
+
 效果图：
 |picture1|
 |--|
@@ -271,7 +294,7 @@ c.系统在四面各留出18dp，以产生有趣的视觉效果，如视差或�
 
 ## 9.WebView API
 
-[**WebView API详解地址**](https://developer.android.com/guide/webapps/managing-webview.html)
+[ **WebView API详解地址** ](https://developer.android.com/guide/webapps/managing-webview.html)
 
 - **Version API**
 
@@ -284,14 +307,16 @@ c.系统在四面各留出18dp，以产生有趣的视觉效果，如视差或�
 - **Termination Handle API**
 
 1. 处理WebView对象的渲染器进程消失的情况
+
 - **Renderer Importance API**
 
 1. 为WebView对象关联的呈现器进程分配优先级
 
   **注：** 为了保持应用程序的稳定性，您不应该更改WebView对象的渲染器优先级策略
+
 ## 10.固定快捷方式和小部件
 
-[**固定快捷方式和小部件**](https://developer.android.com/guide/topics/ui/shortcuts.html#pinning)
+[ **固定快捷方式和小部件** ](https://developer.android.com/guide/topics/ui/shortcuts.html#pinning)
 
 **展示图：**
 |picture1|
@@ -308,8 +333,8 @@ c.系统在四面各留出18dp，以产生有趣的视觉效果，如视差或�
 |--|
 | <img width="300px" src="https://raw.githubusercontent.com/chenxinsi/Pictures/master/demo_pinned_shortcut.png" /> |
 
-- **isRequestPinShortcutSupported()** 
-  
+- **isRequestPinShortcutSupported()**
+
   验证设备的默认启动支持程序快捷启动方式
 
 - **两种创建ShortcutInfo的方式**
@@ -342,9 +367,11 @@ c.系统在四面各留出18dp，以产生有趣的视觉效果，如视差或�
 |适配前后的示例图|
 
 在Galaxy S8发布之后，Android官方提供了适配方案，即提高App所支持的最大屏幕纵横比，实现很简单，在AndroidManifest.xml中可做如下配置：
+
 ```
 <meta-data android:name="android.max_aspect" android:value="ratio_float"/>
 ```
+
 其中ratio_float为浮点数，官方建议为2.1或更大，因为18.5：9=2.055555555……，如果日后出现纵横比更大的手机，此值将会更大。
 
 另外如果没有上述设置，android:resizeableActivity 也为false的话，则应用所支持的最大纵横比为默认值1.86，即默认无法支持全面屏。
@@ -366,6 +393,7 @@ c.系统在四面各留出18dp，以产生有趣的视觉效果，如视差或�
 |huawei Mate10|
 
 对 adb shell 进行了扩展，以支持多个显示器。shell start 命令现在可用于启动操作组件，并指定操作组件的目标显示器：
+
 ```
 adb shell start <activity_name> --display <display_id>
 ```
@@ -385,6 +413,7 @@ Android 8.0 将提供更好的原生多显示器支持。如果某个应用或�
 - paddingHorizontal
 
 **示例：**
+
 ```
 <LinearLayout
     android:layout_width="wrap_content"
@@ -400,6 +429,7 @@ Android 8.0 将提供更好的原生多显示器支持。如果某个应用或�
     android:paddingVertical="50dp"/>
 </LinearLayout>
 ```
+
 **效果图：**
 |picture1|
 |--|
@@ -414,17 +444,19 @@ Android 8.0 将提供更好的原生多显示器支持。如果某个应用或�
 - **请求指针捕获**
 
   只有在包含该视图的视图层次结构具有焦点时，您的应用中的视图才能请求指针捕获。
+
 - **处理捕获的指针事件**
 
   一旦视图成功获取指针捕获，Android就开始提供鼠标事件
-  
+
   a.如果您使用自定义视图，请重写onCapturedPointerEvent(MotionEvent)
-  
+
   b.否则，注册一个OnCapturedPointerListener
-  
+
   无论您使用自定义视图还是注册侦听器，您的视图都会收到一个 MotionEvent带有指针坐标的指针坐标，用于指定相对移动，如X / Y增量，类似于由轨迹球设备提供的坐标。您可以使用getX()和检索坐标getY()。
+
 - **释放指针捕捉**
-  
+
   调用释放指针捕获releasePointerCapture()
 
 ## 15.应用类别
@@ -476,8 +508,9 @@ android电视机顶盒
 
 
 - **键盘导航键区**
-  
+
   某个操作组件使用一种复杂的视图层次结构,可考虑将多组界面元素组成一个键区，简化键盘导航这些元素的操作。
+
 - **视图默认焦点**
 
   您可以指定在创建的操作组件继续运行并且用户按下键盘导航键之后应接收焦点的 View。
@@ -500,10 +533,12 @@ android电视机顶盒
 现在，每个应用均获得一定的磁盘空间配额，用于存储 getCacheQuotaBytes(UUID) 返回的缓存数据。
 
 - **为释放空间删除缓存文件**
+
 1. 低配额被保存
 2. 优先删除最旧
 
 - **为大文件分配磁盘空间**
+
 1. allocateBytes(FileDescriptor, long)
 
 注： 自动清除属于其他应用的缓存文件
@@ -511,6 +546,7 @@ android电视机顶盒
 2. getAllocatableBytes(UUID)代替getUsableSpace()
 
 注： 确定设备是否有足够的磁盘空间保存新数据
+
 ## 20.新的StrictMode检测程序
 
 [新的StrictMode检测程序详解地址](https://developer.android.google.cn/about/versions/oreo/android-8.0.html?hl=zh-cn#sys)
@@ -518,12 +554,15 @@ android电视机顶盒
 帮助识别应用可能出现的错误：
 
 Android8.0添加了三个新的StrictMode检测程序：
+
 - **detectUnbufferedIo()**
 
 **注 ：** 检测您的应用何时读取或写入未缓冲的数据，这可能极大影响性能。
+
 - **detectContentUriWithoutPermission()**
 
 **注：** 检测您的应用在其外部启动 Activity 时何时意外忘记向其他应用授予权限
+
 - **detectUntaggedSockets()**
 
 **注：** 检测您的应用何时使用网络流量
@@ -574,6 +613,7 @@ Android8.0添加了三个新的StrictMode检测程序：
 为了降低发生这些问题的几率，Android 8.0 对应用在用户不与其直接交互时可以执行的操作施加了限制。
 
 应用在两个方面受到限制：
+
  1.后台服务限制
  2.广播限制
 
@@ -600,14 +640,13 @@ Android8.0添加了三个新的StrictMode检测程序：
 
 - **前台应用行为被保留**
 - **调整您的应用的位置行为**
-  
+
   a. 把你的应用程序放在前台。
-  
+
   b. 通过调用在应用程序中 启动前台服务startForegroundService()。
 
   c. 使用Geofencing API的元素（如 GeofencingApi 界面），这些元素经过优化，可最大限度地降低功耗。
-  
-  d. 
+
 - **受影响的API**
 
 ## 25.JobScheduler 改进
@@ -618,15 +657,17 @@ Android8.0添加了三个新的StrictMode检测程序：
 使用计划作业替代现在受限的后台服务或隐式广播接收器，这些改进可以让您的应用更轻松地符合新的后台执行限制。
 
 **JobScheduler 的更新包括：**
+
 - 工作队列与计划作业关联。
 
 通过调用 JobInfo.Builder.setClipData() 的方式将 ClipData 与作业关联。
+
 - 计划作业现在支持多个新的约束条件
-  
+
   1）JobInfo.isRequireStorageNotLow()
-  
+
   2）JobInfo.isRequireBatteryNotLow()
-  
+
   3）NETWORK_TYPE_METERED
 
 
@@ -647,11 +688,13 @@ Android8.0添加了三个新的StrictMode检测程序：
 - 提供数据存储到首选项
 
 ## 27.findViewById()更新
+
 **简述：**
 
 现在 findViewById()函数的全部实例均返回<T extends View> T,而不是View。
 
 **示例：**
+
 ```
 Button btn = findViewById(R.id.btn_test);
 ```
@@ -676,6 +719,7 @@ Button btn = findViewById(R.id.btn_test);
   b. 插值器类型
 
   c. 持续时间
+
 - **使用VolumeShaper**
 
   1. 创建配置 (创建一个实例VolumeShaper.Configuration)
@@ -693,10 +737,10 @@ Button btn = findViewById(R.id.btn_test);
 - **新AudioFocusRequest类**
 
   应用在处理音频焦点变化时会使用新功能：
-  
+
   a.自动闪避
   (另一个应用程序请求焦点时,系统可以在不调用应用程序的onAudioFocusChange()回调的情况下进行缓存并还原卷。)
-  
+
   b.延迟聚焦
   (有时系统不能授予对音频焦点的请求，因为焦点被另一个应用程序“锁定”，例如在电话呼叫期间。发生这种情况时，应用程序不应该继续播放音频，因为它没有获得焦点。）
 
@@ -706,6 +750,7 @@ Button btn = findViewById(R.id.btn_test);
 **简述：**
 
 为 MediaPlayer 类添加了多种新函数。这些函数可以从多个方面增强您的应用处理媒体播放的能力：
+
 - 在搜索帧时进行精细控制。
 - 播放受数字版权管理保护的材料的功能。
 - 支持采样级加密。
@@ -722,6 +767,7 @@ Button btn = findViewById(R.id.btn_test);
 ## 32.改进媒体文件访问功能
 
 **访问远程数据源中的大媒体文件面临一些挑战：**
+
 - 媒体播放器需要以寻址方式访问来自文档提供程序的文件。当大媒体文件驻留在远程数据源上时，文档提供程序必须事先提取所有数据，并创建快照文件描述符。媒体播放器无法播放没有文件描述符的文件，因此在文档提供程序完成文件下载前，无法开始播放。
 - 照片应用等媒体集合管理器必须通过作用域文件夹遍历一系列访问 URI 才能访问存储在外部 SD 卡上的媒体。这种访问模式会让媒体上的批量操作（例如移动、复制和删除）变得非常缓慢。
 - 媒体集合管理器无法根据文档的 URI 确定其位置。这就让这些类型的应用难以允许用户选择媒体文件的保存位置。
@@ -729,14 +775,16 @@ Button btn = findViewById(R.id.btn_test);
 **改进存储访问框架解决了各个挑战：**
 
 - 自定义文档提供程序
-  
-  为远程数据源的文件创建可寻址的**文件描述符**
+
+  为远程数据源的文件创建可寻址的 **文件描述符**
+
 - 直接文档访问
-  
+
    getDocumentUri()
+
 - 文档路径
 
-  DocumentsContract.Path 
+  DocumentsContract.Path
 
 ## 33.音频播放控制
 
@@ -750,6 +798,7 @@ Button btn = findViewById(R.id.btn_test);
 [Wifi感知](https://developer.android.google.cn/guide/topics/connectivity/wifi-aware.html)
 
 **简介：**
+
 新增了对 WLAN 感知的支持，此技术基于周边感知联网 (NAN) 规范。
 
 在具有相应 WLAN 感知硬件的设备上，应用和附近设备可以通过 WLAN 进行搜索和通信，无需依赖互联网接入点。我们正在与硬件合作伙伴合作，以尽快将 WLAN 感知技术应用于设备。
@@ -832,11 +881,12 @@ Button btn = findViewById(R.id.btn_test);
 
 包含可用于与文本可编辑对象的提示文本进行交互的多个函数
 
-- **isShowingHintText() 和 setShowingHintText()** 
+- **isShowingHintText() 和 setShowingHintText()**
 
   注：分别显示和设置节点的当前文本内容是否表示节点的提示文本。
+
 - **getHintText()**
-  
+
   注：访问提示文本本身
 
 ## 44.权限
@@ -844,6 +894,7 @@ Button btn = findViewById(R.id.btn_test);
 [权限详解地址](https://developer.android.com/about/versions/oreo/android-8.0.html#sp)
 
 引入了几个与电话相关的新权限：
+
 -  ANSWER_PHONE_CALLS （允许您的应用通过编程方式接听呼入电话）
 
 -  READ_PHONE_NUMBERS （允许您的应用读取设备中存储的电话号码）
@@ -853,11 +904,13 @@ Button btn = findViewById(R.id.btn_test);
 ## 45.new account access and discovery api
 
 **简述：**
+
 对应用如何访问用户帐户进行了一些改进。对于他们管理的帐户，身份验证人可以使用他们自己的策略来决定是否向应用程序隐藏帐户或向其披露帐户。Android系统跟踪可以访问特定帐户的应用程序。
 
 **api更改：**
 
 AccountManager提供了六种新方法来帮助认证者管理哪些应用可以看到一个帐户：
+
 - setAccountVisibility(android.accounts.Account, java.lang.String, int)：设置特定用户帐户和程序包组合的可见性级别。
 - getAccountVisibility(android.accounts.Account, java.lang.String)：获取特定用户帐户和程序包组合的可见性级别。
 - getAccountsAndVisibilityForPackage(java.lang.String, java.lang.String)：允许认证者获得给定包裹的账户和可见度水平。
@@ -872,6 +925,7 @@ AccountManager提供了六种新方法来帮助认证者管理哪些应用可以
 通过使用安全浏览API，您的应用可以检测到Google已经归类为已知威胁的URL 默认情况下会 显示警告用户已知威胁的插页式广告。该屏幕允许用户选择加载URL，或返回到安全的上一页。
 
 **自定义响应一直威胁：**
+
 - 控制您的应用是否将已知威胁报告给安全浏览。
 - 让自己的应用程序自动执行特定操作（例如回到安全状态），每次遇到安全浏览会将其归类为已知威胁的网址时。
 
@@ -897,10 +951,11 @@ AccountManager提供了六种新方法来帮助认证者管理哪些应用可以
 Android共享内存是Android操作系统的一个组件，它有助于内存共享和保存。这是Linux中的设备驱动程序。
 
 - **为什么需要共享内存？**
- 
+
 binder 中用来打包、传递数据的 Parcel，一般用来传递 IPC 中的小型参数和返回值。binder 目前每个进程 mmap 接收数据的内存是 1M，所以就算你不考虑效率问题用 Parcel 来传，也无法传过去。
 
 只要超过 1M 就会报错（binder 无法分配接收空间）。所以 android 里面有一个专门用来在 IPC 中传递大型数据的东西—— Ashmem（Anonymous Shared Memroy）
+
 - **原理概述：**
 
 ashmem 并不像 binder 是 android 重新自己搞的一套东西，而是利用了 linux 的 tmpfs 文件系统。
@@ -926,9 +981,11 @@ Proc B 在接到的 fd 上同样 mmap 相同的区域到本进程
 [WallpaperColorsAPI](https://developer.android.com/about/versions/oreo/android-8.1.html#wallpaper)
 
 **简述：**
+
 允许您的动态壁纸为系统UI提供颜色信息。
 
 **使用方法：**
+
 - 使用三种颜色创建对象
 - 位图创建对象
 - drawable创建一个对象
@@ -938,7 +995,8 @@ Proc B 在接到的 fd 上同样 mmap 相同的区域到本进程
 [指纹更新详解地址](https://developer.android.com/about/versions/oreo/android-8.1.html#fingerprint)
 
 FingerprintManager类含有以下的错误码：
-- FINGERPRINT_ERROR_LOCKOUT_PERMANENT 
+
+- FINGERPRINT_ERROR_LOCKOUT_PERMANENT
 （用户尝试使用指纹读取器解锁设备的次数过多。）
 - FINGERPRINT_ERROR_VENDOR
 （发生特定于供应商的指纹识别器错误）
@@ -968,6 +1026,7 @@ TensorFlow Lite可与Neural Networks API 协同工作，在移动设备上高效
 
 
 ## 53.运行时和工具
+
 - 平台优化
 - 更新的Java支持
 - 更新的ICU4J Android Framework API

@@ -16,7 +16,7 @@ public void systemReady() {
     readCameraLensCoverState();
     updateUiMode();
     boolean bindKeyguardNow;
-    
+
     //注意，这段代码使用mLock同步
     synchronized (mLock) {
         updateOrientationListenerLp();
@@ -48,7 +48,7 @@ public void systemReady() {
 
 因此上面代码逻辑仅执行：
 
-1. `KeyguardServiceDelegate`对象创建
+1. `KeyguardServiceDelegate` 对象创建
 2. `mKeyguardDelegate.onSystemReady()`
 
 ## KeyguardServiceDelegate构造
@@ -115,7 +115,7 @@ public void onSystemReady() {
 }
 ```
 
-此时`mKeyguardService`为空。只有执行过bindService之后`mKeyguardService`才非空。因此只是简单的设置状态。
+此时 `mKeyguardService` 为空。只有执行过bindService之后 `mKeyguardService` 才非空。因此只是简单的设置状态。
 
 
 # WMS.enableScreenAfterBoot()
@@ -145,7 +145,7 @@ public void enableScreenAfterBoot() {
     mPolicy.systemBooted();
 
     performEnableScreen();
-} 
+}
 ```
 
 ## PhoneWindowManager.systemBooted
@@ -292,7 +292,7 @@ public void onScreenTurningOn(final DrawnListener drawnListener) {
         // This shouldn't happen, but if it does, show the scrim immediately and
         // invoke the listener's callback after the service actually connects.
         mDrawnListenerWhenConnect = drawnListener;
-        
+
         //显示KeyguardScrim窗口
         showScrim();
     }
@@ -318,7 +318,7 @@ private final ServiceConnection mKeyguardConnection = new ServiceConnection() {
         到这里说明SystemUI已经真正启动起来了！
         mKeyguardService = new KeyguardServiceWrapper(mContext,
                 IKeyguardService.Stub.asInterface(service), mShowingStateChangedCallback);
-        
+
         //这里肯定是true
         if (mKeyguardState.systemIsReady) {
             // If the system is ready, it means keyguard crashed and restarted.
@@ -341,7 +341,7 @@ private final ServiceConnection mKeyguardConnection = new ServiceConnection() {
             }
             mDrawnListenerWhenConnect = null;
         }
-        
+
         //此时 bootCompleted为真
         if (mKeyguardState.bootCompleted) {
             mKeyguardService.onBootCompleted();
@@ -462,7 +462,7 @@ oneway interface IKeyguardService {
 }
 ```
 
-注意这个`oneway`关键字，表示调用`IKeyguardService.setOccluded`时不等函数再BN端执行完毕就立刻返回。这是为了避免系统被keyguard的实现端（SystemUI）阻塞。
+注意这个 `oneway` 关键字，表示调用 `IKeyguardService.setOccluded` 时不等函数再BN端执行完毕就立刻返回。这是为了避免系统被keyguard的实现端（SystemUI）阻塞。
 
 ## KeyguardService.setOccluded
 
@@ -592,11 +592,11 @@ private void apply(State state) {
 }
 ```
 
-回调`WMS.updateViewLayout`
+回调 `WMS.updateViewLayout`
 
-存疑，这个函数最终调用到哪里去了呢？？如何把这个函数存储的信息更新给WMS呢？WMS中没有`updateViewLayout` API。
+存疑，这个函数最终调用到哪里去了呢？？如何把这个函数存储的信息更新给WMS呢？WMS中没有 `updateViewLayout` API。
 
-思考：修改`WindowManager.LayoutParams`中的参数，需要WMS执行relayout。因为LP参数中可以配置窗口位置，以及状态栏、导航栏的可见性，这显然需要窗口重新布局。
+思考：修改 `WindowManager.LayoutParams` 中的参数，需要WMS执行relayout。因为LP参数中可以配置窗口位置，以及状态栏、导航栏的可见性，这显然需要窗口重新布局。
 
 #### StatusBarKeyguardViewManager.reset
 
@@ -650,7 +650,7 @@ public void showKeyguard() {
         // 调用这里
         setBarState(StatusBarState.KEYGUARD);
     }
-    
+
     //更新keyguard状态信息，重点分析
     updateKeyguardState(false /* goingToFullShade */, false /* fromShadeLocked */);
     if (!mDeviceInteractive) {
@@ -787,7 +787,7 @@ public void setLockScreenShown(boolean showing, boolean occluded) {
         try {
             // 这行打印日志，此时 showing=true, occluded=false
             if (DEBUG_LOCKSCREEN) logLockScreen(" showing=" + showing + " occluded=" + occluded);
-            
+
             // 此时mLockScreenShown为LOCK_SCREEN_SHOWN
             mLockScreenShown = (showing && !occluded) ? LOCK_SCREEN_SHOWN : LOCK_SCREEN_HIDDEN;
             // 条件不满足
@@ -859,7 +859,7 @@ void goingToSleepLocked() {
             mService.mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
         }
     }
-    
+
     //执行这里
     checkReadyForSleepLocked();
 }

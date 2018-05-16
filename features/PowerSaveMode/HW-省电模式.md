@@ -3,7 +3,7 @@
 # 省电模式
 ---
 
-功能说明：限制后台活动，关闭邮件自动同步和系统提示音，并减弱视觉效果  
+功能说明：限制后台活动，关闭邮件自动同步和系统提示音，并减弱视觉效果
 
 ---
 
@@ -18,6 +18,7 @@
 
 ## 省电原理
 
+```
     private OnCheckedChangeListener mSaveModeCheckListener = new OnCheckedChangeListener() {
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             if (PowerManagerFragment.this.mSaveModeChecked != isChecked) {
@@ -42,14 +43,16 @@
             }
         }
     };
+```
 
 ### 三个方面解析
 ####  发送对应的通知状态
+
 > PowerNotificationUtils.showPowerModeQuitNotification(PowerManagerFragment.this.mAppContext);
 
 #### 改变当前模式
 
-
+```
     private void handlePowerModeSwitch(int powerModeNum) {
         if (powerModeNum == 1) {//  关闭省电模式
             if (getPercentStatusEnterSaveMode()) {
@@ -66,9 +69,11 @@
             HwLog.i(TAG, "handlePowerModeSwitch to SaveMode, settings db SmartModeStatus= " + powerModeNum + " ,broadcast genieValue= " + 1);
         }
     }
+```
 
-主要看wirtePowerMode(..., ...)方法，发广播  
+主要看wirtePowerMode(..., ...)方法，发广播
 
+```
  CHANGE_MODE_ACTION="huawei.intent.action.POWER_MODE_CHANGED_ACTION";
 
     public void wirtePowerMode(int mSaveMode, int genieValue) {
@@ -81,6 +86,7 @@
         intent.putExtra("state", genieValue);
         this.mContext.sendBroadcast(intent);
     }
+```
 
 ## 涉及的模块
 
@@ -90,6 +96,7 @@ huawei.intent.action.POWER_MODE_CHANGED_ACTION
 
 ### 模块1：CPUPowerMode.java
 
+```
                 if (CPUPowerMode.ACTION_POWER_MODE_CHANGE.equals(action)) {
                     int powerMode = intent.getIntExtra("state", 0);
                     if (powerMode == 1) { // 省电模式
@@ -102,10 +109,13 @@ huawei.intent.action.POWER_MODE_CHANGED_ACTION
                         CPUPowerMode.mIsSaveMode.set(false);
                     }
                 }
+```
+
 通知Cpu 改变频率和save mode
 
-调频  
+调频
 
+```
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
@@ -131,9 +141,11 @@ huawei.intent.action.POWER_MODE_CHANGED_ACTION
         }
         CpuDumpRadar.getInstance().insertDumpInfo(time, "setFrequency()", "set cpu frequency", CpuDumpRadar.STATISTICS_CHG_FREQ_POLICY);
     }
+```
 
 两种方式（setfreq   + resetfreq）
 
+```
     private void resetFrequency() {
         long time = System.currentTimeMillis();
         ByteBuffer buffer = ByteBuffer.allocate(8);//申请堆空间缓存数据
@@ -145,12 +157,13 @@ huawei.intent.action.POWER_MODE_CHANGED_ACTION
         }
         CpuDumpRadar.getInstance().insertDumpInfo(time, "resetFrequency()", "reset cpu frequency", CpuDumpRadar.STATISTICS_RESET_FREQ_POLICY);
     }
-
+```
 
 通过socket ByteBuffer
 
 CPUFeature.java
 
+```
     public synchronized int sendPacket(ByteBuffer buffer) {
         if (buffer == null) {
             return -1;
@@ -164,9 +177,11 @@ CPUFeature.java
         } while (retry > 0);
         return -2;
     }
+```
 
-IAwaredConnection.java  
+IAwaredConnection.java
 
+```
     public synchronized boolean sendPacket(byte[] msg, int offset, int count) {
         if (msg != null && offset >= 0 && count > 0) {
             if (offset <= msg.length - count) {
@@ -188,15 +203,13 @@ IAwaredConnection.java
         AwareLog.e(TAG, "Parameter check failed");
         return false;
     }
-
+```
 
 cpu 模块的影响主要是cpu的freq  修改，再往下就是看底层节点对写下的值处理的原则
 
+### 模块2：PowerModeReciever.java
 
-
-### 模块2：PowerModeReciever.java  
-
-
+```
     public void onReceive(Context context, Intent intent) {
         int powerState = 2;
         if (intent != null) {
@@ -213,13 +226,15 @@ cpu 模块的影响主要是cpu的freq  修改，再往下就是看底层节点�
             }
         }
     }
+```
 
 applyLowPowerMode 这个是mSettingsPreferenceFragment的方法，主要是改变设置开关的状态
 
-NotificationAndStatusSettings.java  
+NotificationAndStatusSettings.java
 
 如  DisplaySettings.java(休眠时间：30s，亮度减低)
 
+```
     public void applyLowPowerMode(boolean isLowPowerMode) {
         super.applyLowPowerMode(isLowPowerMode);
         if (isLowPowerMode) {
@@ -228,16 +243,18 @@ NotificationAndStatusSettings.java
             this.mScreenTimeoutPreference.setEnabled(true);
         }
     }
-
+```
 
 ### 模块3：MsgReciever.java
 
-
+```
         } else if ("huawei.intent.action.POWER_MODE_CHANGED_ACTION".equals(action)) {
             evtId = 208;
+```
 
 直接调用到ThermalStateManager.java
 
+```
     private void powerModeChanged(int newMode) {
         if (newMode < 1 || newMode > 4) {
             Log.e("HwThermalStateManager", "invalid new mode:" + newMode);
@@ -271,7 +288,7 @@ NotificationAndStatusSettings.java
             loadThermalConf(usePowerSaveThermalConf);
         }
     }
-
+```
 
 重新load 各种配置，不深究
 
@@ -280,7 +297,3 @@ NotificationAndStatusSettings.java
 
 
 但是对邮件系统同步，系统提示音的，后台活动 在huawei代码中没找到
-
-
-
-

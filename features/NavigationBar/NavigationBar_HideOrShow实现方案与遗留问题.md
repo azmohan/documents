@@ -11,14 +11,17 @@ patch文件见共享中的minibar_prife_3_remove_log.patch文件。
 
 ### 遗留问题
 附加：
+
 4.无法兼容SYSTEM_UI_FLAG_FULLSCREEN
+
 原理上，禁用了fakewindow，当应用设置了SYSTEM_UI_FLAG_FULLSCREEN风格时，无法恢复
 
 1. 隐藏导航栏后，在任一编辑框中点击唤出输入法软，软键盘不能布满全屏。
 
-   **说明**：华为手机无此问题
-   
-   **进展**：该问题已经解决，代码如下：
+   **说明** ：华为手机无此问题
+
+   **进展** ：该问题已经解决，代码如下：
+
    ```
      @@ -2228,7 +2252,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
              if (mHasNavigationBar) {
@@ -31,16 +34,16 @@ patch文件见共享中的minibar_prife_3_remove_log.patch文件。
              }
     @@ -3468,6 +3492,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
              }
-         };   
+         };
    ```
 
-1. 横屏模式下，隐藏/显示导航栏后输入法不能自动布局。 
-   
-   **说明**：该问题在华为手机上安装的第三方输入法也存在，但是华为内置的中文输入法（百度输入法定制版）无此问题，经反编译后发现，该输入法接收隐藏/显示导航栏inten后重新初始化输入法窗口解决该问题。
+1. 横屏模式下，隐藏/显示导航栏后输入法不能自动布局。
+
+   **说明** ：该问题在华为手机上安装的第三方输入法也存在，但是华为内置的中文输入法（百度输入法定制版）无此问题，经反编译后发现，该输入法接收隐藏/显示导航栏inten后重新初始化输入法窗口解决该问题。
 
 1. 唤出输入法后，切换屏幕方向（横屏/竖屏切换），输入法窗口消失
-   
-   **说明**：该问题并非导航栏导致，安卓原生ROM也有此问题，华为手机可以保持输入法窗口横竖屏切换。
+
+   **说明** ：该问题并非导航栏导致，安卓原生ROM也有此问题，华为手机可以保持输入法窗口横竖屏切换。
 
 ```diff
 diff --git a/packages/SettingsProvider/res/values/defaults.xml b/packages/SettingsProvider/res/values/defaults.xml
@@ -97,7 +100,7 @@ index c92ba45..f03b720 100644
 +                android:layout_height="match_parent"
 +                android:src="@drawable/ic_sysbar_hide_bar_port"
 +                />
- 
+
              <!-- navigation controls -->
              <View
 @@ -48,6 +61,7 @@
@@ -127,7 +130,7 @@ index c92ba45..f03b720 100644
 +                />
 +            <!-- Modified end -->
          </LinearLayout>
- 
+
          <!-- lights out layout to match exactly -->
 diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/NavigationBarView.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/NavigationBarView.java
 index 7d2805d..e85f79e 100644
@@ -136,14 +139,14 @@ index 7d2805d..e85f79e 100644
 @@ -333,6 +333,10 @@ public class NavigationBarView extends LinearLayout {
          return mCurrentView.findViewById(R.id.ime_switcher);
      }
- 
+
 +    public View getHideBarButton() {
 +        return mCurrentView.findViewById(R.id.hide_bar);
 +    }
 +
      private void getIcons(Resources res) {
          mBackIcon = mNavBarPlugin.getBackImage(res.getDrawable(R.drawable.ic_sysbar_back));
- 
+
 diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java
 index cd322b9..db71b1e 100644
 --- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java
@@ -151,7 +154,7 @@ index cd322b9..db71b1e 100644
 @@ -1122,6 +1122,55 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
          return mNaturalBarHeight;
      }
- 
+
 +    //prife
 +    private View.OnClickListener mHideClickListener = new View.OnClickListener() {
 +        public void onClick(View v) {
@@ -234,17 +237,17 @@ index c683688..7d42990 100644
 @@ -484,6 +484,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      // If nonzero, a panic gesture was performed at that time in uptime millis and is still pending.
      private long mPendingPanicGestureUptime;
- 
+
 +    //prife
 +    boolean mFreemeosNavBarMin = false;
 +
      InputConsumer mInputConsumer = null;
- 
+
      static final Rect mTmpParentFrame = new Rect();
 @@ -1496,6 +1499,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
          context.registerReceiver(mStkUserActivityEnReceiver, stkUserActivityFilter);
          /// M: @}
- 
+
 +        //prife
 +        IntentFilter navbarFilter = new IntentFilter();
 +        navbarFilter.addAction("com.freeme.navigationbar.statuschange");
@@ -286,7 +289,7 @@ index c683688..7d42990 100644
 @@ -3468,6 +3492,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
          }
      };
- 
+
 +    //prife
 +    private BroadcastReceiver mNavigationBarBCR = new BroadcastReceiver() {
 +        public void onReceive(Context context, Intent intent) {
@@ -314,7 +317,7 @@ index c683688..7d42990 100644
 @@ -3645,11 +3690,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                  navTranslucent &= areTranslucentBarsAllowed();
              }
- 
+
 +            //prife fix navVisible state with
 +            if (mFreemeosNavBarMin) {
 +                navVisible = false;

@@ -1,9 +1,12 @@
 #### Android Power 按键处理流程梳理
 
-电源按键是系统级的按键，分析主要**PhoneWindowManager**的处理流程。
+电源按键是系统级的按键，分析主要 **PhoneWindowManager** 的处理流程。
+
 首先PhoneWindowManager中的dispatchUnhandledKey方法中，下面是关于该方法的部分代码:
+
 代码目录: /frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
 
+```
     public KeyEvent dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags) {
         ...
         KeyEvent fallbackEvent = null;
@@ -52,10 +55,13 @@
         ...
         return fallbackEvent;
     }
+```
 
 系统按键的主要处理流程主要实在 **interceptFallback** 方法中处理的，下面是关于 interceptFallback 方法的部分代码：
+
 代码目录: /frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
 
+```
      private boolean interceptFallback(WindowState win, KeyEvent fallbackEvent, int policyFlags) {
         int actions = interceptKeyBeforeQueueing(fallbackEvent, policyFlags);
         if ((actions & ACTION_PASS_TO_USER) != 0) {
@@ -67,10 +73,13 @@
         }
         return false;
     }
+```
 
-查看interceptFallback方法，主要的处理逻辑是在**interceptKeyBeforeQueueing**方法中
+查看interceptFallback方法，主要的处理逻辑是在 **interceptKeyBeforeQueueing** 方法中
+
 代码目录：/frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
 
+```
      public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
         ...
         case KeyEvent.KEYCODE_POWER: {
@@ -86,10 +95,13 @@
         ...
         return result;
     }
+```
 
-电源按键的处理逻辑，之前是灭屏的，主要是在**interceptPowerKeyDown**方法中实现，下面是关于该方法的部分代码：
+电源按键的处理逻辑，之前是灭屏的，主要是在 **interceptPowerKeyDown** 方法中实现，下面是关于该方法的部分代码：
+
 代码目录：/frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
 
+```
     private void interceptPowerKeyDown(KeyEvent event, boolean interactive) {
         ...
         // Latch power key state to detect screenshot chord.
@@ -152,11 +164,15 @@
             }
         }
     }
+```
 
-灭屏按键**Down**的处理
-分析上面的Down方法，屏幕灭屏的主要逻辑处理是在**!mPowerKeyHandled**分支的**else**中，主要处理逻辑是**wakeUpFromPowerKey**方法
+灭屏按键 **Down** 的处理
+
+分析上面的Down方法，屏幕灭屏的主要逻辑处理是在 **!mPowerKeyHandled** 分支的 **else** 中，主要处理逻辑是 **wakeUpFromPowerKey** 方法
+
 代码目录：/frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
 
+```
     private void wakeUpFromPowerKey(long eventTime) {
         wakeUp(eventTime, mAllowTheaterModeWakeFromPowerKey, "android.policy:POWER");
     }
@@ -173,24 +189,26 @@
         mPowerManager.wakeUp(wakeTime, reason);
         return true;
     }
+```
 
-此时**mAllowTheaterModeWakeFromPowerKey**值为true，会将**Settings.Global.THEATER_MODE_ON**写入，调用*PowerManage*的**wakeUp** 方法
+此时 **mAllowTheaterModeWakeFromPowerKey** 值为true，会将 **Settings.Global.THEATER_MODE_ON** 写入，调用 *PowerManage* 的 **wakeUp** 方法
+
 代码目录：/frameworks/base/core/java/android/os/PowerManager.java
 
+```
     public void wakeUp(long time, String reason) {
         try {
             mService.wakeUp(time, reason, mContext.getOpPackageName());
         } catch (RemoteException e) {
         }
     }
-
-
-
-
+```
 
 Power按键Down之前是灭屏/亮屏的处理逻辑，
+
 代码目录：/frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
 
+```
     private void interceptPowerKeyUp(KeyEvent event, boolean interactive, boolean canceled) {
         final boolean handled = canceled || mPowerKeyHandled;
         mScreenshotChordPowerKeyTriggered = false;
@@ -216,10 +234,13 @@ Power按键Down之前是灭屏/亮屏的处理逻辑，
         // Done.  Reset our state.
         finishPowerKeyPress();
     }
+```
 
-我们在之前Power按键按下，Down的情况时获得的**mPowerKeyHandled**值为true，则直接调用**finishPowerKeyPress()**方法
+我们在之前Power按键按下，Down的情况时获得的 **mPowerKeyHandled** 值为true，则直接调用 **finishPowerKeyPress()** 方法
+
 代码目录：/frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
 
+```
     private void finishPowerKeyPress() {
         mBeganFromNonInteractive = false;
         mPowerKeyPressCounter = 0;
@@ -227,11 +248,15 @@ Power按键Down之前是灭屏/亮屏的处理逻辑，
             mPowerKeyWakeLock.release();
         }
     }
+```
 
 Power按键之前是亮屏的情况，短按、长按：
-长按的情况，上面Down的时候**interactive**有调用逻辑，
+
+长按的情况，上面Down的时候 **interactive** 有调用逻辑，
+
 代码目录：/frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
 
+```
     private void powerLongPress() {
         final int behavior = getResolvedLongPressOnPowerBehavior();
         switch (behavior) {
@@ -253,9 +278,13 @@ Power按键之前是亮屏的情况，短按、长按：
             break;
         }
     }
-长按mPowerKeyHandled = true，直接最后interceptPowerKeyUp函数就调用**finishPowerKeyPress()方法**了。
+```
+
+长按mPowerKeyHandled = true，直接最后interceptPowerKeyUp函数就调用 **finishPowerKeyPress()方法** 了。
+
 短按的情况，代码目录：/frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
 
+```
     private void powerPress(long eventTime, boolean interactive, int count) {
         if (mScreenOnEarly && !mScreenOnFully) {
             Slog.i(TAG, "Suppressed redundant power key press while "
@@ -290,48 +319,15 @@ Power按键之前是亮屏的情况，短按、长按：
                     break;
             }
         }
-最后会调用到**PowerManager**的**goToSleep()**方法。
+```
+
+最后会调用到 **PowerManager** 的 **goToSleep()** 方法。
 
 
 总结：
+
 主要是Power按键在PhoneWindowManager中的处理：
+
 1，Power按键按下时，前面的状态是亮屏还是灭屏
 2，power按键按下时，前面的状态是亮屏，又有短按和长按
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -5,18 +5,22 @@
 
 
 参考文章：
+
 >http://www.jianshu.com/p/0929c4012347
 >http://blog.csdn.net/zhangweiwtmdbf/article/details/52369276
 
 Notification 的隐藏实现(参考以上资料)
 位置：frameworks/base/core/java/android/app/Service.java
 
+```
     public final void stopForeground(boolean removeNotification) {
         stopForeground(removeNotification ? STOP_FOREGROUND_REMOVE : 0);
     }
+```
 
 可以看到主要的实现是在 stopForeground(int )中实现的，继续跟进该方法中
 
+```
     public final void stopForeground(@StopForegroundFlags int flags) {
         try {
             mActivityManager.setServiceForeground(
@@ -24,11 +28,13 @@ Notification 的隐藏实现(参考以上资料)
         } catch (RemoteException ex) {
         }
     }
+```
 
 mActivityManager 变量的定义类型为 IActivityManager
 此时可以看到已经进入到 **IActivityManager** 中，继续进入到其 **BN** 端的 **ActivityManagerService** 中
 位置：frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
 
+```
     @Override
     public void setServiceForeground(ComponentName className, IBinder token,
             int id, Notification notification, int flags) {
@@ -36,12 +42,14 @@ mActivityManager 变量的定义类型为 IActivityManager
             mServices.setServiceForegroundLocked(className, token, id, notification, flags);
         }
     }
+```
 
 mServices 变量的定义类型为 ActiveServices
 接着我们需要跟着进入 **ActiveServices** 中的 **setServiceForegroundLocked**
 位置：frameworks/base/services/core/java/com/android/server/am/ActiveServices.java
 
-    public void setServiceForegroundLocked(ComponentName className, IBinder token, int id, Notification notification,                 boolean removeNotification) {
+```
+    public void setServiceForegroundLocked(ComponentName className, IBinder token, int id, Notification notification, boolean removeNotification) {
         ...
             if(notification == null) {
                 throw new IllegalArgumentException("null notification");
@@ -61,10 +69,12 @@ mServices 变量的定义类型为 ActiveServices
             }
         ...
     }
+```
 
 真正实现隐藏消失Notification的操作地方为 cancelForegroudNotificationLocked(r)
-接着进入到**cancelForegroudNotificationLocked(r)**
+接着进入到 **cancelForegroudNotificationLocked(r)**
 
+```
     private void cancelForegroudNotificationLocked(ServiceRecord r) {
         if (r.foregroundId != 0) {
             // First check to see if this app has any other active foreground services
@@ -91,11 +101,13 @@ mServices 变量的定义类型为 ActiveServices
             r.cancelNotification();
         }
     }
+```
 
 发现在这里，系统会进行判断如果有相同的 NotificationId 就会直接返回，不会有隐藏消失的效果出现.
 我们的处理方式为:
 
-     public void setServiceForegroundLocked(ComponentName className, IBinder token, int id, Notification notification,                 boolean removeNotification) {
+```
+     public void setServiceForegroundLocked(ComponentName className, IBinder token, int id, Notification notification, boolean removeNotification) {
         ...
             if(r.foregroundId != id) {
                 /*/ modified
@@ -120,10 +132,12 @@ mServices 变量的定义类型为 ActiveServices
             }
         ...
     }
+```
 
 以前的处理为 **ServiceRecord.java** 中的 **cancelNotification()** 方法
 位置: frameworks/base/services/core/java/com/android/server/am/ServiceRecord.java
 
+```
     public void cancelNotification() {
         if (foregroundId != 0) {
             // Do asynchronous communication with notification manager to
@@ -147,9 +161,11 @@ mServices 变量的定义类型为 ActiveServices
             });
         }
     }
+```
 
-针对这个问题，我们的修改方式，修改原先的**cancelNotification()**为：
+针对这个问题，我们的修改方式，修改原先的 **cancelNotification()** 为：
 
+```
      public void cancelNotification() {
          final String localPackageName = packageName;
          final int localForegroundId = foregroundId;
@@ -169,18 +185,8 @@ mServices 变量的定义类型为 ActiveServices
              }
          });
      }
-
+```
 
 #### 总结
 这个问题的出现是因为在应用中的[保活方案](http://blog.csdn.net/zhangweiwtmdbf/article/details/52369276)引起的，在Android N 之后对以前实现的保活方案所依赖的 **API** 有所改变，这也就影响到相应应用出现一些不合适的显示问题。
-
-
-
-
-
-
-
-
-
-
 

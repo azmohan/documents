@@ -3,15 +3,16 @@
 # 低分辨率省电
 
 ---
-功能说明：**根据需要自动降低分辨率，有助于省电**
+功能说明： **根据需要自动降低分辨率，有助于省电**
 
-
+```
     public boolean isLowResolutionSupported() {
         if ((SystemProperties.getInt("sys.aps.support", 0)) != 0) {
             return true;
         }
         return false;
     }
+```
 
 该功能开关是通过 sys.aps.support 属性来控制的
 
@@ -20,13 +21,14 @@
 需要调研的三个方向：
 
 1. 如何自动降低分辨率
-2. 省电原理：降低分辨率具体是通过哪些细节来实现省电的（如：分辨率低，应用会模糊，减少绘制计算  
+2. 省电原理：降低分辨率具体是通过哪些细节来实现省电的（如：分辨率低，应用会模糊，减少绘制计算
 3. 开关开启之后，影响的模块有哪些
 
 ## 如何自动降低分辨率
 
-开关之后  
+开关之后
 
+```
     private OnCheckedChangeListener mLowResolutionSwitchCheckListener = new OnCheckedChangeListener() {
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             if (PowerManagerFragment.this.mLowResolutionControlChecked != isChecked) {
@@ -40,10 +42,12 @@
             }
         }
     };
+```
 
 通过HsmStat.statE ，深究进去最后是通过Proxy 通过bindle 往底层写数据
 IHsmStatService.java
 
+```
             public boolean eStat(String key, String value) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
@@ -62,7 +66,7 @@ IHsmStatService.java
                     _data.recycle();
                 }
             }
-
+```
 
 
 ## 省电原理
@@ -70,7 +74,7 @@ IHsmStatService.java
 ## 影响模块
 SysCoreUtils.java中
 
-
+```
     public static void setLowResolutionSwitchState(Context mContext, boolean state) {
         int i = 1;
         ContentResolver contentResolver = mContext.getContentResolver();
@@ -84,9 +88,11 @@ SysCoreUtils.java中
             Object hwNsdImplObject = hwNSDImplClass.getMethod("getDefault", new Class[0]).invoke(null, new Object[0]);
             hwNSDImplClass.getDeclaredMethod("setLowResolutionMode", new Class[]{Context.class, Boolean.TYPE}).invoke(hwNsdImplObject, new Object[]{mContext, Boolean.valueOf(state)});
             HwLog.i(TAG, "setLowResolutionSwitchState, state = " + state);
+```
 
 反射到HwNsdImpl.java中
 
+```
     public void setLowResolutionMode(Context context, boolean enableLowResolutionMode) {
         int i = 0;
         Log.i("sdr", "APS: SDR: HwNsdImpl.setLowResolutionMod, enableLowResolutionMode = " + enableLowResolutionMode);
@@ -121,29 +127,29 @@ SysCoreUtils.java中
             }
         }
     }
+```
 
+这里牵扯到==黑白名单==的问题
 
-这里牵扯到==黑白名单==的问题  
+但是主要的是==setPackageScreenCompatMode==
 
-但是主要的是==setPackageScreenCompatMode==  
-
-ActivityManager 原生方法  
+ActivityManager 原生方法
 
 设置屏幕兼容模式的，当屏幕发生变化的时候这个package的是否是兼容，是否需要更新ui，继续跟踪这个代码会发现，当设置熟悉之后，所有在监控列表中的应用都会被kill
 
-
+```
     private void setPackageScreenCompatModeLocked(ApplicationInfo ai, int mode) {
-    
+
             ....................
             this.mService.forceStopPackage(packageName, UserHandle.myUserId());
         }
     }
+```
 
 我们不用太过关注原生逻辑
 
 
-从上述的分析来看，这个功能开关影响最直接的模块就是所有被监控的UI界面，当  
-分辨率被降低的时候，该应用会被重新绘制，最直观的影响
+从上述的分析来看，这个功能开关影响最直接的模块就是所有被监控的UI界面，当分辨率被降低的时候，该应用会被重新绘制，最直观的影响
 
 
 
@@ -152,16 +158,12 @@ ActivityManager 原生方法
 http://club.huawei.com/thread-11576293-1-1.html
 如帖子上面说：
 
-电池中低分辨率省电在某些软件中有显示不全的问题，目前发现qq的弹出公告等和  
-微信的弹出菜有显示不全。
+电池中低分辨率省电在某些软件中有显示不全的问题，目前发现qq的弹出公告等和微信的弹出菜有显示不全。
 
-在花粉论坛里有很多这样的帖子，这种省电不是对所有的应用，是针对当前系统耗  
-电应用，微信，qq。
+在花粉论坛里有很多这样的帖子，这种省电不是对所有的应用，是针对当前系统耗电应用，微信，qq。
 
 
-问题是要糊，所有应用都糊不好吗！唯独微信是这样。边看网页。上qq，刷微信很  
-正常吧。这楼切换，眼晴根本受不了！就像你看了一分钟杨幂，然后再看一分钟凤  
-姐，再看一分钟芙蓉道理是一样的！
+问题是要糊，所有应用都糊不好吗！唯独微信是这样。边看网页。上qq，刷微信很正常吧。这楼切换，眼晴根本受不了！就像你看了一分钟杨幂，然后再看一分钟凤姐，再看一分钟芙蓉道理是一样的！
 
 微信、京东等的选项菜单页面错位
 

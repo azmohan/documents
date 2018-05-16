@@ -4,8 +4,9 @@
 通过获取系统的IMEI号，做服务器的过滤升级（指定IMEI号才可升级），现获取的IMEI不正确
 
 ### 现象
+
 - v9c/q5c 通过TelephonyManager 的getDeviceId接口，获取的为MEID号，而非IMEI号
-- 通过暗码```*#06#``` 查看IMEI MEID 号，显示全网通三个号码
+- 通过暗码 ```*#06#``` 查看IMEI MEID 号，显示全网通三个号码
 - 通过设置 - 关于手机 - 状态 - IMEI信息，只看到俩个信息（默认卡槽一 MEID 卡槽二 IMEI号）
 
 ### 相关模块
@@ -22,9 +23,8 @@
 TelephonyManager tm = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
 String imsi = tm.getSubscriberId();
 String imei = tm.getDeviceId();
-      	
-mTextView.setText("imei = " + imei + "\n" + 
-      			  "imsi = " + imsi + " \n ");
+
+mTextView.setText("imei = " + imei + "\n" + "imsi = " + imsi + " \n ");
 // 结果 imei为 MEID号码
 
 //而实际的在 TelephonyManager 中 getDeviceId() 实现如下
@@ -113,6 +113,7 @@ try {
 }
 break;
 ```
+
 分析代码发现，其通过一个字符串数组保存俩个卡槽自带的IMEI号，然后通过暗码显示（该方案由mtk提供，详情请见[C2K双卡项目通话界面输入“*#06#”显示MEID/IMEI的客制化](https://onlinesso.mediatek.com/Pages/FAQ.aspx?List=SW&FAQID=FAQ15598)）
 
 ### 总结

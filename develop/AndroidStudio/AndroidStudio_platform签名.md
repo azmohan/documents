@@ -4,7 +4,7 @@
 
 ### 生成keyStore
 
-github 有开源的生成工具：[keytool-importkeypai](https://github.com/getfatday/keytool-importkeypair) 
+github 有开源的生成工具：[keytool-importkeypai](https://github.com/getfatday/keytool-importkeypair)
 
 命令：
 
@@ -81,16 +81,15 @@ def getSigningProperties(){
         } else {
             println 'signing.properties found but some entries are missing'
             android.buildTypes.release.signingConfig = null
-        } 
+        }
     }else {
         println 'signing.properties not found'
         android.buildTypes.release.signingConfig = null
     }
 }
-
 ```
 
-此处为debug模式签名，如果是release模式则将```getSigningProperties()``` 函数中的```android.signingConfigs.debug.* ```改成``` android.signingConfigs.release.*```
+此处为debug模式签名，如果是release模式则将 ```getSigningProperties()``` 函数中的 ```android.signingConfigs.debug.``` 改成 ```android.signingConfigs.release.```
 
 
 

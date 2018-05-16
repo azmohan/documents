@@ -63,9 +63,9 @@ void setWindowStyle(Window window) {
 Dump Log如下：
 ```
 Hardware Composer state (version 01040000):
-type   |  handle  | hint | flag | tr | blnd |   format    |     source crop (l,t,r,b)      |          frame         | name 
+type   |  handle  | hint | flag | tr | blnd |   format    |     source crop (l,t,r,b)      |          frame         | name
   GLES | 00000000 | 0000 | 0001 | 00 | 0105 | ? ffffffff  |    0.0,    0.0,   -1.0,   -1.0 |    0,    0,  720, 1280 | BlurLayer
-  
+
 Allocated buffers:
 0xb87db2b0:  140.62 KiB |  720 ( 720) x   50 |        1 | 0x00000b00
 0xb87db368: 3680.00 KiB |  720 ( 736) x 1280 |        1 | 0x00001a00

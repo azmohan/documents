@@ -10,10 +10,10 @@
 
 #### 模板
 
-位置：**`vendor/freeme/samples/Android.mk-sample`** 
+位置： **`vendor/freeme/samples/Android.mk-sample`**
 
 ```shell
-LOCAL_PATH := $(call my-dir)                                                                                     
+LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE := sample
 LOCAL_MODULE_TAGS := optional
@@ -28,39 +28,41 @@ include $(BUILD_PREBUILT)
 
 #### 步骤
 
-1. 是否需要提取`odex`？
+1. 是否需要提取 `odex`？
 
    ```shell
        LOCAL_DEX_PREOPT := true
    ```
 
-2. 是否放置于`priv-app` ？
+2. 是否放置于 `priv-app` ？
 
    ```shell
    LOCAL_PRIVILEGED_MODULE := true
    ```
 
-3. 是否存在`so`库？
+3. 是否存在 `so`库？
 
    ```shell
    # 指定编译目标为 32位 或 64位
-   LOCAL_MULTILIB := ###可选值 /32/64/both 
+   LOCAL_MULTILIB := ###可选值 /32/64/both
    ```
-   不建议提取, 如运行出错(***FAQ：无法找到库导致应用无法启动***)，则提取文件并添加配置
+
+   不建议提取, 如运行出错( ***FAQ：无法找到库导致应用无法启动*** )，则提取文件并添加配置
+
    ```shell
    # 编译32位库文件
-   LOCAL_PREBUILT_JNI_LIBS_arm := $(subst $(LOCAL_PATH)/,,$(wildcard $(LOCAL_PATH)/lib/armeabi/*.so)) 
+   LOCAL_PREBUILT_JNI_LIBS_arm := $(subst $(LOCAL_PATH)/,,$(wildcard $(LOCAL_PATH)/lib/armeabi/*.so))
    # 编译64位库文件
-   LOCAL_PREBUILT_JNI_LIBS_arm64 := $(subst $(LOCAL_PATH)/,,$(wildcard $(LOCAL_PATH)/lib/arm64-v8a/*.so)) 
+   LOCAL_PREBUILT_JNI_LIBS_arm64 := $(subst $(LOCAL_PATH)/,,$(wildcard $(LOCAL_PATH)/lib/arm64-v8a/*.so))
    ```
 
 ## 3. 配置应用可卸载
 #### 模板
 
-位置：**`vendor/freeme/samples/Android.mk-sample`** 
+位置： **`vendor/freeme/samples/Android.mk-sample`**
 
 ```shell
-LOCAL_PATH := $(call my-dir)                                                                                                     
+LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE := sample
 LOCAL_MODULE_TAGS := optional
@@ -75,9 +77,9 @@ include $(BUILD_PREBUILT)
 ```
 #### 步骤
 
-1. 是否存在`so`库？ 配置方法如上
-2. 是否需要提取`odex` ？配置方法如上
-3. 如遇到应用无法安装或启动，则参考***FAQ***
+1. 是否存在 `so` 库？ 配置方法如上
+2. 是否需要提取 `odex` ？配置方法如上
+3. 如遇到应用无法安装或启动，则参考 ***FAQ***
 
 ## FAQ
 
@@ -98,6 +100,7 @@ include $(BUILD_PREBUILT)
      - 如应用可卸载则建议配置为不可卸载
 
 2. **V2签名导致应用无法安装**
+
    - 现象
      - 应用可卸载
 
@@ -111,8 +114,8 @@ include $(BUILD_PREBUILT)
        ```
 
    - 解决方法
-   
-     在`Android.mk`中添加
+
+     在 `Android.mk` 中添加
 
      ```shell
      LOCAL_REPLACE_PREBUILT_APK_INSTALLED :=$(LOCAL_PATH)/$(LOCAL_MODULE).apk

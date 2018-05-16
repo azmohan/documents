@@ -2,7 +2,7 @@
 
 [TOC]
 
-### 简介 
+### 简介
 
 Android Overlay 即编译时动态替换资源，包括资源覆盖与新增
 
@@ -48,7 +48,7 @@ LOCAL_RESOURCE_DIR := $(package_resource_overlays) $(LOCAL_RESOURCE_DIR)
 
 2. 如不想给每个资源手动添加`add-resource`字段，可利用`aapt`的`--auto-add-overlay`参数 ，如：
 
-   在项目的`Android.mk`添加如属性`LOCAL_AAPT_FLAGS += --auto-add-overlay` 
+   在项目的`Android.mk`添加如属性`LOCAL_AAPT_FLAGS += --auto-add-overlay`
 
 ### AAPT编译过程
 
@@ -58,24 +58,24 @@ AAPT接收参数后，启动编译（以`framework-res`为例）
 
 ```
 out/host/linux-x86/bin/aapt package
-	-u 
-	-x 
-	--private-symbols com.android.internal 
-	-z    
-	-M frameworks/base/core/res/AndroidManifest.xml 
-	-S device/sample/overlays/location/frameworks/base/core/res/res 
-	-S vendor/partner_gms/products/gms_overlay/frameworks/base/core/res/res 
-	-S device/droi/v9h62_gb/overlay/frameworks/base/core/res/res 
-	-S device/mediatek/common/overlay/navbar/frameworks/base/core/res/res 
-	-S frameworks/base/core/res/res 
-	-A frameworks/base/core/res/assets  
-	--min-sdk-version 24 
-	--target-sdk-version 24 
-	--product default 
-	--version-code 24 
-	--version-name 7.0   
-	--skip-symbols-without-default-localization 
-	-F out/target/common/obj/APPS/framework-res_intermediates/package-export.apk 
+	-u
+	-x
+	--private-symbols com.android.internal
+	-z
+	-M frameworks/base/core/res/AndroidManifest.xml
+	-S device/sample/overlays/location/frameworks/base/core/res/res
+	-S vendor/partner_gms/products/gms_overlay/frameworks/base/core/res/res
+	-S device/droi/v9h62_gb/overlay/frameworks/base/core/res/res
+	-S device/mediatek/common/overlay/navbar/frameworks/base/core/res/res
+	-S frameworks/base/core/res/res
+	-A frameworks/base/core/res/assets
+	--min-sdk-version 24
+	--target-sdk-version 24
+	--product default
+	--version-code 24
+	--version-name 7.0
+	--skip-symbols-without-default-localization
+	-F out/target/common/obj/APPS/framework-res_intermediates/package-export.apk
 ```
 
 而AAPT的主要参数解释如下（详细参数解释见[ Android自动打包工具aapt详解](http://blog.csdn.net/xiangzhihong8/article/details/53607539)）：
@@ -114,7 +114,7 @@ Usage:
 
 ### 参考
 
-[浅谈Android的aapt资源编译过程 - jlins - 博客园](http://www.cnblogs.com/dyllove98/archive/2013/06/19/3144950.html) 
+[浅谈Android的aapt资源编译过程 - jlins - 博客园](http://www.cnblogs.com/dyllove98/archive/2013/06/19/3144950.html)
 
 [AndroidStudio Add App Resources](http://blog.zhaiyifan.cn/2016/02/18/android-resource-overlay/)
 

@@ -144,6 +144,7 @@ device/droi/project_name
 - 字段2用于表示显示在Summary中的字串，其中，对如下字符串有做多语言转义，appweixin/appqq/appbrowser/appcall/appmusic/musicstartpause/musicprev/musicnext，其余保持原始字串显示
 - 字段3、4根据字段1的功能不同有所区别，如果为startupapp，字段3、4分别表示包名和类名；如果为startupcall，字段3为呼叫的号码；如果为startupmms和unlock，无字段3和4；如果为mediacontrol，字段3为子功能项：musicprev/musicnext/musicstartpause，表示为上一首/下一首/播放暂停；
 - 如下代码段为示例
+
 ```
 <integer name="def_home_doubletap_poweroff_enabled" translatable="false">0</integer>
 ……
@@ -151,6 +152,7 @@ device/droi/project_name
     startupapp;appmusic;com.google.android.music;com.android.music.activitymanagement.TopLevelActivity</string>
 ……
 ```
+
 - [defaults_freeme.xml]
 
 frameworks\base\packages\SettingsProvider\res\value

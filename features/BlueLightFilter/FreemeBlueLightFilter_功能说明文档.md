@@ -24,11 +24,12 @@
 
 蓝光过滤在`android7.1`后系统自带，只是没有亮度调节功能，所以在7.1.1上只是添加调节功能。而`android7.0`上自己实现
 
-- `android 7.0` 
+- `android 7.0`
 
   - 功能实现代码：`FreemeOS/common/apps/FreemeBluelightFilter`
 
   - 配置文件：`freeme_bluelight_filter.properties` 相关配置如下：
+
     ```
     # 手动调度开关
     # - 0, off

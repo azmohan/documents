@@ -98,6 +98,7 @@ Vendor/freeme/frameworks/base/core-export/java/com/freeme/util
 ```
 FREEME_THREE_POINTER_TAKE_SCREEN_SHOT=yes
 ```
+
 - [ProjectConfig.mk]
 
 device/droi/common
@@ -120,16 +121,20 @@ device/droi/common
 ```
 FREEME_THREE_POINTER_TAKE_SCREEN_SHOT=yes
 ```
+
 - [ProjectConfig.mk]
 
 device/droi/project_name
 
 ###### ==2、唤醒行为默认值设置，配置时，请在相应的项目文件夹中重写该文件==
 ###### keyword: "Three finger snapshot"
+
 - 开关配置，false为关闭，true为开启
+
 ```
 <integer name="def_three_pointer_take_screen_shot" translatable="false">true</integer>
 ```
+
 - [defaults_freeme.xml]
 
 frameworks\base\packages\SettingsProvider\res\value

@@ -11,6 +11,7 @@
 ---
 
 需要调研的方向：
+
 - 核心：监控后台应用耗电的算法。
 - 界面上相对比较独立化
 - 一键结束功能
@@ -26,8 +27,9 @@
 
 
 
-## “一键结束”功能  
+## “一键结束”功
 
+```
         if (!packageName.isEmpty()) {
             SysCoreUtils.forceStopPackageAndSyncSaving(this.mContext.getApplicationContext(), packageName);
         }
@@ -41,7 +43,7 @@
             ProviderWrapper.updateWakeupNumDBSingle(context, pkg);
         }
     }
-
+```
 
 核心就是这个。
 

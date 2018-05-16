@@ -9,9 +9,9 @@
 
 # Android N Nofication Bug
 
-## `bug`现象
+## `bug` 现象
 
-`QQ/wechat` 打开时出现一条没有任何`action`的`Notification`. (`Android 7.0_r1`，`QQ`版本`8.9.20026`，相同版本`QQ`在`Android 7.0_r1`之前没有该现象，`Android 7.1`没有该现象)
+`QQ/wechat` 打开时出现一条没有任何 `action` 的 `Notification` . ( `Android 7.0_r1` ， `QQ` 版本 `8.9.20026` ，相同版本 `QQ` 在 `Android 7.0_r1` 之前没有该现象， `Android 7.1` 没有该现象)
 
 【评注：这里重写下，用列表形式描述】
 
@@ -21,13 +21,13 @@ Bug 现象如图所示
 
 ## Notification
 
-通知是可以在应用的常规`UI`外部向用户显示的消息. 告知系统发出通知时，它将先以图标的形式显示在通知区域中. 用户可以下拉状态栏查 看通知的详细信息. 
+通知是可以在应用的常规`UI`外部向用户显示的消息. 告知系统发出通知时，它将先以图标的形式显示在通知区域中. 用户可以下拉状态栏查 看通知的详细信息.
 
-显示一条`Notification`，至少需要设置：
+显示一条 `Notification` ，至少需要设置：
 
-- `setSmallIcon(@DrawableRes int icon)`，设置小图标
-- `setContentTitle(CharSequence title)`，设置标题
-- `setContentText(CharSequence text)`，设置通知内容
+- `setSmallIcon(@DrawableRes int icon)` ，设置小图标
+- `setContentTitle(CharSequence title)` ，设置标题
+- `setContentText(CharSequence text)` ，设置通知内容
 
 ## 显示通知
 
@@ -35,19 +35,19 @@ Bug 现象如图所示
 
 ### `notify(int id, Notification notification)`
 
-应用中一般发送通知所使用的方法为`notify`方法，该方法中有一个参 数为所构建出的`notification`，可以通过`cancel`方法来移除该条通知.
+应用中一般发送通知所使用的方法为 `notify` 方法，该方法中有一个参 数为所构建出的 `notification` ，可以通过 `cancel` 方法来移除该条通知.
 
 ### `startForeground(int id, Notification notification)`
 
-`Android SDK`中对该方法的描述如下:
+`Android SDK` 中对该方法的描述如下:
 
 > Make this service run in the foreground, supplying the ongoing notification to be shown to the user while in this state.
 
-该`API`将服务提到前台运行，在该状态过程中，将正在运行的(`ongoing`)通知显示给用户. 
+该 `API` 将服务提到前台运行，在该状态过程中，将正在运行的(`ongoing`)通知显示给用户.
 
->该通知只有在该服务被终止或者从前台主动移除才能被解除，可以通过`stopForeground` 方法来移除该条通知.
+>该通知只有在该服务被终止或者从前台主动移除才能被解除，可以通过 `stopForeground` 方法来移除该条通知.
 
-`Android SDK`中对`ongoing`的描述如下:
+`Android SDK` 中对 `ongoing` 的描述如下:
 
 > Ongoing notifications cannot be dismissed by the user, so your application or service must take care of canceling them.
 
@@ -55,15 +55,16 @@ Bug 现象如图所示
 ## 删除通知
 
 
-### `setAutoCancel(boolean autoCancel)`、`cancel(int id)`、`cancelAll()`
+### `setAutoCancel(boolean autoCancel)` 、 `cancel(int id)` 、 `cancelAll()`
 
-- 用户手动通过点击`清除全部`按钮
-- 在用户点击通知时，执行`setAutoCancel(boolean autoCancel)` 
-- 调用`cancel(int id)`，删除指定通知，注意，该`API`还可以清除
-`ongoing`的通知
-- 调用`cancelAll()`，删除所有的通知
+- 用户手动通过点击 `清除全部` 按钮
+- 在用户点击通知时，执行 `setAutoCancel(boolean autoCancel)`
+- 调用 `cancel(int id)` ，删除指定通知，注意，该 `API` 还可以清除
 
-注意：`setAutoCancel`方法是在创建通知时使用的，如果设置 `setAutoCancel(true)`则在发出通知后，该条通知在发出后会自动删除
+ `ongoing` 的通知
+- 调用 `cancelAll()` ，删除所有的通知
+
+注意： `setAutoCancel` 方法是在创建通知时使用的，如果设置  `setAutoCancel(true)` 则在发出通知后，该条通知在发出后会自动删除
 
 ### `stopForeground(boolean removeNotification)`
 
@@ -74,7 +75,7 @@ Bug 现象如图所示
 
 ## Bug 产生
 
-打开`QQ`，在使用`stopForeground`方法却没能将相同`notification id`的通知移除.
+打开 `QQ` ，在使用 `stopForeground` 方法却没能将相同 `notification id` 的通知移除.
 
 【评注：描述不清、后面描述也不全，没有说明黑色通知是startForegroud产生的】
 
@@ -84,10 +85,10 @@ Bug 现象如图所示
 
 ```
 public final void stopForeground(boolean removeNotificatio) {
-   stopForeground(removeNotification ? STOP_FOREGROUND_REMOVE : 0); 
+   stopForeground(removeNotification ? STOP_FOREGROUND_REMOVE : 0);
 }
-
 ```
+
 ```
 public final void stopForeground(@StopForegroundFlags int flags) {
     try {
@@ -99,6 +100,7 @@ public final void stopForeground(@StopForegroundFlags int flags) {
 ```
 
 [frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java]
+
 ```
 public void setServiceForeground(ComponentName className, IBinder token,int id, Notification notification, int  flags) {
     synchronized(this) {
@@ -108,6 +110,7 @@ public void setServiceForeground(ComponentName className, IBinder token,int id, 
 ```
 
 [frameworks/base/services/core/java/com/android/server/am/ActiveServices.java]
+
 ```
 public void setServiceForegroundLocked(ComponentName className, IBinder token,int id, Notification notification, int flags) {
     ...
@@ -124,8 +127,9 @@ public void setServiceForegroundLocked(ComponentName className, IBinder token,in
         }
         ...
     }
-}    
+}
 ```
+
 ```
 private void cancelForegroudNotificationLocked(ServiceRecord r) {
     if (r.foregroundId != 0) {
@@ -148,27 +152,28 @@ private void cancelForegroudNotificationLocked(ServiceRecord r) {
 }
 ```
 
-可以看到在移除通知时，发现有相同`notification id`的通知会直接 退出.
+可以看到在移除通知时，发现有相同 `notification id` 的通知会直接 退出.
 
 【评注：为什么`直接`和`退出`中间有个空格？？？这是什么写法？】
 
 ## 问题
 
-1. 在`Android M`中没有该现象，`Android 7.1`中也没有这个现象,
+1. 在 `Android M` 中没有该现象， `Android 7.1` 中也没有这个现象,
 我们的版本却有该问题?
 
 【评注：为什么这里逗号后面有断行？？描述也不清楚】
 
-2. 使用`startForeground`方法将通知提到前台服务，却还要用`stopForeground`将该通知移除?
+2. 使用 `startForeground` 方法将通知提到前台服务，却还要用 `stopForeground` 将该通知移除?
 
-3. 使用`startForeground`方法将通知提到前台，意义何在?
+3. 使用 `startForeground` 方法将通知提到前台，意义何在?
 
 【评注：问题3可以删掉，问题2描述改写下】
 
 ## 问题回答
 
-问题1，查找`Google`源码提交记录发现在`2016/08/01`有一个提交改动，如下
+问题1，查找 `Google` 源码提交记录发现在 `2016/08/01` 有一个提交改动，如下
 
+```
     commit 0ba4c710c6f8805175bde2dbd85d7d8788a15ee0
     Author: Dianne Hackborn <hackbod@google.com>
     Date:   Mon Aug 1 17:49:41 2016 -0700
@@ -179,9 +184,11 @@ private void cancelForegroudNotificationLocked(ServiceRecord r) {
     services using the same notification ID.
 
     Change-Id: I02a49d9a07af0203e59e70be2dc6773f3cefee47
+```
 
 也就是说`Android M`中没有这个改变，还沿用以前的方案，
 frameworks/base/services/core/java/com/android/server/am/ServiceRecord.java
+
 ```
 public void cancelNotification() {
     final String localPackageName = packageName;

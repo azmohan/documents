@@ -16,6 +16,7 @@
 EditText.getText() 方法返回 Editable，之前是返回CharSequence.这个改变是向下兼容的，Editable 实现了 CharSequence
 
 ### 程序化安全浏览操作
+
 1.您可以控制您的应用是否将已知威胁报告给安全浏览。
 
 2.您可以让自己的应用程序自动执行特定操作（例如回到安全状态），每次遇到安全浏览会将其归类为已知威胁的网址时。
@@ -32,9 +33,10 @@ EditText.getText() 方法返回 Editable，之前是返回CharSequence.这个改
 
 ### 指纹更新
 FingerprintManager 介绍了如下的error codes
+
 FINGERPRINT_ERROR_LOCKOUT_PERMANENT - 用户尝试了太多次指纹解锁
 
-FINGERPRINT_ERROR_VENDOR - 指纹识别发生错误 
+FINGERPRINT_ERROR_VENDOR - 指纹识别发生错误
 
 ### 加密更新
 加密使用了新的算法
