@@ -1,5 +1,10 @@
 [TOC]
 
+## 修改记录
+| 版本 | 修改日期 | 作者 | 修改内容 |
+| :---| ----------| ---- | ---- |
+| v1.0 | 2018.06.05 | 王磊 | 初版 |
+| v2.0 | 2018.06.15 | 王磊 | 更新 |
 
 ## 概要
 从本次分享中，你能知道些什么？
@@ -16,7 +21,7 @@
 O版本的设置界面相对于N有了一些变化，去掉了7.0上新加的侧滑菜单，O上面增加了顶级类别的菜单，之前一级菜单的部分菜单选项则移动到了二级界面里面。
 如图：
 
-![icon](https://note.youdao.com/yws/api/personal/file/WEBebc34aaabb89b1a28d55382e4c749e64?method=download&shareKey=06b11f2216e5009164b06c9e12d00e4e)
+![icon](res/11.jpg)
 
 1、 设置一级菜单是如何加载的？
 
@@ -47,7 +52,7 @@ O版本的设置界面相对于N有了一些变化，去掉了7.0上新加的侧
 ```
 
 如图：
-![icon](https://note.youdao.com/yws/api/personal/file/WEBbd4c7c667a3b41a06139446bdedff2fa?method=download&shareKey=7be2e197194171971771e94153e29efa)
+![icon](res/settings_main.png)
 
 TileUtils.java：一二级界面动态加载的工具类
 
@@ -156,7 +161,7 @@ void launchSettingFragment(String initialFragmentName, boolean isSubSettings, In
 ### Wifi 设置界面
 Wifi 设置界面的代码实现是在 WifiSettings.java 中，从布局中看到，界面主要包括Wifi开关，已连接Wifi列表，扫描到的Wifi列表以及Wifi设置
 如图
-![icon](https://note.youdao.com/yws/api/personal/file/WEB41bb871a53b8514ab95e9156043a44eb?method=download&shareKey=6a31920072e886128a2948ce720d0d7e)
+![icon](res/settings_wifi.png)
 
 布局实现在freeme_wifi_settings.xml
 
@@ -335,7 +340,7 @@ public void handleMessage(Message message) {
 }
 ```
 如图：
-![icon](https://note.youdao.com/yws/api/personal/file/WEBa07ec04b27bd3097649c62f8d1aa3e92?method=download&shareKey=52655e9d9c6b48cae786e385f9bbc73c)
+![icon](res/设置Wifi扫描时序图.png)
 
 ### Wifi列表加载
 
