@@ -9,9 +9,10 @@
 | :---| ----------| ---- | ---- |
 | v1.0 | 2018.05.16 | 李秋月 | 初版 |
 | v2.0 | 2018.06.10 | 李秋月 | 更新 |
+| v3.0 | 2018.06.20 | 李秋月 | 更新 |
 
 ## 前言
-在开始讲解蓝牙模块之前，先叨扰两句，Android O1设置模块架构改变很大，蓝牙里面的各个preference的显示， google都是通过类似BluetoothDeviceNamePreferenceController、BluetoothPairingPreferenceController等一系列Controller来统一控制。另外，之前的addPreference()方法依旧有效。
+在开始讲解蓝牙模块之前，先叨扰两句， **Android O1** 设置模块架构改变很大，蓝牙里面的各个 **preference** 的显示， **google** 都是通过类似 **BluetoothDeviceNamePreferenceController** 、 **BluetoothPairingPreferenceController** 等一系列 **Controller** 来统一控制。另外，之前的 **addPreference()** 方法依旧有效。
 
 ## 正文
 
@@ -1202,20 +1203,389 @@ public final class BluetoothDeviceFilter {
 
 ### 6、与设备配对、连接、通信
 
+首先蓝牙的事件处理会在 **BluetoothEvenManager** 类里面，在该类的构造方法里注册了许多 **action** ，用来监听蓝牙的相关变化。下面我们简单说一下有哪些广播：
 
+- BluetoothAdpater.ACTION_STATE_CHANGED ：本机蓝牙状态发生了改变
+- BluetoothAdpater.ACTION_DISCOVERY_STARTED：开始扫描
+- BluetoothAdpater.ACTION_DISCOVERY_FINISHED：扫描结束
+- BluetoothDevice.ACTION_FOUND：发现远程蓝牙设备
+- BluetoothDevice.ACTION_DISAPPEARED：远程设备消失
+- BluetoothDevice.ACTION_NAME_CHANGED：远程设备蓝牙名称改变
+- BluetoothDevice.ACTION_BOND_STATE_CHANGED：远程设备连接状态改变
+- BluetoothDevice.ACTION_PAIRING_CANCLE：远程设备取消配对
+- BluetoothDevice.ACTION_CLASS_CHANGED：远程设备的蓝牙类已经改变
+- BluetoothDevice.ACTION_UUID：
+- BluetoothDevice.ACTION_BATTERY_LEVEL_CHANGED：远程设备的电量改变
 
+#### a、扫描附近可用设备
 
+在扫描开始之前，会先判断蓝牙是否开启。如果开启，则判断是否正在扫描，如果正在扫描，则不做处理。如果正在播放音乐，也不做处理，除非强制开启扫描。下面我们进到 **LocalBluetoothAdapter** 类里查看。
 
+```
+public class LocalBluetoothAdapter {
 
------ **未完待续...**
+......此处省略代码
 
-### 7、常用类的介绍
+    public void startScanning(boolean force) {
+        // Only start if we're not already scanning
+        if (!mAdapter.isDiscovering()) {
+            if (!force) {
+                // Don't scan more than frequently than SCAN_EXPIRATION_MS,
+                // unless forced
+                //除非强制，否则设置扫描的时间间隔不超过 5min
+                if (mLastScan + SCAN_EXPIRATION_MS > System.currentTimeMillis()) {
+                    return;
+                }
 
-- **LocalBluetoothManager.java** 类里提供了本地蓝牙API的简化接口。
+                // If we are playing music, don't scan unless forced.
+                //根据蓝牙协议，除了强制，否则播放音乐的时候不扫描
+                A2dpProfile a2dp = mProfileManager.getA2dpProfile();
+                if (a2dp != null && a2dp.isA2dpPlaying()) {
+                    return;
+                }
+                A2dpSinkProfile a2dpSink = mProfileManager.getA2dpSinkProfile();
+                if ((a2dpSink != null) && (a2dpSink.isA2dpPlaying())){
+                    return;
+                }
+            }
 
-- **LocalBluetoothAdapter.java** 类里提供了设置app和本地蓝牙 **BluetoothAdapter** 功能调用的接口，特别是adapter自身状态的改变。
+            if (mAdapter.startDiscovery()) {
+                mLastScan = System.currentTimeMillis();
+            }
+        }
+    }
 
-- **BluetoothAdapter** 类代表本地蓝牙适配器，能够开启设备扫描、请求已配对设备列表、实例化已知的mac地址、监听从其它设备发来的连接请求，扫描LE设备。其中各种 **action** 、蓝牙模式以及其它有关的其它的蓝牙行为都定义在此类中。
+......此处省略代码
 
-- **BluetoothDevice** 类代表远程蓝牙设备，创建各种设备的连接以及名字、地址和连接的状态的请求。
+}
+```
+
+在扫描开始的时候，会发送广播；扫描结束的时候，也会发送广播。由 **BluetoothEvenManager** 里的 **Handler** 处理。
+
+不同的是：
+
+- 开始扫描时， **mStarted** 为 **true**
+- 扫描结束时， **mStarted** 为 **false**
+
+```
+public class BluetoothEventManager {
+
+......此处省略代码
+
+    private class ScanningStateChangedHandler implements Handler {
+        private final boolean mStarted;
+        //开始扫描时传入的为true
+        ScanningStateChangedHandler(boolean started) {
+            mStarted = started;
+        }
+        public void onReceive(Context context, Intent intent,
+                BluetoothDevice device) {
+            synchronized (mCallbacks) {
+                for (BluetoothCallback callback : mCallbacks) {
+                    //调用DeviceListPreferenceFragment.java中的方法显示扫描指示progress
+                    callback.onScanningStateChanged(mStarted);
+                }
+            }
+            //首先更新缓存列表，然后对显示列表进行排序更新显示。
+            //排序规则代码在CachedBluetoothDevice.java中
+            mDeviceManager.onScanningStateChanged(mStarted);
+        }
+    }
+
+......此处省略代码
+
+}
+
+```
+
+在搜索过程中发现设备会发送广播，程序会在广播处理代码中对缓存列表以及显示列表进行更新。
+
+```
+public class BluetoothEventManager {
+
+......此处省略代码
+
+    private class DeviceFoundHandler implements Handler {
+        public void onReceive(Context context, Intent intent,
+                BluetoothDevice device) {
+            //获取到蓝牙的信号强度，默认为Short类型的最小值-2的15次方
+            short rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
+            //获取到远程设备的类型
+            BluetoothClass btClass = intent.getParcelableExtra(BluetoothDevice.EXTRA_CLASS);
+            //获取到远程设备的name
+            String name = intent.getStringExtra(BluetoothDevice.EXTRA_NAME);
+            // TODO Pick up UUID. They should be available for 2.1 devices.
+            // Skip for now, there's a bluez problem and we are not getting uuids even for 2.1.
+            //获取到远程设备后检测是否在缓存列表中，若有就返回设备，若没有返回 null
+            CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
+            if (cachedDevice == null) {
+                //将设备添加到缓存列表中
+                cachedDevice = mDeviceManager.addDevice(mLocalAdapter, mProfileManager, device);
+                Log.d(TAG, "DeviceFoundHandler created new CachedBluetoothDevice: "
+                        + cachedDevice);
+            }
+            cachedDevice.setRssi(rssi);
+            cachedDevice.setBtClass(btClass);
+            cachedDevice.setNewName(name);
+            cachedDevice.setJustDiscovered(true);
+        }
+    }
+
+......此处省略代码
+
+}
+```
+
+#### b、蓝牙设备配对
+
+设备列表中包括已配对设备、未配对设备、已连接设备等，当点击 **preference** 时会首先判断处于哪个状态，然后去进行下一个状态。如果没有配对，就进行配对
+
+配对程序如下：在进行配对时首先检查远程设备是否正在配对，如果是，就返回true；如果没有在配对,就先将本机的蓝牙配对状态设为 **true**，表示正在配对，紧接着停止蓝牙的扫描操作，与远程设备进行配对，配对成功后进行自动连接
+
+因为是点击 **preference** 进行配对连接，所以点击事件写在 **BluetoothDevicePreference** 里的 **onClicked()** 里。
+
+```
+public final class BluetoothDevicePreference extends GearPreference implements
+        CachedBluetoothDevice.Callback {
+
+......此处省略代码
+
+    void onClicked() {
+        Context context = getContext();
+        int bondState = mCachedDevice.getBondState();
+
+        final MetricsFeatureProvider metricsFeatureProvider =
+                FeatureFactory.getFactory(context).getMetricsFeatureProvider();
+
+        //判断当前的状态如果已连接，则断开连接
+        if (mCachedDevice.isConnected()) {
+            metricsFeatureProvider.action(context,
+                    MetricsEvent.ACTION_SETTINGS_BLUETOOTH_DISCONNECT);
+            Log.d(TAG, mCachedDevice.getName() + " askDisconnect");
+            askDisconnect();
+        //如果已配对，则连接
+        } else if (bondState == BluetoothDevice.BOND_BONDED) {
+            metricsFeatureProvider.action(context,
+                    MetricsEvent.ACTION_SETTINGS_BLUETOOTH_CONNECT);
+            Log.d(TAG, mCachedDevice.getName() + " connect");
+            mCachedDevice.connect(true);
+        //如果未配对，则配对
+        } else if (bondState == BluetoothDevice.BOND_NONE) {
+            metricsFeatureProvider.action(context,
+                    MetricsEvent.ACTION_SETTINGS_BLUETOOTH_PAIR);
+            Log.d(TAG, mCachedDevice.getName() + " pair");
+            if (!mCachedDevice.hasHumanReadableName()) {
+                metricsFeatureProvider.action(context,
+                        MetricsEvent.ACTION_SETTINGS_BLUETOOTH_PAIR_DEVICES_WITHOUT_NAMES);
+            }
+            pair();
+        }
+    }
+
+......此处省略代码
+
+    private void pair() {
+        //调用 CachedBluetoothDevice 里的 startPairing 方法，配对成功返回 true
+        if (!mCachedDevice.startPairing()) {
+            Utils.showError(getContext(), mCachedDevice.getName(),
+                    R.string.bluetooth_pairing_error_message);
+        }
+    }
+
+......此处省略代码
+
+}
+```
+
+配对之前进行判断，是否进行扫描，如果是，则停止扫描。通过底层服务进行配对，成功返回 **true**。
+
+```
+public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> {
+
+......此处省略代码
+
+    public boolean startPairing() {
+        // Pairing is unreliable while scanning, so cancel discovery
+        //如果正在扫描，则停止扫描
+        if (mLocalAdapter.isDiscovering()) {
+            mLocalAdapter.cancelDiscovery();
+        }
+
+        //配对成功返回 true
+        if (!mDevice.createBond()) {
+            return false;
+        }
+
+        return true;
+    }
+
+......此处省略代码
+
+}
+```
+
+接下来我们进到 **BluetoothDevice**  的 **createBond** 方法里查看，通过底层服务进行配对，成功返回 **true**。
+
+```
+public final class BluetoothDevice implements Parcelable {
+
+......此处省略代码
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    public boolean createBond() {
+        final IBluetooth service = sService;
+        if (service == null) {
+            Log.e(TAG, "BT not enabled. Cannot create bond to Remote Device");
+            return false;
+        }
+        try {
+            Log.i(TAG, "createBond() for device " + getAddress()
+                    + " called by pid: " + Process.myPid()
+                    + " tid: " + Process.myTid());
+            return service.createBond(this, TRANSPORT_AUTO);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+        return false;
+    }
+
+......此处省略代码
+
+}
+```
+
+#### c、蓝牙设备连接
+
+在进行连接之前，先判断是否配对了；如果没有，则返回先配对；如果配对了，则进行连接。下面我们进到 **CachedBluetoothDevice** 里的 **
+
+```
+public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> {
+
+......此处省略代码
+    public void connect(boolean connectAllProfiles) {
+        if (!ensurePaired()) {
+            return;
+        }
+
+        mConnectAttempted = SystemClock.elapsedRealtime();
+        connectWithoutResettingTimer(connectAllProfiles);
+    }
+
+......此处省略代码
+
+    private void connectWithoutResettingTimer(boolean connectAllProfiles) {
+        //本机蓝牙与远程设备通信的配置规范，如果没有配置文件则不能进行通信
+        //配置规范指定所使用的蓝牙通信协议，用户界面格式等等
+        if (mProfiles.isEmpty()) {
+            Log.d(TAG, "No profiles. Maybe we will connect later");
+            return;
+        }
+
+        // Reset the only-show-one-error-dialog tracking variable
+        //当我们去连接多个设备发生错误时我们只想显示一个错误对话框
+        mIsConnectingErrorPossible = true;
+
+        int preferredProfiles = 0;
+        for (LocalBluetoothProfile profile : mProfiles) {
+            if (connectAllProfiles ? profile.isConnectable() : profile.isAutoConnectable()) {
+                if (profile.isPreferred(mDevice)) {
+                    ++preferredProfiles;
+                    //连接设备
+                    connectInt(profile);
+                }
+            }
+        }
+        if (DEBUG) Log.d(TAG, "Preferred profiles = " + preferredProfiles);
+
+        if (preferredProfiles == 0) {
+            connectAutoConnectableProfiles();
+        }
+    }
+
+    //确保配对，如果没有配对，则进行配对
+    private boolean ensurePaired() {
+        if (getBondState() == BluetoothDevice.BOND_NONE) {
+            startPairing();
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    //连接设备
+    synchronized void connectInt(LocalBluetoothProfile profile) {
+        if (!ensurePaired()) {
+            return;
+        }
+        //底层去连接，连接成功返回 true
+        if (profile.connect(mDevice)) {
+            if (Utils.D) {
+                Log.d(TAG, "Command sent successfully:CONNECT " + describe(profile));
+            }
+            return;
+        }
+        Log.i(TAG, "Failed to connect " + profile.toString() + " to " + mName);
+    }
+
+......此处省略代码
+
+}
+```
+
+至此，蓝牙大部分业务逻辑介绍完毕。
+
+### 7、蓝牙常用知识整理
+
+#### a、常用方法
+
+- 获取本地蓝牙适配器：BluetoothAdapter.getDefaultAdapter()；
+
+- 开启蓝牙：BluetoothAdapter----enable()
+
+- 关闭蓝牙：BluetoothAdapter----disable()
+
+- 重命名蓝牙：BluetoothAdapter----setName()
+
+- 获取蓝牙名称：BluetoothAdapter----getName()
+
+- 开启可检测性：BluetoothAdapter----setScanMode(BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE，timeout) //当 timeout 设为 0 时表示永不超时
+
+- 获取蓝牙状态：BluetoothAdapter----getState()
+
+- 获取蓝牙所支持的uuid数组：BluetoothAdapter----getUuids()
+
+- 获取已配对设备：BluetoothAdapter----getBoneDevices()
+
+- 开启扫描：BluetoothAdapter----startDiscovery()
+
+- 停止扫描：BluetoothAdapter----cancelDiscovery()
+
+- 判断是否正在扫描：BluetoothAdapter----isDiscovery()
+
+- 扫描低功耗BLE蓝牙设备：BluetoothAdapter----startLeScan(mLeScanCallBack)
+
+- 停止对BLE设备的扫描：BluetoothAdapter----stopLeScan(mLeScanCallBack)
+
+#### b、常用类
+
+- **BluetoothSettings**
+蓝牙界面的显示布局 fragment，只有布局相关，会对本机蓝牙的名字，可检测性进行实时更新，所有的点击事件的处理都在别处
+
+- **DeviceListPreferenceFragment**
+远程设备列表的显示的更新，包括已配对列表和附近可用设备列表
+
+- **BluetoothDevicePreference** 列表中每个设备的 title、summary、icon的修改，包括设备的点击事件
+
+- **CachedBluetoothDevice** 管理远程设备，配对、连接
+
+- **LocalBluetoothManager** 提供了本地蓝牙 API 的简化接口。
+
+- **LocalBluetoothAdapter** 提供了设置 app 和本地蓝牙 BluetoothAdapter 功能调用的接口，特别是 adapter 自身状态的改变。
+
+- **BluetoothAdapter** 代表本地蓝牙适配器，能够开启设备扫描、请求已配对设备列表、实例化已知的 mac 地址、监听从其它设备发来的连接请求，扫描 LE 设备。其中各种 action 、蓝牙模式以及其它有关的其它的蓝牙行为都定义在此类中。
+
+- **BluetoothDevice** 代表远程蓝牙设备，创建各种设备的连接以及名字、地址和连接的状态的请求。
+
+- **BluetoothEvenManager**
+对设备的状态进行监听并处理，在该类的构造方法中注册了许多的监听器，监听蓝牙相关的变化，比如蓝牙状态改变 ACTION_STATE_CHANGED 等等。程序中已经为这些广播注册了监听器，当接收到广播后作出相应动作，对列表就行修改。首先是对缓存列表进行更改，然后再对显示列表进行更改。
 
